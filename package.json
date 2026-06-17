@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "start": "node index.js",
+    "manifest": "node scripts/update-manifest.mjs",
+    "validate:ko": "node scripts/validate-translations.mjs",
+    "translate:ko": "node scripts/translate-ko.mjs",
+    "zip:ko": "npm run manifest && npm run validate:ko && node scripts/zip-ko.mjs"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^4.19.2"
+  }
+}
