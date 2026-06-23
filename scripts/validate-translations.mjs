@@ -54,7 +54,9 @@ for (const file of files) {
       emptyValues += 1
       samples.push(`${rel(file)} :: ${entry.path.join(' > ')}: empty value`)
     }
-    const tokenProblems = compareProtectedTokens(entry.key, entry.value)
+    const tokenProblems = compareProtectedTokens(entry.key, entry.value, {
+      lineBreaks: rel(file).startsWith('translations/novels/') ? 'korean-dialogue' : 'source-max',
+    })
     if (tokenProblems.length) {
       tokenErrors += 1
       samples.push(`${rel(file)} :: ${entry.path.join(' > ')}: ${tokenProblems.join(', ')}`)

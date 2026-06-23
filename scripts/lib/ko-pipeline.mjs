@@ -25,6 +25,7 @@ export function parseArgs(argv, defaults = {}) {
     changed: false,
     dir: null,
     removeDeleted: false,
+    fix: false,
     ...defaults,
   }
   for (let i = 0; i < argv.length; i++) {
@@ -36,6 +37,7 @@ export function parseArgs(argv, defaults = {}) {
     if (a === '--dry-run') args.dryRun = true
     else if (a === '--no-push') args.noPush = true
     else if (a === '--force') args.force = true
+    else if (a === '--fix') args.fix = true
     else if (a === '--changed') args.changed = true
     else if (a === '--remove-deleted') args.removeDeleted = true
     else if (a === '--scope') args.scope = next()
@@ -264,7 +266,7 @@ export function countValues(values) {
   return map
 }
 
-export function compareProtectedTokens(source, target) {
+export function compareProtectedTokens(source, target, options = {}) {
   const a = countValues(extractProtectedTokens(source))
   const b = countValues(extractProtectedTokens(target))
   const errors = []
@@ -278,7 +280,9 @@ export function compareProtectedTokens(source, target) {
   const lineBreakPattern = /<br(?:\s+[^>]*)?>|\\r\\n|\\[nr]|\r\n|\r|\n/gi
   const sourceBreaks = source.match(lineBreakPattern)?.length || 0
   const targetBreaks = target.match(lineBreakPattern)?.length || 0
-  if (targetBreaks > sourceBreaks) {
+  if (options.lineBreaks === 'korean-dialogue') {
+    if (targetBreaks > 1) errors.push(`line-breaks: target=${targetBreaks}, max=1`)
+  } else if (targetBreaks > sourceBreaks) {
     errors.push(`line-breaks: source=${sourceBreaks} target=${targetBreaks}, max=${sourceBreaks}`)
   }
   return errors
