@@ -1,9 +1,23 @@
 {
   "scripts": {
     "start": "node index.js",
+    "ko:update": "node scripts/ko-update.mjs",
+    "sync:upstream": "node scripts/sync-upstream.mjs",
+    "sync:keys": "node scripts/sync-keys.mjs",
     "manifest": "node scripts/update-manifest.mjs",
     "validate:ko": "node scripts/validate-translations.mjs",
     "translate:ko": "node scripts/translate-ko.mjs",
+    "translate:changed": "node scripts/translate-ko.mjs --changed",
+    "merge:partial": "node scripts/merge-partial.mjs",
+    "merge:runtime": "node scripts/merge-runtime-collection.mjs",
+    "extract:cache": "node scripts/extract-game-cache.mjs",
+    "track:cache": "node scripts/extract-game-cache.mjs --snapshot-only",
+    "outgame:update": "node scripts/outgame-update.mjs",
+    "game:update": "node scripts/outgame-update.mjs",
+    "normalize:ko": "node scripts/normalize-terminology.mjs",
+    "review:layout": "node scripts/review-layout.mjs",
+    "review:context": "node scripts/review-context.mjs",
+    "publish": "node scripts/publish.mjs",
     "zip:ko": "npm run manifest && npm run validate:ko && node scripts/zip-ko.mjs"
   },
   "dependencies": {
