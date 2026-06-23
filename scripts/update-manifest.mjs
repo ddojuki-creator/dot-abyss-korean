@@ -6,7 +6,7 @@ const separator = '\0'
 const pathSeparator = '\x01'
 const translationDir = 'translations'
 const languages = ['ko_KR']
-const contentTypes = ['names', 'titles', 'descriptions', 'another_name']
+const contentTypes = ['names', 'titles', 'descriptions', 'another_name', 'outgame']
 
 function traverse(obj, prefix = '') {
     const entries = []

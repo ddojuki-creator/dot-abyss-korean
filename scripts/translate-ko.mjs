@@ -1,309 +1,368 @@
 #!/usr/bin/env node
-import fs from 'node:fs'
-import path from 'node:path'
-import crypto from 'node:crypto'
 import { spawnSync } from 'node:child_process'
+import path from 'node:path'
+import { collectEntries, compareProtectedTokens, getTargetFiles, loadPrompt, loadState, parseArgs, printSummary, readJson, readPromptVersion, rel, saveState, setByPath, sha1, shouldTranslateValue, stableHash, writeJson, ROOT } from './lib/ko-pipeline.mjs'
 
-const ROOT = process.cwd()
-const TRANSLATIONS_DIR = path.join(ROOT, 'translations')
-const MANIFEST_FILE = path.join(TRANSLATIONS_DIR, 'manifest', 'ko_KR.json')
-const STATE_FILE = path.join(ROOT, '.translate-ko-state.json')
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4.1-mini'
 const API_KEY = process.env.OPENAI_API_KEY
-const BATCH_SIZE = Number(process.env.TRANSLATE_BATCH_SIZE || 40)
+const BATCH_SIZE = Number(process.env.TRANSLATE_BATCH_SIZE || 20)
 const MAX_RETRIES = Number(process.env.TRANSLATE_MAX_RETRIES || 4)
 const API_URL = process.env.OPENAI_API_URL || 'https://api.openai.com/v1/chat/completions'
 
-function parseArgs(argv) {
-  const out = { scope: 'all', limit: null, file: null, force: false, dryRun: false }
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i]
-    if (a === '--scope') out.scope = argv[++i]
-    else if (a.startsWith('--scope=')) out.scope = a.slice(8)
-    else if (a === '--limit') out.limit = Number(argv[++i])
-    else if (a.startsWith('--limit=')) out.limit = Number(a.slice(8))
-    else if (a === '--file') out.file = argv[++i]
-    else if (a.startsWith('--file=')) out.file = a.slice(7)
-    else if (a === '--force') out.force = true
-    else if (a === '--dry-run') out.dryRun = true
-    else if (a === '--help' || a === '-h') usage(0)
-    else throw new Error(`Unknown argument: ${a}`)
-  }
-  return out
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-function usage(code = 0) {
-  console.log(`Usage:
-  npm run translate:ko -- --scope common
-  npm run translate:ko -- --scope novels --limit 5
-  npm run translate:ko -- --file translations/novels/hmn_10030100003/ko_KR.json
-  npm run translate:ko -- --scope novels
-
-Options:
-  --scope common|novels|all   Translation target. common = names/titles/descriptions/another_name
-  --limit N                   Limit novel files for test translation
-  --file PATH                 Translate only one ko_KR.json file
-  --force                     Translate all string values, even if they look Korean
-  --dry-run                   Show target files/items without API calls
-
-Env:
-  OPENAI_API_KEY              Required unless --dry-run
-  OPENAI_MODEL                Optional, default: ${MODEL}
-  TRANSLATE_BATCH_SIZE        Optional, default: ${BATCH_SIZE}
-  TRANSLATE_MAX_RETRIES       Optional, default: ${MAX_RETRIES}`)
-  process.exit(code)
-}
-
-function toPosix(p) { return p.split(path.sep).join('/') }
-function rel(p) { return toPosix(path.relative(ROOT, p)) }
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
-function sha1(s) { return crypto.createHash('sha1').update(s).digest('hex') }
-function readJson(file) { return JSON.parse(fs.readFileSync(file, 'utf8')) }
-function writeJson(file, data) { fs.writeFileSync(file, JSON.stringify(data, null, 4) + '\n', 'utf8') }
-
-function walk(dir) {
-  if (!fs.existsSync(dir)) return []
-  const files = []
-  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, ent.name)
-    if (ent.isDirectory()) files.push(...walk(full))
-    else files.push(full)
-  }
-  return files
-}
-
-function isManifest(file) { return path.resolve(file) === path.resolve(MANIFEST_FILE) }
-function isKoJson(file) { return file.endsWith(`${path.sep}ko_KR.json`) || file.endsWith('/ko_KR.json') }
-
-function getTargetFiles(args) {
-  if (args.file) {
-    const full = path.resolve(ROOT, args.file)
-    if (!fs.existsSync(full)) throw new Error(`File not found: ${args.file}`)
-    if (!isKoJson(full)) throw new Error(`Not a ko_KR.json file: ${args.file}`)
-    if (isManifest(full)) throw new Error('translations/manifest/ko_KR.json is excluded from translation')
-    return [full]
-  }
-
-  let files = []
-  if (args.scope === 'common') {
-    for (const d of ['names', 'titles', 'descriptions', 'another_name']) {
-      const f = path.join(TRANSLATIONS_DIR, d, 'ko_KR.json')
-      if (fs.existsSync(f)) files.push(f)
-    }
-  } else if (args.scope === 'novels') {
-    files = walk(path.join(TRANSLATIONS_DIR, 'novels')).filter(isKoJson).sort()
-    if (args.limit != null) files = files.slice(0, args.limit)
-  } else if (args.scope === 'all') {
-    files = walk(TRANSLATIONS_DIR).filter(isKoJson).filter(f => !isManifest(f)).sort()
-  } else {
-    throw new Error(`Invalid --scope: ${args.scope}`)
-  }
-  return files.filter(f => !isManifest(f))
-}
-
-const jpRe = /[\u3040-\u30ff\u3400-\u9fff]/
-const koRe = /[\uac00-\ud7a3]/
-function looksJapanese(s) { return jpRe.test(s) }
-function looksNaturalKoreanEnough(s) { return koRe.test(s) && !/[\u3040-\u30ff]/.test(s) }
-function shouldTranslate(value, force = false) {
-  if (typeof value !== 'string') return false
-  if (value.trim() === '') return false
-  if (force) return true
-  if (looksNaturalKoreanEnough(value)) return false
-  return looksJapanese(value)
-}
-
-function extractTagTokens(s) {
-  const patterns = [
-    /<[^>]+>/g,                         // HTML, TMP, Unity rich text tags, <user>, <br>
-    /%[A-Za-z0-9_]+%/g,                 // %user%
-    /\{[A-Za-z0-9_]+\}/g,              // {name}
-    /\$\{[^}]+\}/g,                    // ${name}
-    /\\[nrt]/g                          // escaped control markers in literal text
-  ]
-  const tokens = []
-  for (const re of patterns) {
-    for (const m of s.matchAll(re)) tokens.push(m[0])
-  }
-  return tokens
-}
-
-function validateTokenPreservation(source, translated) {
-  const src = extractTagTokens(source)
-  const dst = extractTagTokens(translated)
-  for (const token of src) {
-    const a = src.filter(x => x === token).length
-    const b = dst.filter(x => x === token).length
-    if (a !== b) return `token count mismatch: ${token} source=${a} translated=${b}`
-  }
-  return null
-}
-
-function collectEntries(data, prefix = []) {
+function chunk(items, size) {
   const out = []
-  if (!data || typeof data !== 'object' || Array.isArray(data)) return out
-  for (const [key, value] of Object.entries(data)) {
-    const p = [...prefix, key]
-    if (typeof value === 'string') out.push({ path: p, key, value })
-    else if (value && typeof value === 'object' && !Array.isArray(value)) out.push(...collectEntries(value, p))
-  }
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size))
   return out
-}
-
-function setByPath(obj, p, value) {
-  let cur = obj
-  for (let i = 0; i < p.length - 1; i++) cur = cur[p[i]]
-  cur[p[p.length - 1]] = value
-}
-
-function loadState() {
-  if (!fs.existsSync(STATE_FILE)) return { done: {}, failed: {} }
-  try { return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')) }
-  catch { return { done: {}, failed: {} } }
-}
-function saveState(state) { fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2) + '\n', 'utf8') }
-
-function batchId(file, items) {
-  return sha1(JSON.stringify({ file: rel(file), items: items.map(x => [x.path, x.value]) }))
-}
-
-function chunk(arr, n) {
-  const out = []
-  for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n))
-  return out
-}
-
-function buildMessages(items) {
-  return [
-    {
-      role: 'system',
-      content: [
-        '당신은 일본어 게임 번역 전문 번역가입니다.',
-        '일본어 게임 대사를 자연스러운 한국어로 번역한다.',
-        'key는 절대 번역하지 않는다.',
-        'value만 번역한다.',
-        '<br>, <user>, %user%, HTML/TMP 태그는 그대로 유지한다.',
-        'Unity Rich Text 태그(<size=48>, <color=#fff>, </size> 등)도 그대로 유지한다.',
-        '특수기호, 줄바꿈 의미, 말줄임표, 따옴표의 의미를 보존한다.',
-        '성인향/선정적 표현은 의미가 사라지지 않게 한국어 게임 번역처럼 자연스럽게 번역한다.',
-        '출력은 JSON만 한다.',
-        '항목 수를 유지한다.',
-        '출력 스키마: {"items":[{"id":number,"value":string}]}',
-        '입력 id는 반드시 그대로 반환한다.'
-      ].join('\n')
-    },
-    {
-      role: 'user',
-      content: JSON.stringify({ items: items.map((x, id) => ({ id, key: x.key, value: x.value })) }, null, 2)
-    }
-  ]
 }
 
 function stripJsonFence(text) {
   return text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
 }
 
-async function callOpenAI(items) {
-  const res = await fetch(API_URL, {
+function stateKey(file, entry) {
+  return `${rel(file)}::${entry.path.join('\u0001')}`
+}
+
+function normalizeTerminology(key, value) {
+  let normalized = value
+  if (key.includes('\u5927\u7A74')) {
+    normalized = normalized.replace(/\ub300\uacf5\ub3d9|\ub300\uad6c\uba4d|\ud070 \uad6c\uba4d|\ub300\ub3d9\uad74/g, '\uc5b4\ube44스')
+  }
+  if (key.includes('\u932C\u73CD\u8853')) {
+    normalized = normalized.replace(/\uc5f0진술|\uc5f0단술/g, '\uc721봉연술')
+  }
+  if (key.includes('\u30F4\u30A3\u30FC\u30E9')) {
+    normalized = normalized.replace(/\ube44\uc774\ub77c/g, '\ube44\ub77c')
+  }
+  if (key.includes('\u30CE\u30EF\u30FC\u30EB')) {
+    normalized = normalized.replace(/\ub178\uc640\ub974|\ub204\uc640\ub974|\ub204\uc544\ub974/g, '\ub290\uc640\ub974')
+  }
+  if (key.includes('\u30DA\u30EB\u30C7\u30A3\u30AA\u30F3')) {
+    normalized = normalized.replace(/펄디온|펠디온/g, '페르디온')
+  }
+  if (/\u30DF\u30EB\u30C6\u30A3(?:\u30FC?\u30E6|\u30FC\u30E6)/.test(key)) {
+    normalized = normalized.replace(/미르티유|밀티유/g, '밀피유')
+  }
+  if (key.includes('\u30D0\u30C3\u30AF')) {
+    normalized = normalized
+      .replace(/가방|후위/g, '백')
+  }
+  if (key.includes('\u30D5\u30ED\u30F3\u30C8')) {
+    normalized = normalized.replace(/전위/g, '프론트')
+  }
+  if (key.includes('\u30AF\u30A4\u30C3\u30AF\u9078\u629E')) {
+    normalized = normalized.replace(/퀵 선택/g, '빠른 선택')
+  }
+  const floorLabel = key.match(/^\u30D5\u30ED\u30A2([123])$/)
+  if (floorLabel) {
+    normalized = `플로어${floorLabel[1]}`
+  }
+  if (
+    /(?:\u3056\u3053\u3056\u3053|\u3056\u3063\u3053\u3056\u3053|\u30B6\u30B3\u30B6\u30B3|\u3088\u308F\u3088\u308F)/.test(key)
+    && /(?:\u304A\u306B\u30FC\u3055\u3093|\u304A\u5144\u3055\u3093|\u5144\u3055\u3093|\u53F8\u4EE4\u5B98)/.test(key)
+  ) {
+    normalized = normalized
+      .replace(/\uc57d\ud574\ube60\uc9c4 \ud5c8\uc811 \uc624\ube60/g, '\ud5c8\uc811 \uc624\ube60')
+      .replace(/약한 약한 오빠|약해빠진 오빠|약한 오빠|약골 오빠|쫄보 오빠|잔챙이 오빠/g, '허접 오빠')
+      .replace(/\uc7a1\ub2e4\ud55c \uc624\ube60\ub4e4\uc5d0\uac8c/g, '\ud5c8\uc811 \uc624\ube60\uc5d0\uac8c')
+      .replace(/\uc57d\ud55c \uc0ac\ub839\uad00|\uc57d\uace8 \uc0ac\ub839\uad00|\ucad0\ubcf4 \uc0ac\ub839\uad00/g, '\ud5c8\uc811 \uc0ac\ub839\uad00')
+  }
+  if (key.includes('\u3088\u308F\u3088\u308F\u304A\u3061\u3093\u307D')) {
+    normalized = normalized.replace(/약골 오빠야|약약한 고추|약한 고추|약골 고추/g, '허접 자지')
+  }
+  if (/(?:ざこざこ|ざっこざこ|ザコザコ|よわよわ|ざ～こ|ざこじゃ|ざこ炎|ざこざ～～こ)/.test(key)) {
+    normalized = normalized
+      .replace(/정말 약골이구나/g, '정말 허접이구나')
+      .replace(/그저 그런 사령관 오빠/g, '허접 사령관 오빠')
+      .replace(/약골♡ 약골♡/g, '허접♡ 허접♡')
+      .replace(/약골 광석/g, '허접 광석')
+      .replace(/약한 불/g, '허접한 불')
+      .replace(/약하네/g, '허접이네')
+      .replace(/약골 약골 고추/g, '허접허접 자지')
+      .replace(/약골 몬스터/g, '허접 몬스터')
+      .replace(/보잘것없는 평범한 인간들/g, '허접한 평범한 인간들')
+      .replace(/마법도 못 쓰는 약골이니까/g, '마법도 못 쓰는 허접이니까')
+  }
+  if (key.includes('\u304A\u3057\u3054\u3068\u7528') && key.includes('\u30B3\u30B9\u30C1\u30E5\u30FC\u30E0')) {
+    normalized = normalized.replace(/\uc77c\uc6a9(?=<br>|\s*\ucf54\uc2a4\ud2ac)/g, '\uc5c5\ubb34\uc6a9')
+  }
+  return normalized
+    .replace(/닷트 어비스/g, '도트 어비스')
+    .replace(/어비스을/g, '어비스를')
+    .replace(/어비스은/g, '어비스는')
+    .replace(/어비스과/g, '어비스와')
+    .replace(/어비스으로/g, '어비스로')
+    .replace(/어비스이(?=\s*(?:있는|나타난|평화로운|얼마나))/g, '어비스가')
+    .replace(/어비스이(?=구나|군)/g, '어비스')
+    .replace(/어비스이(?=니까)/g, '어비스')
+    .replace(/어비스이(?=라면|라서|라도|라\?|라는|라고)/g, '어비스')
+    .replace(/고마움으로 베리사쨩의/g, '보답으로 베리사쨩의')
+    .replace(/가게에서 대인기예요/g, '가게에서 큰 인기예요')
+    .replace(/형님은 누구를 데리고 갈 건가요~/g, '오빠는 누구를 데리고 갈 건가요~')
+}
+
+function isDoneInState(state, file, entry, promptVersion) {
+  const item = state.items[stateKey(file, entry)]
+  if (!item) return false
+  return item.status === 'done'
+    && item.model === MODEL
+    && item.promptVersion === promptVersion
+    && item.sourceHash === sha1(entry.key)
+    && item.valueHash === sha1(entry.value)
+}
+
+function buildMessages(prompt, items) {
+  return [
+    {
+      role: 'system',
+      content: [
+        'You are a professional Korean localizer for a Japanese 2D subculture game.',
+        'Translate only JSON values into natural Korean.',
+        'Never modify JSON keys, IDs, tags, or placeholders. Source line breaks may only be reduced according to the Korean layout rules.',
+        'Do not leave any Japanese kana outside protected tags; fully rewrite mixed Japanese-Korean values in Korean.',
+        'Japanese text inside tag syntax such as <ruby=...> is protected and must remain unchanged.',
+        'Return JSON only with this schema: {"items":[{"id":0,"value":"..."}]}.',
+        prompt,
+      ].join('\n\n'),
+    },
+    {
+      role: 'user',
+      content: JSON.stringify({
+        items: items.map((item, id) => ({
+          id,
+          source_key: item.key,
+          current_value: item.value,
+        })),
+      }, null, 2),
+    },
+  ]
+}
+
+async function callOpenAI(prompt, items) {
+  const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${API_KEY}`,
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       model: MODEL,
       temperature: 0.2,
       response_format: { type: 'json_object' },
-      messages: buildMessages(items)
-    })
+      messages: buildMessages(prompt, items),
+    }),
   })
-  const text = await res.text()
-  if (!res.ok) throw new Error(`OpenAI API ${res.status}: ${text.slice(0, 1000)}`)
+  const text = await response.text()
+  if (!response.ok) {
+    if (text.includes('insufficient_quota')) {
+      const err = new Error(`OpenAI insufficient_quota: ${text}`)
+      err.noRetry = true
+      throw err
+    }
+    throw new Error(`OpenAI API ${response.status}: ${text.slice(0, 1200)}`)
+  }
   const data = JSON.parse(text)
-  const content = data.choices?.[0]?.message?.content
+  const choice = data.choices?.[0]
+  const content = choice?.message?.content
   if (!content) throw new Error('OpenAI response has no message content')
-  const parsed = JSON.parse(stripJsonFence(content))
-  if (!Array.isArray(parsed.items)) throw new Error('OpenAI JSON does not contain items array')
-  if (parsed.items.length !== items.length) throw new Error(`Item count mismatch: expected=${items.length} actual=${parsed.items.length}`)
-  const byId = new Map(parsed.items.map(x => [Number(x.id), x.value]))
+  if (choice.finish_reason === 'length') {
+    const err = new Error('OpenAI response was truncated')
+    err.splitBatch = true
+    throw err
+  }
+
+  let parsed
+  try {
+    parsed = JSON.parse(stripJsonFence(content))
+  } catch (cause) {
+    const err = new Error(`Invalid OpenAI response JSON: ${cause.message}`)
+    err.splitBatch = true
+    throw err
+  }
+  if (!Array.isArray(parsed.items)) {
+    const err = new Error('OpenAI response JSON has no items array')
+    err.splitBatch = true
+    throw err
+  }
+  const byId = new Map(parsed.items.map((item) => [Number(item.id), item.value]))
   return items.map((item, id) => {
-    const value = byId.get(id)
-    if (typeof value !== 'string') throw new Error(`Missing or non-string translated value for id=${id}`)
-    const tokenError = validateTokenPreservation(item.value, value)
-    if (tokenError) throw new Error(`Token preservation failed at id=${id}: ${tokenError}\nsource=${item.value}\ntranslated=${value}`)
+    const responseValue = byId.get(id)
+    if (typeof responseValue !== 'string') {
+      const err = new Error(`Missing translated value for id=${id}`)
+      err.splitBatch = true
+      throw err
+    }
+    const value = normalizeTerminology(item.key, responseValue)
+    const tokenErrors = compareProtectedTokens(item.value, value)
+    if (tokenErrors.length) {
+      const err = new Error(`Protected token mismatch at id=${id}: ${tokenErrors.join(', ')}`)
+      err.splitBatch = true
+      throw err
+    }
+    if (shouldTranslateValue(item.key, value)) {
+      const err = new Error(`Translation still contains untranslated Japanese at id=${id}`)
+      err.splitBatch = true
+      throw err
+    }
     return value
   })
 }
 
-async function translateBatchWithRetry(items) {
-  let lastErr
+async function translateByLineBreaks(prompt, item) {
+  const breakPattern = /(<br(?:\s+[^>]*)?>)/gi
+  const valueParts = item.value.split(breakPattern)
+  if (valueParts.length < 3) return null
+
+  const keyParts = item.key.split(breakPattern)
+  const segmentItems = []
+  const segmentIndexes = []
+  for (let i = 0; i < valueParts.length; i += 2) {
+    if (valueParts[i] === '') continue
+    segmentIndexes.push(i)
+    segmentItems.push({
+      key: keyParts[i] || item.key,
+      value: valueParts[i],
+    })
+  }
+
+  const translatedSegments = await callOpenAI(prompt, segmentItems)
+  for (let i = 0; i < segmentIndexes.length; i++) {
+    valueParts[segmentIndexes[i]] = translatedSegments[i]
+  }
+
+  const value = valueParts.join('')
+  const tokenErrors = compareProtectedTokens(item.value, value)
+  if (tokenErrors.length) {
+    throw new Error(`Protected token mismatch after line split: ${tokenErrors.join(', ')}`)
+  }
+  return value
+}
+
+async function translateWithRetry(prompt, items) {
+  let lastError
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    try { return await callOpenAI(items) }
-    catch (err) {
-      lastErr = err
-      const delay = Math.min(30000, 1000 * 2 ** (attempt - 1))
-      console.warn(`  retry ${attempt}/${MAX_RETRIES} failed: ${err.message.split('\n')[0]}`)
-      if (attempt < MAX_RETRIES) await sleep(delay)
+    try {
+      return await callOpenAI(prompt, items)
+    } catch (err) {
+      lastError = err
+      if (err.noRetry) throw err
+      if (err.splitBatch && items.length > 1) throw err
+      console.warn(`retry ${attempt}/${MAX_RETRIES}: ${err.message.split('\n')[0]}`)
+      if (attempt < MAX_RETRIES) await sleep(Math.min(30000, 1000 * 2 ** (attempt - 1)))
     }
   }
-  throw lastErr
+
+  if (items.length === 1 && lastError?.splitBatch && /<br(?:\s+[^>]*)?>/i.test(items[0].value)) {
+    console.warn('retrying as <br>-separated segments')
+    const value = await translateByLineBreaks(prompt, items[0])
+    if (value !== null) return [value]
+  }
+
+  throw lastError
 }
 
 async function main() {
   const args = parseArgs(process.argv.slice(2))
+  const promptScope = args.scope === 'common' ? 'common' : 'novels'
+  const promptVersion = readPromptVersion()
+  const prompt = loadPrompt(promptScope)
   const files = getTargetFiles(args)
-  console.log(`model=${MODEL}`)
-  console.log(`target_files=${files.length}`)
-  if (!args.dryRun && !API_KEY) throw new Error('OPENAI_API_KEY environment variable is required')
-
   const state = loadState()
-  let totalCandidates = 0, totalTranslated = 0, totalSkippedBatches = 0, totalFailed = 0
+  state.promptVersion = promptVersion
+
+  if (!args.dryRun && !API_KEY) throw new Error('OPENAI_API_KEY is required unless --dry-run is used')
+
+  let candidates = 0
+  let translated = 0
+  let skippedByState = 0
+  let failedBatches = 0
+
+  console.log(`model=${MODEL}`)
+  console.log(`promptVersion=${promptVersion}`)
+  console.log(`targetFiles=${files.length}`)
 
   for (const file of files) {
     const data = readJson(file)
-    const entries = collectEntries(data).filter(x => shouldTranslate(x.value, args.force))
-    totalCandidates += entries.length
-    console.log(`\n[${rel(file)}] candidates=${entries.length}`)
+    let entries = collectEntries(data).filter((entry) => shouldTranslateValue(entry.key, entry.value, args))
+    if (args.changed) {
+      const before = entries.length
+      entries = entries.filter((entry) => !isDoneInState(state, file, entry, promptVersion))
+      skippedByState += before - entries.length
+    }
+    candidates += entries.length
+    console.log(`\n${rel(file)} candidates=${entries.length}`)
     if (args.dryRun || entries.length === 0) continue
 
-    const batches = chunk(entries, BATCH_SIZE)
-    for (let i = 0; i < batches.length; i++) {
-      const batch = batches[i]
-      const id = batchId(file, batch)
-      if (state.done[id]) {
-        totalSkippedBatches++
-        continue
-      }
-      process.stdout.write(`  batch ${i + 1}/${batches.length} items=${batch.length} ... `)
+    const pendingBatches = chunk(entries, BATCH_SIZE)
+    while (pendingBatches.length > 0) {
+      const batch = pendingBatches.shift()
+      process.stdout.write(`batch items=${batch.length} ... `)
       try {
-        const translatedValues = await translateBatchWithRetry(batch)
-        translatedValues.forEach((v, idx) => setByPath(data, batch[idx].path, v))
+        const values = await translateWithRetry(prompt, batch)
+        for (let i = 0; i < batch.length; i++) {
+          const entry = batch[i]
+          const value = values[i]
+          setByPath(data, entry.path, value)
+          state.items[stateKey(file, entry)] = {
+            status: 'done',
+            file: rel(file),
+            path: entry.path,
+            sourceHash: sha1(entry.key),
+            valueHash: sha1(value),
+            model: MODEL,
+            promptVersion,
+            at: new Date().toISOString(),
+          }
+          delete state.failed[stateKey(file, entry)]
+        }
         writeJson(file, data)
-        state.done[id] = { file: rel(file), count: batch.length, at: new Date().toISOString() }
-        delete state.failed[id]
         saveState(state)
-        totalTranslated += batch.length
+        translated += batch.length
         console.log('ok')
       } catch (err) {
-        totalFailed++
-        state.failed[id] = { file: rel(file), count: batch.length, at: new Date().toISOString(), error: err.message }
+        if (err.splitBatch && batch.length > 1) {
+          const middle = Math.ceil(batch.length / 2)
+          pendingBatches.unshift(batch.slice(middle))
+          pendingBatches.unshift(batch.slice(0, middle))
+          console.log(`split ${batch.length} -> ${middle}+${batch.length - middle}`)
+          continue
+        }
+
+        failedBatches += 1
+        for (const entry of batch) {
+          state.failed[stateKey(file, entry)] = {
+            status: 'failed',
+            file: rel(file),
+            path: entry.path,
+            sourceHash: sha1(entry.key),
+            valueHash: sha1(entry.value),
+            model: MODEL,
+            promptVersion,
+            error: err.message,
+            at: new Date().toISOString(),
+          }
+        }
         saveState(state)
         console.log('failed')
         console.error(err.message)
+        if (err.noRetry) throw err
       }
     }
   }
 
-  console.log(`\nsummary candidates=${totalCandidates} translated=${totalTranslated} skipped_batches=${totalSkippedBatches} failed_batches=${totalFailed}`)
-  if (!args.dryRun) {
-    console.log('regenerating manifest...')
-    const r = spawnSync(process.execPath, [path.join(ROOT, 'scripts/update-manifest.mjs')], { stdio: 'inherit', cwd: ROOT })
-    if (r.status !== 0) process.exitCode = r.status || 1
+  printSummary('translate:ko', { candidates, translated, skippedByState, failedBatches })
+  if (!args.dryRun && translated > 0) {
+    const result = spawnSync(process.execPath, [path.join(ROOT, 'scripts/update-manifest.mjs')], { cwd: ROOT, stdio: 'inherit' })
+    if (result.status !== 0) process.exitCode = result.status || 1
   }
-  if (totalFailed > 0) process.exitCode = 1
+  if (failedBatches) process.exitCode = 1
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(err.stack || err.message)
   process.exit(1)
 })
