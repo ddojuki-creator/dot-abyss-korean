@@ -5,4 +5,3 @@
 - Button labels should be short when possible.
 - Do not give system messages a character voice.
 - Do not over-explain short labels.
-
