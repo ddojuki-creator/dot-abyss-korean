@@ -82,6 +82,7 @@ git push origin test
 
 - JSON 파싱 성공
 - 캐릭터명과 어빌리티명 value가 한국어인지 확인
+- `ドリンク`는 `음료`가 아니라 `드링크`로 번역했는지 확인
 - `<br>`와 색상 태그 보존
 - 한계돌파 강화 설명의 `【覚醒効果】`, 수치, 색상 태그 보존
 - `translations/manifest/ko_KR.json` 갱신 확인
