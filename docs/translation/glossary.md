@@ -44,6 +44,7 @@ Use this table format:
 | フロント (formation role) | 프론트 | Formation role. Always use `프론트`; never use `전위`. |
 | クイック選択 | 빠른 선택 | Formation UI action. Never use `퀵 선택`. |
 | ピッケル | 곡갱이 | Weapon/equipment type. Always use `곡갱이`; never use `픽켈` or `피켈`. |
+| 選べる○○BOX / 選べる○○BOX交換券 | ○○ 선택 BOX | Selectable item names must put the target first, e.g. `SSR 캐릭터 선택 BOX`, `Rank4 무기 선택 BOX`, `초급 기술 원소 선택 BOX`. Do not use `선택 가능한 ○○ BOX`. |
 | フロア1 / フロア2 / フロア3 | 플로어1 / 플로어2 / 플로어3 | Brothel management area labels. Do not translate these labels as `1층`, `2층`, or `3층`. Actual building floors such as `1階` remain `1층`. |
 | 司令官 / 指揮官 | 사령관 | Commander title/address. Use `사령관` or `사령관님` as context requires; never use `지휘관`. |
 | ざこざこ / ザコザコ / よわよわ + おにーさん·司令官 | 허접 오빠 / 허접 사령관 | Mesugaki-style taunt, especially in Berisa-like dialogue. Never soften it to `약한`, `약골`, `잔챙이`, or `쫄보`. Neutral narration using `弱い` or `弱々しい` is excluded. |

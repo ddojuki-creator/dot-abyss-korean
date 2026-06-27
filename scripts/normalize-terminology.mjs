@@ -64,6 +64,12 @@ function normalize(key, value) {
   if (key.includes('\u30D4\u30C3\u30B1\u30EB')) {
     result = result.replace(/픽켈|피켈|곡괭이/g, '곡갱이')
   }
+  if (key.includes('\u9078\u3079\u308B') && /BOX|\u30DC\u30C3\u30AF\u30B9/.test(key)) {
+    result = result
+      .replace(/선택 가능한 ([^\n]*?) BOX/g, '$1 선택 BOX')
+      .replace(/선택 가능한 ([^\n]*?) 상자/g, '$1 선택 BOX')
+      .replace(/SSR 캐릭터 선택 BOX 교환권/g, 'SSR 캐릭터 선택 BOX')
+  }
   const floorLabel = key.match(/^\u30D5\u30ED\u30A2([123])$/)
   if (floorLabel) {
     result = `플로어${floorLabel[1]}`
