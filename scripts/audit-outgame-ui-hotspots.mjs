@@ -32,6 +32,8 @@ const HOTSPOTS = [
   /アイテムの使用|アイテムを使用|アイテムを使って|アイテムを消費/,
   /アビリティ 強化|スキル \/ アビリティ 詳細情報/,
   /覚醒pt|覚醒強化|絆pt|限界突破/,
+  /フォロー|フォロワー|おすすめ|ID検索|プレイヤーLv|最終ログイン/,
+  /時間前|日前|分前|秒前/,
   /^マント$/,
   /ランク\d+の(?:コモン|エピック|レジェンダー).+マント/,
 ]
@@ -44,7 +46,7 @@ function isHotspot(source) {
 function hasJapaneseLeftover(value) {
   const text = value.replace(/<[^>]*>/g, '')
   if (/[\u3041-\u3096\u30a1-\u30fa\u30fd-\u30ff]/.test(text)) return true
-  return /研究効果|解放|開放|使用|所持|消費|覚醒|絆|限界突破|イベント|ステージ|ミッション|クリスタル|マント|ランク/.test(text)
+  return /研究効果|解放|開放|使用|所持|消費|覚醒|絆|限界突破|イベント|ステージ|ミッション|クリスタル|マント|ランク|フォロー|フォロワー|おすすめ|ID検索|プレイヤーLv|最終ログイン/.test(text)
 }
 
 function truncate(value, max = 180) {
