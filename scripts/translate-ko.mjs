@@ -38,6 +38,15 @@ function normalizeTerminology(key, value) {
   if (key.includes('\u30F4\u30A3\u30FC\u30E9')) {
     normalized = normalized.replace(/\ube44\uc774\ub77c/g, '\ube44\ub77c')
   }
+  if (key.includes('\u30B4\u30EC\u30A4\u30CC')) {
+    normalized = normalized.replace(/고레인느|고레인누|골레누|고레누|고레인/g, '고레이누')
+  }
+  if (key.includes('\u30B5\u30F3\u30AF\u30C1\u30E5\u30A8\u30FC\u30EB\u5973\u5B66\u5712')) {
+    normalized = normalized.replace(/생츄에를 여자학원|생츄에르 여자학원|생츄에를 여학원|생츄에르 여학원/g, '생크추어리 여학원')
+  }
+  if (key.includes('\u30B5\u30F3\u5973')) {
+    normalized = normalized.replace(/산여|생여/g, '생크학원')
+  }
   if (key.includes('\u30CE\u30EF\u30FC\u30EB')) {
     normalized = normalized.replace(/\ub178\uc640\ub974|\ub204\uc640\ub974|\ub204\uc544\ub974/g, '\ub290\uc640\ub974')
   }
