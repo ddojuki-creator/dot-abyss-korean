@@ -18,6 +18,7 @@ nodeScript('translate-ko.mjs', [
 ])
 if (!args.dryRun) nodeScript('normalize-terminology.mjs')
 nodeScript('validate-translations.mjs', ['--file', 'translations/outgame/ko_KR.json'])
+nodeScript('audit-outgame-critical.mjs', ['--added-only'])
 
 if (!args.dryRun) nodeScript('update-manifest.mjs')
 printSummary(args.dryRun ? 'outgame:update dry-run' : 'outgame:update', { status: 'ok' })

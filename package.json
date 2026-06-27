@@ -12,6 +12,7 @@
     "merge:runtime": "node scripts/merge-runtime-collection.mjs",
     "extract:cache": "node scripts/extract-game-cache.mjs",
     "track:cache": "node scripts/extract-game-cache.mjs --snapshot-only",
+    "audit:outgame-critical": "node scripts/audit-outgame-critical.mjs",
     "outgame:update": "node scripts/outgame-update.mjs",
     "game:update": "node scripts/outgame-update.mjs",
     "normalize:ko": "node scripts/normalize-terminology.mjs",
