@@ -14,6 +14,11 @@ const CRITICAL_TABLES = new Set([
   'm_transition_tips',
 ])
 
+const HARDCODED_UI_TEXTS = new Set([
+  'プレゼントボックス',
+  '未受け取り数',
+])
+
 const args = new Set(process.argv.slice(2))
 const addedOnly = args.has('--added-only')
 const noFail = args.has('--no-fail')
@@ -58,6 +63,15 @@ for (const item of entries) {
   const value = translations[item.source]
   if (typeof value !== 'string' || value === item.source || shouldTranslateValue(item.source, value)) {
     issues.push({ ...item, table, value })
+  }
+}
+
+for (const source of HARDCODED_UI_TEXTS) {
+  const table = 'hardcoded-ui'
+  byTable.set(table, (byTable.get(table) || 0) + 1)
+  const value = translations[source]
+  if (typeof value !== 'string' || value === source || shouldTranslateValue(source, value)) {
+    issues.push({ location: `hardcoded-ui/${source}`, source, table, value })
   }
 }
 
