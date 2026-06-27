@@ -50,6 +50,7 @@
 
 - `스킬 레벨 업` 영역의 강화 후 스킬 설명
 - `어빌리티 강화` 영역의 강화 후 어빌리티 설명
+- 어빌리티 등급 상승 전/후 설명과 스크롤로 가려진 하단 설명
 - `【覚醒効果】`가 붙은 전체 설명
 - `<color=#...>` 태그가 포함된 수치 강조 설명
 - `紋章`, `状態異常`, `クエスト中1回まで`, `バトル開始時`가 포함된 복합 설명
@@ -73,6 +74,7 @@
 ```powershell
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\update-manifest.mjs
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\validate-translations.mjs
+& "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-character-abilities.mjs
 git add translations/names/ko_KR.json translations/outgame/ko_KR.json translations/manifest/ko_KR.json docs/new-character-update.md
 git commit -m "Update new character translation guide"
 git push origin test
@@ -85,6 +87,7 @@ git push origin test
 - `ドリンク`는 `음료`가 아니라 `드링크`로 번역했는지 확인
 - `<br>`와 색상 태그 보존
 - 한계돌파 강화 설명의 `【覚醒効果】`, 수치, 색상 태그 보존
+- `scripts\audit-character-abilities.mjs` 통과
 - `translations/manifest/ko_KR.json` 갱신 확인
 
 ## 문제 발생 시 확인 순서
@@ -92,9 +95,10 @@ git push origin test
 1. 캐릭터명 일본어: 이름 key가 names/outgame 양쪽에 있는지 확인한다.
 2. 어빌리티명 일본어: 어빌리티명 독립 key가 outgame에 있는지 확인한다.
 3. 한계돌파 강화 설명 일본어: `outgame-ja_JP.json`에 수집된 전체 문장이 outgame 번역에 있는지 확인한다.
-4. 재시작 후에도 일본어: 실제 문장이 기존 템플릿과 같은지 비교한다.
-5. 태그 또는 색상 오류: 원문의 `<color>` 범위와 템플릿 토큰 위치를 확인한다.
-6. CDN 미반영: manifest hash와 `test` 브랜치 push 여부를 확인한다.
+4. 어빌리티 등급 상승 후 일본어: `scripts\audit-character-abilities.mjs`를 실행해 누락/일본어 잔존을 확인한다.
+5. 재시작 후에도 일본어: 실제 문장이 기존 템플릿과 같은지 비교한다.
+6. 태그 또는 색상 오류: 원문의 `<color>` 범위와 템플릿 토큰 위치를 확인한다.
+7. CDN 미반영: manifest hash와 `test` 브랜치 push 여부를 확인한다.
 
 ## 완료 기준
 
