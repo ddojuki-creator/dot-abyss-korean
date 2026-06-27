@@ -61,6 +61,9 @@ function normalize(key, value) {
   if (key.includes('\u30AF\u30A4\u30C3\u30AF\u9078\u629E')) {
     result = result.replace(/퀵 선택/g, '빠른 선택')
   }
+  if (key.includes('\u30D4\u30C3\u30B1\u30EB')) {
+    result = result.replace(/픽켈|피켈|곡괭이/g, '곡갱이')
+  }
   const floorLabel = key.match(/^\u30D5\u30ED\u30A2([123])$/)
   if (floorLabel) {
     result = `플로어${floorLabel[1]}`

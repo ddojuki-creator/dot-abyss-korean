@@ -43,6 +43,7 @@ Use this table format:
 | バック (formation role) | 백 | Formation role. Always use `백`; never use `가방` or `후위`. Note that バッグ means a physical bag and is unrelated. |
 | フロント (formation role) | 프론트 | Formation role. Always use `프론트`; never use `전위`. |
 | クイック選択 | 빠른 선택 | Formation UI action. Never use `퀵 선택`. |
+| ピッケル | 곡갱이 | Weapon/equipment type. Always use `곡갱이`; never use `픽켈` or `피켈`. |
 | フロア1 / フロア2 / フロア3 | 플로어1 / 플로어2 / 플로어3 | Brothel management area labels. Do not translate these labels as `1층`, `2층`, or `3층`. Actual building floors such as `1階` remain `1층`. |
 | 司令官 / 指揮官 | 사령관 | Commander title/address. Use `사령관` or `사령관님` as context requires; never use `지휘관`. |
 | ざこざこ / ザコザコ / よわよわ + おにーさん·司令官 | 허접 오빠 / 허접 사령관 | Mesugaki-style taunt, especially in Berisa-like dialogue. Never soften it to `약한`, `약골`, `잔챙이`, or `쫄보`. Neutral narration using `弱い` or `弱々しい` is excluded. |
@@ -84,3 +85,5 @@ Use this table format:
 | 럭스노바 | 룩스노바 | `ルクスノヴァ`의 표기는 `룩스노바`로 통일한다. |
 | 루크스 노바 | 룩스노바 | `ルクスノヴァ`의 표기는 띄어 쓰지 않고 `룩스노바`로 통일한다. |
 | 럭스 노바 | 룩스노바 | `ルクスノヴァ`의 표기는 띄어 쓰지 않고 `룩스노바`로 통일한다. |
+| 픽켈 | 곡갱이 | `ピッケル`의 표기는 `곡갱이`로 통일한다. |
+| 피켈 | 곡갱이 | `ピッケル`의 표기는 `곡갱이`로 통일한다. |
