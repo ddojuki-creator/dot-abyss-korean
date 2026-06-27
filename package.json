@@ -14,6 +14,7 @@
     "track:cache": "node scripts/extract-game-cache.mjs --snapshot-only",
     "audit:outgame-critical": "node scripts/audit-outgame-critical.mjs",
     "audit:character-abilities": "node scripts/audit-character-abilities.mjs",
+    "audit:outgame-ui-hotspots": "node scripts/audit-outgame-ui-hotspots.mjs",
     "audit:novel-location-titles": "node scripts/audit-novel-location-titles.mjs",
     "outgame:update": "node scripts/outgame-update.mjs",
     "game:update": "node scripts/outgame-update.mjs",
