@@ -5,6 +5,7 @@ import { ROOT, readJson, shouldTranslateValue } from './lib/ko-pipeline.mjs'
 
 const DEFAULT_COLLECTION = 'F:/DMMGamePlayer/dotabyss_x_cl/BepInEx/config/AbyssMod/outgame-ja_JP.json'
 const translationFile = path.join(ROOT, 'translations', 'outgame', 'ko_KR.json')
+const abilityTranslationFile = path.join(ROOT, 'translations', 'ability_descriptions', 'ko_KR.json')
 
 function parseArgs(argv) {
   const args = {
@@ -30,7 +31,9 @@ function usage() {
   console.log(`Usage: node scripts/audit-character-abilities.mjs [--collection path] [--no-fail]
 
 Checks runtime-collected outgame Japanese strings for character ability descriptions that
-are missing or still contain Japanese in translations/outgame/ko_KR.json.`)
+are missing or still contain Japanese in translations/outgame/ko_KR.json.
+Also fails when ability_descriptions entries are not mirrored into outgame, because
+the current CDN manifest does not publish ability_descriptions separately.`)
 }
 
 function stripTags(value) {
@@ -85,6 +88,7 @@ if (!fs.existsSync(translationFile)) throw new Error(`Missing outgame translatio
 
 const collection = readJson(args.collection)
 const translations = readJson(translationFile)
+const abilityTranslations = fs.existsSync(abilityTranslationFile) ? readJson(abilityTranslationFile) : {}
 const sources = Object.keys(collection).filter(isCharacterAbilitySource).sort()
 const issues = []
 
@@ -99,13 +103,19 @@ for (const source of sources) {
   }
 }
 
+for (const source of Object.keys(abilityTranslations).sort()) {
+  if (typeof translations[source] !== 'string') {
+    issues.push({ status: 'ability-only-not-in-outgame', source, value: abilityTranslations[source] })
+  }
+}
+
 const counts = issues.reduce((acc, issue) => {
   acc[issue.status] = (acc[issue.status] || 0) + 1
   return acc
 }, {})
 
 console.log(
-  `audit:character-abilities checked=${sources.length} issues=${issues.length} missing=${counts.missing || 0} untranslated=${counts.untranslated || 0} japanese-leftover=${counts['japanese-leftover'] || 0}`,
+  `audit:character-abilities checked=${sources.length} issues=${issues.length} missing=${counts.missing || 0} untranslated=${counts.untranslated || 0} japanese-leftover=${counts['japanese-leftover'] || 0} ability-only=${counts['ability-only-not-in-outgame'] || 0}`,
 )
 
 for (const issue of issues.slice(0, 50)) {
