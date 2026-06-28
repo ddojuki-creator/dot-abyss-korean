@@ -64,6 +64,18 @@ function normalize(key, value) {
   if (key.includes('\u30D4\u30C3\u30B1\u30EB')) {
     result = result.replace(/픽켈|피켈|곡괭이/g, '곡갱이')
   }
+  if (key.includes('\u98E2\u9913')) {
+    result = result.replace(/기아/g, '굶주림')
+  }
+  if (key.includes('\u30AB\u30CE\u30F3\u30B3\u30FC\u30EB')) {
+    result = result.replace(/카논 콜/g, '캐논 콜')
+  }
+  if (key === '\u571F' || key.includes('\u571F\u5C5E\u6027') || key.includes('\u706B\u3001\u6C34\u3001\u571F') || key.includes('\u706B\u30FB\u6C34\u30FB\u571F')) {
+    result = result
+      .replace(/흙\s*속성/g, '토 속성')
+      .replace(/흙속성/g, '토속성')
+      .replace(/\[흙\]/g, '[토]')
+  }
   if (key.includes('\u9078\u3079\u308B') && /BOX|\u30DC\u30C3\u30AF\u30B9/.test(key)) {
     result = result
       .replace(/선택 가능한 ([^\n]*?) BOX/g, '$1 선택 BOX')
