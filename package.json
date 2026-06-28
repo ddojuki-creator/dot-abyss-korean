@@ -23,6 +23,7 @@
     "review:layout": "node scripts/review-layout.mjs",
     "review:novel-layout": "node scripts/review-novel-layout.mjs",
     "review:context": "node scripts/review-context.mjs",
+    "review:dialogue-openai": "node scripts/review-dialogue-openai.mjs",
     "publish": "node scripts/publish.mjs",
     "zip:ko": "npm run manifest && npm run validate:ko && node scripts/zip-ko.mjs"
   },
