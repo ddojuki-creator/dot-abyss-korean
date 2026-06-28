@@ -4,12 +4,16 @@ import path from 'node:path'
 import { ROOT, readJson, shouldTranslateValue } from './lib/ko-pipeline.mjs'
 
 const DEFAULT_COLLECTION = 'F:/DMMGamePlayer/dotabyss_x_cl/BepInEx/config/AbyssMod/outgame-ja_JP.json'
+const DEFAULT_SNAPSHOT = path.join(ROOT, 'snapshots', 'game-cache-ja_JP.json')
 const translationFile = path.join(ROOT, 'translations', 'outgame', 'ko_KR.json')
 const abilityTranslationFile = path.join(ROOT, 'translations', 'ability_descriptions', 'ko_KR.json')
+const CHARACTER_SNAPSHOT_TABLES = new Set(['m_character_abilities', 'm_character_action_skills'])
+const CHARACTER_SNAPSHOT_FIELDS = new Set(['3', '4'])
 
 function parseArgs(argv) {
   const args = {
     collection: DEFAULT_COLLECTION,
+    snapshot: DEFAULT_SNAPSHOT,
     noFail: false,
   }
   for (let i = 0; i < argv.length; i++) {
@@ -20,6 +24,8 @@ function parseArgs(argv) {
     }
     if (arg === '--collection') args.collection = next()
     else if (arg.startsWith('--collection=')) args.collection = arg.slice('--collection='.length)
+    else if (arg === '--snapshot') args.snapshot = next()
+    else if (arg.startsWith('--snapshot=')) args.snapshot = arg.slice('--snapshot='.length)
     else if (arg === '--no-fail') args.noFail = true
     else if (arg === '--help' || arg === '-h') args.help = true
     else throw new Error(`Unknown argument: ${arg}`)
@@ -28,12 +34,14 @@ function parseArgs(argv) {
 }
 
 function usage() {
-  console.log(`Usage: node scripts/audit-character-abilities.mjs [--collection path] [--no-fail]
+  console.log(`Usage: node scripts/audit-character-abilities.mjs [--collection path] [--snapshot path] [--no-fail]
 
 Checks runtime-collected outgame Japanese strings for character ability descriptions that
 are missing or still contain Japanese in translations/outgame/ko_KR.json.
 Also fails when ability_descriptions entries are not mirrored into outgame, because
-the current CDN manifest does not publish ability_descriptions separately.`)
+the current CDN manifest does not publish ability_descriptions separately.
+Also checks character skill/ability rows in snapshots/game-cache-ja_JP.json so new
+characters are caught before their strings appear in the runtime collection.`)
 }
 
 function stripTags(value) {
@@ -86,6 +94,42 @@ function hasJapaneseAbilityLeftover(value) {
   return /発動条件|覚醒効果|自身|味方|敵|通常|攻撃|防御|最大|上昇|減少|付与|状態異常|紋章|会心|回復|秒|確率|対象|喪失|炎上|戦闘不能|バトル|クエスト|スキルチャージ|被ダメージ|ノワール|憑依/.test(text)
 }
 
+function locationTable(location) {
+  return location.split('/', 1)[0]
+}
+
+function locationField(location) {
+  return location.split('/').pop()
+}
+
+function isCharacterSnapshotLocation(location) {
+  return CHARACTER_SNAPSHOT_TABLES.has(locationTable(location)) && CHARACTER_SNAPSHOT_FIELDS.has(locationField(location))
+}
+
+function hasBareRuntimeToken(source) {
+  return /(^|[^{])\[[A-Z0-9_.]+\]/.test(source)
+}
+
+function dynamicSkeleton(source) {
+  return stripTags(source)
+    .replace(/\{\[[^\]]+\]([^}]*)\}/g, '{#}$1')
+    .replace(/(^|[^{])\[[A-Z0-9_.]+\]/g, '$1{#}')
+    .replace(/\{(?!#\})(?!\[)[^{}]+\}/g, '{#}')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function collectSafeDynamicSkeletons(translations) {
+  const skeletons = new Map()
+  for (const source of Object.keys(translations)) {
+    if (hasBareRuntimeToken(source)) continue
+    const skeleton = dynamicSkeleton(source)
+    if (!skeletons.has(skeleton)) skeletons.set(skeleton, [])
+    skeletons.get(skeleton).push(source)
+  }
+  return skeletons
+}
+
 const args = parseArgs(process.argv.slice(2))
 if (args.help) {
   usage()
@@ -98,14 +142,20 @@ if (!fs.existsSync(translationFile)) throw new Error(`Missing outgame translatio
 const collection = readJson(args.collection)
 const translations = readJson(translationFile)
 const abilityTranslations = fs.existsSync(abilityTranslationFile) ? readJson(abilityTranslationFile) : {}
+const snapshot = fs.existsSync(args.snapshot) ? readJson(args.snapshot) : { entries: {} }
+const snapshotSources = Object.entries(snapshot.entries || {})
+  .filter(([location, source]) => isCharacterSnapshotLocation(location) && typeof source === 'string')
+  .map(([, source]) => source)
 const sources = [
   ...new Set([
     ...Object.keys(collection).filter(isCharacterAbilitySource),
+    ...snapshotSources,
     ...Object.keys(translations).filter(isCharacterAbilitySource),
     ...Object.keys(abilityTranslations).filter(isCharacterAbilitySource),
   ]),
 ].sort()
 const issues = []
+const safeDynamicSkeletons = collectSafeDynamicSkeletons(translations)
 
 for (const source of sources) {
   const value = translations[source]
@@ -115,6 +165,11 @@ for (const source of sources) {
     issues.push({ status: 'untranslated', source, value })
   } else if (shouldTranslateValue(source, value) || hasJapaneseAbilityLeftover(value)) {
     issues.push({ status: 'japanese-leftover', source, value })
+  } else if (
+    hasBareRuntimeToken(source) &&
+    !(safeDynamicSkeletons.get(dynamicSkeleton(source)) || []).some((candidate) => candidate !== source)
+  ) {
+    issues.push({ status: 'unsafe-dynamic-template', source, value })
   }
 }
 
@@ -130,7 +185,7 @@ const counts = issues.reduce((acc, issue) => {
 }, {})
 
 console.log(
-  `audit:character-abilities checked=${sources.length} issues=${issues.length} missing=${counts.missing || 0} untranslated=${counts.untranslated || 0} japanese-leftover=${counts['japanese-leftover'] || 0} ability-only=${counts['ability-only-not-in-outgame'] || 0}`,
+  `audit:character-abilities checked=${sources.length} issues=${issues.length} missing=${counts.missing || 0} untranslated=${counts.untranslated || 0} japanese-leftover=${counts['japanese-leftover'] || 0} unsafe-dynamic=${counts['unsafe-dynamic-template'] || 0} ability-only=${counts['ability-only-not-in-outgame'] || 0}`,
 )
 
 for (const issue of issues.slice(0, 50)) {
