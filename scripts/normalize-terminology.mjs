@@ -65,7 +65,7 @@ function normalize(key, value) {
     result = result.replace(/픽켈|피켈|곡괭이/g, '곡갱이')
   }
   if (key.includes('\u98E2\u9913')) {
-    result = result.replace(/기아/g, '굶주림')
+    result = result.replace(/굶주림/g, '기아')
   }
   if (key.includes('\u30AB\u30CE\u30F3\u30B3\u30FC\u30EB')) {
     result = result.replace(/카논 콜/g, '캐논 콜')

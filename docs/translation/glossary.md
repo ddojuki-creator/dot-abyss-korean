@@ -44,7 +44,7 @@ Use this table format:
 | フロント (formation role) | 프론트 | Formation role. Always use `프론트`; never use `전위`. |
 | クイック選択 | 빠른 선택 | Formation UI action. Never use `퀵 선택`. |
 | ピッケル | 곡갱이 | Weapon/equipment type. Always use `곡갱이`; never use `픽켈` or `피켈`. |
-| 飢餓 / 飢餓の厄災 | 굶주림 / 굶주림의 재앙 | Disaster and status terminology. Always use `굶주림`; never use `기아`. |
+| 飢餓 / 飢餓の厄災 | 기아 / 기아의 재앙 | Disaster and status terminology. Always use `기아`; never use `굶주림`. |
 | 土 / 土属性 | 토 / 토 속성 | Attribute name. Use `토` in compact UI and `토 속성` in prose. Never use `흙` or `흙 속성` for the attribute. |
 | カノンコール | 캐논 콜 | Skill name. Never use `카논 콜`. |
 | 選べる○○BOX / 選べる○○BOX交換券 | ○○ 선택 BOX | Selectable item names must put the target first, e.g. `SSR 캐릭터 선택 BOX`, `Rank4 무기 선택 BOX`, `초급 기술 원소 선택 BOX`. Do not use `선택 가능한 ○○ BOX`. |
@@ -92,7 +92,7 @@ Use this table format:
 | 픽켈 | 곡갱이 | `ピッケル`의 표기는 `곡갱이`로 통일한다. |
 | 피켈 | 곡갱이 | `ピッケル`의 표기는 `곡갱이`로 통일한다. |
 | 곡괭이 | 곡갱이 | `ピッケル`의 표기는 `곡갱이`로 통일한다. |
-| 기아 | 굶주림 | `飢餓` 상태/재앙명은 `굶주림`으로 통일한다. |
-| 기아의 재앙 | 굶주림의 재앙 | `飢餓の厄災`은 `굶주림의 재앙`으로 통일한다. |
+| 굶주림 | 기아 | `飢餓` 상태/재앙명은 `기아`로 통일한다. |
+| 굶주림의 재앙 | 기아의 재앙 | `飢餓の厄災`은 `기아의 재앙`으로 통일한다. |
 | 흙 속성 | 토 속성 | `土属性`의 속성명 문맥에서는 `토 속성`으로 통일한다. |
 | 카논 콜 | 캐논 콜 | `カノンコール`의 스킬명 표기는 `캐논 콜`로 통일한다. |
