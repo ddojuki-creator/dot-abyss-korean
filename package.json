@@ -15,6 +15,7 @@
     "audit:outgame-critical": "node scripts/audit-outgame-critical.mjs",
     "audit:character-abilities": "node scripts/audit-character-abilities.mjs",
     "audit:outgame-ui-hotspots": "node scripts/audit-outgame-ui-hotspots.mjs",
+    "audit:outgame-proposal-colors": "node scripts/audit-outgame-proposal-colors.mjs",
     "audit:novel-location-titles": "node scripts/audit-novel-location-titles.mjs",
     "outgame:update": "node scripts/outgame-update.mjs",
     "game:update": "node scripts/outgame-update.mjs",
