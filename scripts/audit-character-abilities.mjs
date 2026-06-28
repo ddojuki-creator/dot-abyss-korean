@@ -51,15 +51,24 @@ function isCharacterAbilitySource(source) {
     /通常攻撃/,
     /通常回復/,
     /紋章：/,
+    /パラメーター/,
+    /大砲/,
+    /召喚/,
+    /引き継ぐ/,
     /喪失状態/,
     /炎上状態/,
     /戦闘不能/,
     /状態異常/,
     /スキルチャージ/,
+    /ダメージ/,
+    /HIT/,
+    /連撃率/,
+    /連撃確率/,
     /被ダメージ/,
     /味方全体/,
     /自身の/,
     /自身が/,
+    /自身に/,
     /バトル開始時/,
     /クエスト中1回まで/,
   ]
@@ -89,7 +98,13 @@ if (!fs.existsSync(translationFile)) throw new Error(`Missing outgame translatio
 const collection = readJson(args.collection)
 const translations = readJson(translationFile)
 const abilityTranslations = fs.existsSync(abilityTranslationFile) ? readJson(abilityTranslationFile) : {}
-const sources = Object.keys(collection).filter(isCharacterAbilitySource).sort()
+const sources = [
+  ...new Set([
+    ...Object.keys(collection).filter(isCharacterAbilitySource),
+    ...Object.keys(translations).filter(isCharacterAbilitySource),
+    ...Object.keys(abilityTranslations).filter(isCharacterAbilitySource),
+  ]),
+].sort()
 const issues = []
 
 for (const source of sources) {
