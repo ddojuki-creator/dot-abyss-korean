@@ -3,13 +3,18 @@ import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { ROOT, readJson, walk } from './lib/ko-pipeline.mjs'
+import { ROOT, readJson, walk, writeJson } from './lib/ko-pipeline.mjs'
 
 const japanese = /[\u3041-\u3096\u30a1-\u30fa\u30fd-\u30ff]/
+const novelIdRe = /(?:evs|hmr|men)_\d{11}/g
 
 function option(name) {
   const index = process.argv.indexOf(name)
   return index >= 0 ? process.argv[index + 1] : null
+}
+
+function hasFlag(name) {
+  return process.argv.includes(name)
 }
 
 function defaultCacheRoot() {
@@ -39,9 +44,22 @@ function scanLogNovelIds(logFile) {
     return novelIds
   }
 
-  for (const match of text.matchAll(/NovelId:\s*(evs_\d{11})/g)) novelIds.add(match[1])
-  for (const match of text.matchAll(/translations\/novels\/(evs_\d{11})\/ko_KR\.json/g)) novelIds.add(match[1])
+  for (const match of text.matchAll(/NovelId:\s*((?:evs|hmr|men)_\d{11})/g)) novelIds.add(match[1])
+  for (const match of text.matchAll(/translations\/novels\/((?:evs|hmr|men)_\d{11})\/ko_KR\.json/g)) novelIds.add(match[1])
   return novelIds
+}
+
+function stripMessageMeta(text) {
+  let message = text
+  for (;;) {
+    const before = message
+    message = message
+      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),vc_[^,]*(?:,(?:\d+\/)?chara_\d+)?[,]?$/, '')
+      .replace(/,,vc_[^,]*(?:,(?:\d+\/)?chara_\d+)?[,]?$/, '')
+      .replace(/,{2,3}(?:\d+\/)?chara_\d+$/, '')
+      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?)(?:,,[^,]+)?$/, '')
+    if (message === before) return message
+  }
 }
 
 function extractMessages(script) {
@@ -52,16 +70,16 @@ function extractMessages(script) {
     const firstComma = rest.indexOf(',')
     if (firstComma < 0) continue
     rest = rest.slice(firstComma + 1)
-    const marker = rest.match(/,(?:\d{6,}|[A-Z]?\d{6,}[A-Z]?)(?:,,[^,]+)?$/)
-    const message = marker ? rest.slice(0, marker.index) : rest
+    const message = stripMessageMeta(rest)
     if (message) messages.push(message)
   }
   return messages
 }
 
-function scanCachedBundleNames(cacheRoot) {
+function scanCachedBundleNames(cacheRoot, options = {}) {
   const bundles = new Map()
   if (!fs.existsSync(cacheRoot)) return bundles
+  const cachedNovelIdRe = options.allCached ? novelIdRe : /evs_\d{11}/g
 
   for (const file of walk(cacheRoot)) {
     if (path.basename(file) !== '__data') continue
@@ -76,12 +94,11 @@ function scanCachedBundleNames(cacheRoot) {
       continue
     }
 
-    const nameMatches = [...header.matchAll(/evs_\d{11}/g)]
+    const nameMatches = [...header.matchAll(cachedNovelIdRe)]
     if (!nameMatches.length) continue
 
     for (const match of nameMatches) {
       const name = match[0]
-      if (!name.startsWith('evs_')) continue
       bundles.set(name, { file })
     }
   }
@@ -136,7 +153,7 @@ for file in files_to_scan:
                 text = str(script or "")
             if "message," not in text:
                 continue
-            novel_ids = sorted(set(re.findall(r"evs_\d{11}", str(name) + "\n" + text)))
+            novel_ids = sorted(set(re.findall(r"(?:evs|hmr|men)_\d{11}", str(name) + "\n" + text)))
             for novel_id in novel_ids:
                 found.append({"id": novel_id, "file": file, "script": text})
         except Exception:
@@ -235,7 +252,9 @@ function mergeScripts(...maps) {
 
 const cacheRoot = option('--cache-root') || defaultCacheRoot()
 const logFile = option('--log-file') || defaultLogFile()
-const cachedBundles = scanCachedBundleNames(cacheRoot)
+const allCached = hasFlag('--all-cached')
+const writeMissingSource = hasFlag('--write-missing-source')
+const cachedBundles = scanCachedBundleNames(cacheRoot, { allCached })
 const candidateFiles = [...new Set([...cachedBundles.values()].map((info) => info.file))]
 const unity = scanUnityTextAssets(cacheRoot, candidateFiles)
 const scripts = mergeScripts(unity.scripts)
@@ -250,7 +269,7 @@ for (const novelId of novelIds) {
   checked++
   const target = path.join(ROOT, 'translations', 'novels', novelId, 'ko_KR.json')
   if (!fs.existsSync(target)) {
-    issues.push({ type: 'missing-file', novelId, file: info.file, count: info.messages.length })
+    issues.push({ type: 'missing-file', novelId, file: info.file, count: info.messages.length, messages: info.messages })
     continue
   }
 
@@ -276,8 +295,20 @@ for (const novelId of novelIds) {
 
 console.log(`audit:cached-event-novels cacheRoot=${cacheRoot}`)
 console.log(`audit:cached-event-novels logFile=${logFile}`)
-console.log(`audit:cached-event-novels scanner=${unity.scanner} bundles=${cachedBundles.size} files=${candidateFiles.length} unity=${unity.scripts.size} logIds=${logNovelIds.size}`)
+console.log(`audit:cached-event-novels scanner=${unity.scanner} allCached=${allCached} bundles=${cachedBundles.size} files=${candidateFiles.length} unity=${unity.scripts.size} logIds=${logNovelIds.size}`)
 console.log(`audit:cached-event-novels checked=${checked} issues=${issues.length}`)
+if (writeMissingSource) {
+  let written = 0
+  for (const issue of issues) {
+    if (issue.type !== 'missing-file' || !issue.messages.length) continue
+    const target = path.join(ROOT, 'translations', 'novels', issue.novelId, 'ko_KR.json')
+    if (fs.existsSync(target)) continue
+    const data = Object.fromEntries(issue.messages.map((message) => [message, message]))
+    writeJson(target, data)
+    written++
+  }
+  console.log(`audit:cached-event-novels wroteMissingSource=${written}`)
+}
 for (const issue of issues.slice(0, 40)) {
   if (issue.type === 'missing-file') {
     console.log(`\n[missing-file] ${issue.novelId} messages=${issue.count}`)

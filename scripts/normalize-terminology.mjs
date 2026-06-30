@@ -39,7 +39,11 @@ function normalizeKurehaDannaAddress(value) {
     .replace(/나리/g, '서방님')
 }
 
-function normalize(key, value) {
+function isKurehaNovelFile(file) {
+  return /[\\/](?:hmr|men)_105801\d{5}[\\/]ko_KR\.json$/.test(file)
+}
+
+function normalize(key, value, file = '') {
   let result = value
   if (key.includes('\u5927\u7A74')) {
     result = result.replace(/\ub300\uacf5\ub3d9|\ub300\uad6c\uba4d|\ud070 \uad6c\uba4d|\ub300\ub3d9\uad74/g, '\uc5b4\ube44스')
@@ -65,7 +69,11 @@ function normalize(key, value) {
   if (key.includes('\u30AF\u30EC\u30CF')) {
     result = result.replace(/크레하/g, '쿠레하')
   }
-  if (KUREHA_DANNA_KEYS.has(key) || (/(?:クレハ|鬼ヶ島|鬼族|シラエス)/.test(key) && /旦那(?:様|さま)?/.test(key))) {
+  if (
+    KUREHA_DANNA_KEYS.has(key)
+    || (isKurehaNovelFile(file) && /旦那(?:様|さま)?/.test(key))
+    || (/(?:クレハ|鬼ヶ島|鬼族|シラエス)/.test(key) && /旦那(?:様|さま)?/.test(key))
+  ) {
     result = normalizeKurehaDannaAddress(result)
   }
   if (key.includes('\u30B7\u30E9\u30A8\u30B9')) {
@@ -120,6 +128,7 @@ function normalize(key, value) {
   if (/\u8089\u68D2|\u7537\u6839|\u9670\u830E|\u7537\u6027\u5668/.test(key)) {
     result = result
       .replace(/고기봉/g, '남근')
+      .replace(/육봉(?!연술)/g, '남근')
       .replace(/정액 전체/g, '남근 전체')
       .replace(/정액을 조여/g, '남근을 조여')
       .replace(/정액에 힘/g, '남근에 힘')
@@ -245,7 +254,7 @@ function visit(directory) {
     let fileChanged = false
     for (const [key, value] of Object.entries(data)) {
       if (typeof value !== 'string') continue
-      const normalized = normalize(key, value)
+      const normalized = normalize(key, value, file)
       if (normalized === value) continue
       data[key] = normalized
       changedValues += 1
