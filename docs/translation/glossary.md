@@ -46,7 +46,7 @@ Use this table format:
 | ピッケル | 곡갱이 | Weapon/equipment type. Always use `곡갱이`; never use `픽켈` or `피켈`. |
 | 飢餓 / 飢餓の厄災 | 기아 / 기아의 재앙 | Disaster and status terminology. Always use `기아`; never use `굶주림`. |
 | 土 / 土属性 | 토 / 토 속성 | Attribute name. Use `토` in compact UI and `토 속성` in prose. Never use `흙` or `흙 속성` for the attribute. |
-| カノンコール | 캐논 콜 | Skill name. Never use `카논 콜`. |
+| カノンコール / キャノン コール / キャノンコール | 캐논 콜 | Skill name. Always use `캐논 콜`; never use `카논 콜`, `카논콜`, `캐넌 콜`, or `캐논콜`. |
 | 魔導炉 / 特殊魔導炉 | 마도로 / 특수 마도로 | Wendy automata core term. Always use `마도로`; never use `마도 노심` or `마도노심`. |
 | 選べる○○BOX / 選べる○○BOX交換券 | ○○ 선택 BOX | Selectable item names must put the target first, e.g. `SSR 캐릭터 선택 BOX`, `Rank4 무기 선택 BOX`, `초급 기술 원소 선택 BOX`. Do not use `선택 가능한 ○○ BOX`. |
 | フロア1 / フロア2 / フロア3 | 플로어1 / 플로어2 / 플로어3 | Brothel management area labels. Do not translate these labels as `1층`, `2층`, or `3층`. Actual building floors such as `1階` remain `1층`. |
@@ -54,6 +54,12 @@ Use this table format:
 | 司令官殿 | 사령관공 | Formal knight/soldier address. Preserve this when the source explicitly uses `殿`; do not normalize it to `사령관님`. |
 | 司令官さん | 사령관씨 | Casual/soft address. Preserve this when the source explicitly uses `さん`; do not normalize it to `사령관님`. |
 | 司令室 / しれーしつ | 사령실 | Commander room/location term. Always use `사령실`; never use `지휘실`. Treat playful `しれーしつ` as the same room term. |
+| グラディア / グラティア | 글라디아 | Character name. Always use `글라디아`; treat stray source spelling `グラティア` as the same character. Never use `그라디아`, `그라티아`, or `글라티아`. |
+| クレハ | 쿠레하 | Character name. Always use `쿠레하`; never use `크레하`. |
+| シラエス | 시라에스 | Character name. Always use `시라에스`; never use `실라에스`, `시라이스`, or `시라에쓰`. |
+| 鬼ヶ島 | 오니가시마 | Place/event name. Always use `오니가시마`; never translate it as `귀신섬` or `귀가섬`. |
+| 鬼族 | 오니족 | Race/faction term. Always use `오니족`; distinguish it from `貴族`=`귀족`. Never use `강족`, `귀족족`, or `귀족` for `鬼族`. |
+| 羅刹 | 나찰 | Weapon/name component. Always use `나찰`; never use `라살`. |
 | ざこざこ / ザコザコ / よわよわ + おにーさん·司令官 | 허접 오빠 / 허접 사령관 | Mesugaki-style taunt, especially in Berisa-like dialogue. Never soften it to `약한`, `약골`, `잔챙이`, or `쫄보`. Neutral narration using `弱い` or `弱々しい` is excluded. |
 | おしごと用コスチューム | 업무용 코스튬 | UI costume category. Never abbreviate it as `일용 코스튬`. Preserve an existing `<br>` between the words. |
 | 嘘 / ウソ / うそ | 거짓말 / 말도 안 돼 / 농담 | Translate naturally by context. Never transliterate it as `우소`. |
@@ -99,5 +105,21 @@ Use this table format:
 | 굶주림 | 기아 | `飢餓` 상태/재앙명은 `기아`로 통일한다. |
 | 굶주림의 재앙 | 기아의 재앙 | `飢餓の厄災`은 `기아의 재앙`으로 통일한다. |
 | 흙 속성 | 토 속성 | `土属性`의 속성명 문맥에서는 `토 속성`으로 통일한다. |
-| 카논 콜 | 캐논 콜 | `カノンコール`의 스킬명 표기는 `캐논 콜`로 통일한다. |
+| 카논 콜 | 캐논 콜 | `カノンコール`/`キャノン コール`/`キャノンコール`의 스킬명 표기는 `캐논 콜`로 통일한다. |
+| 카논콜 | 캐논 콜 | `カノンコール`/`キャノン コール`/`キャノンコール`의 스킬명 표기는 띄어 쓴 `캐논 콜`로 통일한다. |
+| 캐넌 콜 | 캐논 콜 | `カノンコール`/`キャノン コール`/`キャノンコール`의 스킬명 표기는 `캐논 콜`로 통일한다. |
+| 캐넌콜 | 캐논 콜 | `カノンコール`/`キャノン コール`/`キャノンコール`의 스킬명 표기는 띄어 쓴 `캐논 콜`로 통일한다. |
+| 캐논콜 | 캐논 콜 | `カノンコール`/`キャノン コール`/`キャノンコール`의 스킬명 표기는 띄어 쓴 `캐논 콜`로 통일한다. |
 | 지휘실 | 사령실 | `司令室`/`しれーしつ`의 장소명은 `사령실`로 통일한다. |
+| 그라디아 | 글라디아 | `グラディア`의 표기는 `글라디아`로 통일한다. |
+| 그라티아 | 글라디아 | 원문이 `グラティア`로 흔들린 경우도 캐릭터명은 `글라디아`로 통일한다. |
+| 글라티아 | 글라디아 | 원문이 `グラティア`로 흔들린 경우도 캐릭터명은 `글라디아`로 통일한다. |
+| 크레하 | 쿠레하 | `クレハ`의 표기는 `쿠레하`로 통일한다. |
+| 실라에스 | 시라에스 | `シラエス`의 표기는 `시라에스`로 통일한다. |
+| 시라이스 | 시라에스 | `シラエス`의 표기는 `시라에스`로 통일한다. |
+| 시라에쓰 | 시라에스 | `シラエス`의 표기는 `시라에스`로 통일한다. |
+| 귀신섬 | 오니가시마 | `鬼ヶ島`는 고유명사 `오니가시마`로 통일한다. |
+| 귀가섬 | 오니가시마 | `鬼ヶ島`는 고유명사 `오니가시마`로 통일한다. |
+| 강족 | 오니족 | `鬼族`은 `오니족`으로 통일한다. |
+| 귀족족 | 오니족 | `鬼族`은 `오니족`으로 통일한다. |
+| 라살 | 나찰 | `羅刹`은 `나찰`로 통일한다. |

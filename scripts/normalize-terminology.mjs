@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs'
 import path from 'node:path'
-import { ROOT } from './lib/ko-pipeline.mjs'
+import { ROOT, writeJson } from './lib/ko-pipeline.mjs'
 
 const translationsRoot = path.join(ROOT, 'translations')
 let changedFiles = 0
@@ -26,6 +26,15 @@ function normalize(key, value) {
   }
   if (/\u30DF\u30EB\u30C6\u30A3(?:\u30FC?\u30E6|\u30FC\u30E6)/.test(key)) {
     result = result.replace(/밀피유|미르티유/g, '밀티유')
+  }
+  if (key.includes('\u30B0\u30E9\u30C7\u30A3\u30A2') || key.includes('\u30B0\u30E9\u30C6\u30A3\u30A2')) {
+    result = result.replace(/그라디아|그라티아|글라티아/g, '글라디아')
+  }
+  if (key.includes('\u30AF\u30EC\u30CF')) {
+    result = result.replace(/크레하/g, '쿠레하')
+  }
+  if (key.includes('\u30B7\u30E9\u30A8\u30B9')) {
+    result = result.replace(/실라에스|시라이스|시라에쓰/g, '시라에스')
   }
   if (key.includes('\u30DE\u30C3\u30AF\u30F3')) {
     result = result.replace(/맛쿤/g, '마쿤')
@@ -67,14 +76,42 @@ function normalize(key, value) {
   if (key.includes('\u98E2\u9913')) {
     result = result.replace(/굶주림/g, '기아')
   }
-  if (key.includes('\u30AB\u30CE\u30F3\u30B3\u30FC\u30EB')) {
-    result = result.replace(/카논 콜/g, '캐논 콜')
+  if (key.includes('\u30AB\u30CE\u30F3\u30B3\u30FC\u30EB') || /\u30AD\u30E3\u30CE\u30F3\s*\u30B3\u30FC\u30EB/.test(key)) {
+    result = result.replace(/카논\s*콜|카논콜|캐넌\s*콜|캐넌콜|캐논콜/g, '캐논 콜')
   }
   if (key.includes('\u9B54\u5C0E\u7089')) {
     result = result.replace(/마도\s*노심|마도노심/g, '마도로')
   }
   if (key.includes('\u53F8\u4EE4\u5BA4') || key.includes('\u3057\u308C\u30FC\u3057\u3064')) {
     result = result.replace(/지휘실/g, '사령실')
+  }
+  if (key.includes('\u9B3C\u30F6\u5CF6')) {
+    result = result.replace(/귀신\s*섬|귀신섬|귀가섬|오니가\s*섬/g, '오니가시마')
+  }
+  if (key.includes('\u9B3C\u65CF')) {
+    result = result
+      .replace(/귀족족|강족/g, '오니족')
+      .replace(/귀족/g, '오니족')
+  }
+  if (key.includes('\u9B3C\u65CF\u3068\u4EBA\u9593\u3068')) {
+    result = result.replace(/오니족과 인간과/g, '오니족과 인간')
+  }
+  if (key.includes('\u7F85\u5239')) {
+    result = result.replace(/라살/g, '나찰')
+  }
+  if (key.includes('\u706B')) {
+    result = result.replace(/\(火\)/g, '(화)')
+  }
+  if (key.includes('\u5473\u65B9')) {
+    result = result.replace(/味方/g, '아군')
+  }
+  if (
+    (key.includes('\u524D\u885B') || key.includes('\u5F8C\u885B'))
+    && /\u5473\u65B9|\u6575|\u30AD\u30E3\u30E9|\u653B\u6483\u529B|\u9632\u5FA1\u529B|\u8010\u6027|\u30B9\u30AD\u30EB|\u7DE8\u6210|\u52B9\u679C|\u4ED8\u4E0E|\u4E0A\u6607/.test(key)
+  ) {
+    result = result
+      .replace(/전위/g, '프론트')
+      .replace(/후위/g, '백')
   }
   if (key === '\u571F' || key.includes('\u571F\u5C5E\u6027') || key.includes('\u706B\u3001\u6C34\u3001\u571F') || key.includes('\u706B\u30FB\u6C34\u30FB\u571F')) {
     result = result
@@ -131,6 +168,18 @@ function normalize(key, value) {
     .replace(/어비스이(?=구나|군)/g, '어비스')
     .replace(/어비스이(?=니까)/g, '어비스')
     .replace(/어비스이(?=라면|라서|라도|라\?|라는|라고)/g, '어비스')
+    .replace(/<ruby=大穴>어비스<\/ruby>/g, '어비스')
+    .replace(/무\(無\)/g, '무')
+    .replace(/업화\(業火\)/g, '업화')
+    .replace(/환수\(幻獣\)/g, '환수')
+    .replace(/오니가시마으로/g, '오니가시마로')
+    .replace(/오니가시마을/g, '오니가시마를')
+    .replace(/오니가시마의 프로듀스/g, '오니가시마 프로듀스')
+    .replace(/나리가라도/g, '나리라도')
+    .replace(/나리가기에/g, '나리라서')
+    .replace(/나리가세요/g, '나리세요')
+    .replace(/나리가었으면/g, '나리였으면')
+    .replace(/나리가라면/g, '나리라면')
     .replace(/고마움으로 베리사쨩의/g, '보답으로 베리사쨩의')
     .replace(/가게에서 대인기예요/g, '가게에서 큰 인기예요')
     .replace(/형님은 누구를 데리고 갈 건가요~/g, '오빠는 누구를 데리고 갈 건가요~')
@@ -157,7 +206,7 @@ function visit(directory) {
       fileChanged = true
     }
     if (fileChanged) {
-      fs.writeFileSync(file, `${JSON.stringify(data, null, 4)}\n`, 'utf8')
+      writeJson(file, data)
       changedFiles += 1
     }
   }

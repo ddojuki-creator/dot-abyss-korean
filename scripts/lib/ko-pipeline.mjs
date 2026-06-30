@@ -86,7 +86,13 @@ export function readJson(file) {
 
 export function writeJson(file, data) {
   ensureDir(path.dirname(file))
-  fs.writeFileSync(file, `${JSON.stringify(data, null, 4)}\n`, 'utf8')
+  fs.writeFileSync(file, `${JSON.stringify(data, null, detectJsonIndent(file))}\n`, 'utf8')
+}
+
+export function detectJsonIndent(file, fallback = 4) {
+  if (!fs.existsSync(file)) return fallback
+  const match = readText(file).match(/\n( +)"/)
+  return match ? match[1].length : fallback
 }
 
 export function walk(dir) {

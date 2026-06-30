@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from 'node:fs'
+import { writeJson } from './lib/ko-pipeline.mjs'
 
 const file = 'translations/outgame/ko_KR.json'
 const fix = process.argv.includes('--fix')
@@ -74,7 +75,7 @@ for (const [key, value] of Object.entries(data)) {
 }
 
 if (fix && changed) {
-  fs.writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`, 'utf8')
+  writeJson(file, data)
 }
 
 console.log('\naudit:outgame-proposal-colors')
