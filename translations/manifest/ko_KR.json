@@ -1,9 +1,9 @@
 {
-    "names": "02303fd52b3da6b7357f9351a27297e4",
+    "names": "69cfc6bebd49f7831219bf33ad443574",
     "titles": "b417087ed25dc74f7c8769209af05881",
     "descriptions": "15c118e2ec05f19eb0cb1b95c6c2639c",
     "another_name": "fee207e629d0a1aee260c94bd3eacc7d",
-    "outgame": "4840c2f6ded19566bcf0ec09045c00da",
+    "outgame": "c4b2ec446855c47471b239587e5e23c8",
     "novels": {
         "evs_10200010101": "ff426c329650e2edcee858356343b015",
         "evs_10200010201": "165257a28f2b6a51d9a20648afbd6867",
@@ -13,6 +13,7 @@
         "evs_10200010601": "acc880195dc3052bfd9995fa17bba295",
         "evs_10200010701": "dae9a3cc160f9894bd7f7da9db00ec27",
         "evs_10200010801": "75da7d58f705e98940ed21ecf3dd9ca1",
+        "evs_10200020101": "4300d591f02ff0f97bc83fb03243073d",
         "hmn_10010100001": "ec306095a91c8511a37236465190a1f0",
         "hmn_10010100002": "9e0d1e6a089df5e9accef3e4d7e9fbcf",
         "hmn_10010100003": "8190fc0354aab9bf18ee2e776f6a6b80",
@@ -840,5 +841,5 @@
         "men_10770100002": "93e5d48c300f2f2f2781e2e477e08c26",
         "men_10770100003": "84b808de5461f695d4a69407941f5f5a"
     },
-    "hash": "903db29f696a2aa2b01aeb61c6362e6d"
+    "hash": "a8d75043ee939c7ccc6494c2de9aaabe"
 }
