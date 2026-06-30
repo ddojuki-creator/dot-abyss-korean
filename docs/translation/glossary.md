@@ -11,7 +11,8 @@ Use this table format:
 | 娼館 | 창관 | Always use `창관`. Do not use `매음굴` or `매음관`. |
 | おちんちん / オチンチン | 자지 | Adult dialogue term. Do not transliterate as `오칭칭` or `오징징`. |
 | おまんこ / まんこ / マンコ | 보지 | Adult female-genital dialogue term. Never translate these as `자지`. |
-| 肉棒 / 男根 / 陰茎 / 男性器 | 남근 / 음경 | Adult narration term. Do not mistranslate as `정액`, `고환`, `고기`, or `고기봉`. Use `남근` for narration unless a more clinical `음경` fits the sentence. |
+| 肉棒 | 남근 | Adult narration term. Always use `남근`; do not translate as `음경`, `육봉`, `정액`, `고환`, `고기`, or `고기봉`. |
+| 男根 / 陰茎 / 男性器 | 남근 / 음경 | Adult narration term. Use `남근` for narration unless a more clinical `음경` fits the sentence. Do not mistranslate as `정액`, `고환`, `고기`, or `고기봉`. |
 | キョンシー | 강시 | Always use `강시`. Do not transliterate as `경시` or translate as `좀비`. |
 | 大穴 | 어비스 | Core world-location and title term. Always use `어비스`; do not use `대공`, `대공동`, `대구멍`, `거대 구멍`, `큰 구멍`, or `대동굴`. |
 | ドットアビス | 도트어비스 | Project/game title. Always use `도트어비스`. |
@@ -127,6 +128,6 @@ Use this table format:
 | 라살 | 나찰 | `羅刹`은 `나찰`로 통일한다. |
 | 쿠레하 대사의 나리 | 서방님 | `クレハ`가 주인공을 부르는 `旦那様`/`旦那さま`/`旦那`는 `서방님`으로 통일한다. |
 | 쿠레하 대사의 주인님 | 서방님 | `クレハ`의 `旦那様`를 `ご主人様`처럼 번역하지 않는다. |
-| 고기봉 | 남근 | `肉棒`/`男根` 계열의 성인 서술어를 `고기봉`으로 번역하지 않는다. |
+| 고기 / 고기봉 / 육봉 | 남근 | `肉棒`은 일반 성인 서술에서 반드시 `남근`으로 번역한다. 단, 별도 고유 스킬명으로 확정된 `육봉연술`은 예외. |
 | 정액 전체 / 정액에 힘 / 정액을 조여 | 남근 전체 / 남근에 힘 / 남근을 조여 | `肉棒`을 `精液`처럼 오역하지 않는다. |
 | 질 습관 | 질벽 | `膣壁` 또는 원문 오탈자 `膣癖` 문맥은 신체 부위 `질벽`으로 처리한다. |
