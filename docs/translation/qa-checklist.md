@@ -14,6 +14,15 @@
 - UI text is concise.
 - No invented setting, relationship, or emotion was added.
 
+## CDN Update QA
+
+- After a client update, confirm whether the local game `DownloadCache` date/hash actually changed before assuming new CDN/server text was extracted.
+- Check added, changed, and removed source text. Do not treat "no new file" as "no work"; balance updates can modify existing skill, ability, shop, notice, and proposal-card text.
+- Inspect `.cache/game-cache-extract-report.json` `changes.added`, `changes.changed`, and `changes.removed` after `extract-game-cache`.
+- Run upstream sync dry-run and review `addedKeys` / `removedKeys`; changed source strings usually appear as old removed keys plus new added keys.
+- For balance updates, re-check `m_character_action_skills`, `m_ability_details`, character profiles/skins, tavern proposal cards, notices, and payment/shop text before publishing.
+- New or changed characters require a full pass over normal skill, enhanced skill, ability, enhanced ability, awakening effect, limit break, and pure crystal text, including dynamic exact keys with resolved numbers.
+
 ## Character / Glossary QA
 
 - `glossary.md` and `character-cards.md` do not conflict.
