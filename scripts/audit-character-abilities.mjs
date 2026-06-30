@@ -7,8 +7,11 @@ const DEFAULT_COLLECTION = 'F:/DMMGamePlayer/dotabyss_x_cl/BepInEx/config/AbyssM
 const DEFAULT_SNAPSHOT = path.join(ROOT, 'snapshots', 'game-cache-ja_JP.json')
 const translationFile = path.join(ROOT, 'translations', 'outgame', 'ko_KR.json')
 const abilityTranslationFile = path.join(ROOT, 'translations', 'ability_descriptions', 'ko_KR.json')
-const CHARACTER_SNAPSHOT_TABLES = new Set(['m_character_abilities', 'm_character_action_skills'])
-const CHARACTER_SNAPSHOT_FIELDS = new Set(['3', '4'])
+const CHARACTER_SNAPSHOT_FIELDS_BY_TABLE = new Map([
+  ['m_character_abilities', new Set(['3', '4'])],
+  ['m_character_action_skills', new Set(['3', '4'])],
+  ['m_ability_details', new Set(['4', '5'])],
+])
 
 function parseArgs(argv) {
   const args = {
@@ -40,8 +43,9 @@ Checks runtime-collected outgame Japanese strings for character ability descript
 are missing or still contain Japanese in translations/outgame/ko_KR.json.
 Also fails when ability_descriptions entries are not mirrored into outgame, because
 the current CDN manifest does not publish ability_descriptions separately.
-Also checks character skill/ability rows in snapshots/game-cache-ja_JP.json so new
-characters are caught before their strings appear in the runtime collection.`)
+Also checks character skill/ability/detail rows in snapshots/game-cache-ja_JP.json
+so new characters and limit-break/awakening text are caught before their strings
+appear in the runtime collection.`)
 }
 
 function stripTags(value) {
@@ -103,7 +107,8 @@ function locationField(location) {
 }
 
 function isCharacterSnapshotLocation(location) {
-  return CHARACTER_SNAPSHOT_TABLES.has(locationTable(location)) && CHARACTER_SNAPSHOT_FIELDS.has(locationField(location))
+  const fields = CHARACTER_SNAPSHOT_FIELDS_BY_TABLE.get(locationTable(location))
+  return fields ? fields.has(locationField(location)) : false
 }
 
 function hasBareRuntimeToken(source) {
