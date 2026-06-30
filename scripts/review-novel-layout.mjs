@@ -4,8 +4,8 @@ import path from 'node:path'
 import { collectEntries, parseArgs, rel, ROOT, setByPath, walk, writeJson } from './lib/ko-pipeline.mjs'
 
 const args = parseArgs(process.argv.slice(2))
-const TARGET = 35
-const HARD_LIMIT = 37
+const TARGET = Number(process.env.NOVEL_LAYOUT_TARGET ?? 50)
+const HARD_LIMIT = Number(process.env.NOVEL_LAYOUT_HARD_LIMIT ?? 54)
 const REPORT_FILE = path.join(ROOT, '.cache', 'novel-layout-review.json')
 
 function visibleLength(value) {
@@ -31,12 +31,37 @@ function wordWrapTwoLines(value) {
   if (!compact) return { lines: [], fits: true, longWord: false, value: compact }
 
   const words = compact.split(' ')
+  const longWord = words.some((word) => visibleLength(word) > HARD_LIMIT)
+
+  if (visibleLength(compact) <= HARD_LIMIT) {
+    return { lines: [compact], fits: !longWord, longWord, value: compact }
+  }
+
+  let best = null
+  for (let split = 1; split < words.length; split += 1) {
+    const lines = [
+      words.slice(0, split).join(' '),
+      words.slice(split).join(' '),
+    ]
+    const lengths = lines.map(visibleLength)
+    if (lengths.some((length) => length > HARD_LIMIT)) continue
+    const shortest = Math.min(...lengths)
+    const score = Math.max(...lengths) * 100 + Math.abs(lengths[0] - lengths[1]) + (shortest < 12 ? 1000 : 0)
+    if (!best || score < best.score) best = { lines, lengths, score }
+  }
+
+  if (best) {
+    return {
+      lines: best.lines,
+      fits: !longWord,
+      longWord,
+      value: best.lines.join('<br>'),
+    }
+  }
+
   const lines = []
   let current = ''
-  let longWord = false
-
   for (const word of words) {
-    if (visibleLength(word) > HARD_LIMIT) longWord = true
     const next = current ? `${current} ${word}` : word
     if (!current || visibleLength(next) <= HARD_LIMIT) {
       current = next
