@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs'
 import path from 'node:path'
-import { ROOT, readJson, shouldTranslateValue } from './lib/ko-pipeline.mjs'
+import { ROOT, readJson, shouldTranslateValue, writeJson } from './lib/ko-pipeline.mjs'
 
 const DEFAULT_COLLECTION = 'F:/DMMGamePlayer/dotabyss_x_cl/BepInEx/config/AbyssMod/outgame-ja_JP.json'
 const DEFAULT_SNAPSHOT = path.join(ROOT, 'snapshots', 'game-cache-ja_JP.json')
@@ -13,6 +13,7 @@ function parseArgs(argv) {
     collection: DEFAULT_COLLECTION,
     snapshot: DEFAULT_SNAPSHOT,
     noFail: false,
+    writeMissingSource: false,
   }
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
@@ -25,6 +26,7 @@ function parseArgs(argv) {
     else if (arg === '--snapshot') args.snapshot = next()
     else if (arg.startsWith('--snapshot=')) args.snapshot = arg.slice('--snapshot='.length)
     else if (arg === '--no-fail') args.noFail = true
+    else if (arg === '--write-missing-source') args.writeMissingSource = true
     else throw new Error(`Unknown argument: ${arg}`)
   }
   return args
@@ -46,6 +48,21 @@ function truncate(value, max = 180) {
 
 function storyRewardSource(title) {
   return `ストーリー解放：「${title}」が解放！`
+}
+
+function isRuntimeStoryUiSource(source) {
+  return /ストーリー|閲覧しますか|再生しますか|재생하시겠습니까|初回報酬|クリアで解放|鬼退治|鬼と協力|追加データ.*ボイス/s.test(source)
+}
+
+function isStoryMetadataLocation(location) {
+  return [
+    /^m_novel_characters\/id:\d+\/(?:3|4)$/,
+    /^m_novel_character_skins\/id:\d+\/(?:4|5)$/,
+    /^m_novel_mains\/id:\d+\/(?:4|5)$/,
+    /^m_novel_others\/id:\d+\/(?:2|4|5)$/,
+    /^m_novel_prologues\/id:\d+\/(?:3|4)$/,
+    /^m_event_story_stages\/id:\d+\/2$/,
+  ].some((pattern) => pattern.test(location))
 }
 
 const args = parseArgs(process.argv.slice(2))
@@ -73,12 +90,29 @@ const sources = new Set([
 ])
 
 for (const source of Object.keys(collection)) {
-  if (/^ストーリー解放：「.+」が解放！$/.test(source)) sources.add(source)
+  if (isRuntimeStoryUiSource(source)) sources.add(source)
 }
 
 for (const [location, source] of Object.entries(snapshot.entries || {})) {
-  if (/^m_novel_characters\/id:\d+\/3$/.test(location) && typeof source === 'string') {
+  if (typeof source !== 'string') continue
+  if (isStoryMetadataLocation(location)) {
+    sources.add(source)
+  }
+  if (/^m_novel_characters\/id:\d+\/3$/.test(location)) {
     sources.add(storyRewardSource(source))
+  }
+}
+
+if (args.writeMissingSource) {
+  const seeded = []
+  for (const source of [...sources].sort()) {
+    if (typeof outgame[source] === 'string') continue
+    outgame[source] = source
+    seeded.push(source)
+  }
+  if (seeded.length) {
+    writeJson(outgameFile, outgame)
+    console.log(`audit:character-story-ui seeded-missing=${seeded.length}`)
   }
 }
 

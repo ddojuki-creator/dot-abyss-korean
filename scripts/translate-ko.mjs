@@ -61,6 +61,21 @@ function normalizeKurehaDannaAddress(value) {
     .replace(/나리/g, '서방님')
 }
 
+function normalizeOnigashimaProduce(value) {
+  return value
+    .replace(/프로듀스 계획/g, '홍보 계획')
+    .replace(/프로듀스 대작전/g, '홍보 대작전')
+    .replace(/프로듀스한다는/g, '홍보한다는')
+    .replace(/프로듀스하는/g, '홍보하는')
+    .replace(/프로듀스하기/g, '홍보하기')
+    .replace(/프로듀스하려/g, '홍보하려')
+    .replace(/프로듀스할/g, '홍보할')
+    .replace(/프로듀스는/g, '홍보는')
+    .replace(/프로듀스를/g, '홍보를')
+    .replace(/프로듀스에/g, '홍보에')
+    .replace(/프로듀스/g, '홍보')
+}
+
 function stateKey(file, entry) {
   return `${rel(file)}::${entry.path.join('\u0001')}`
 }
@@ -100,6 +115,9 @@ function normalizeTerminology(key, value) {
   if (key.includes('\u30AF\u30EC\u30CF')) {
     normalized = normalized.replace(/크레하/g, '쿠레하')
   }
+  if (key.includes('\u30D0\u30D6\u307F')) {
+    normalized = normalized.replace(/바붐/g, '바부미')
+  }
   if (KUREHA_DANNA_KEYS.has(key) || (/(?:クレハ|鬼ヶ島|鬼族|シラエス)/.test(key) && /旦那(?:様|さま)?/.test(key))) {
     normalized = normalizeKurehaDannaAddress(normalized)
   }
@@ -128,7 +146,6 @@ function normalizeTerminology(key, value) {
   if (/\u8089\u68D2|\u7537\u6839|\u9670\u830E|\u7537\u6027\u5668/.test(key)) {
     normalized = normalized
       .replace(/고기봉/g, '남근')
-      .replace(/육봉(?!연술)/g, '남근')
       .replace(/정액 전체/g, '남근 전체')
       .replace(/정액을 조여/g, '남근을 조여')
       .replace(/정액에 힘/g, '남근에 힘')
@@ -142,6 +159,23 @@ function normalizeTerminology(key, value) {
   }
   if (key.includes('\u9B3C\u30F6\u5CF6')) {
     normalized = normalized.replace(/귀신\s*섬|귀신섬|귀가섬|오니가\s*섬/g, '오니가시마')
+  }
+  if (key.includes('\u30D7\u30ED\u30C7\u30E5\u30FC\u30B9')) {
+    normalized = normalizeOnigashimaProduce(normalized)
+  }
+  if (key.includes('\u982D\u3092\u60A9\u307E\u305B')) {
+    normalized = normalized
+      .replace(/골머리를 앓고/g, '골치를 썩이고')
+      .replace(/머리를 앓고/g, '골치를 썩이고')
+  }
+  if (key.includes('\u9B3C\u9000\u6CBB') || key.includes('\u9B3C\u3068\u5354\u529B')) {
+    normalized = normalized
+      .replace(/귀퇴치/g, '오니 퇴치')
+      .replace(/귀 퇴치/g, '오니 퇴치')
+      .replace(/귀와 협력/g, '오니와 협력')
+  }
+  if (key === '\u9B3C') {
+    normalized = normalized.replace(/^귀$/g, '오니')
   }
   if (key.includes('\u9B3C\u65CF')) {
     normalized = normalized
@@ -201,6 +235,9 @@ function normalizeTerminology(key, value) {
   if (key.includes('\u304A\u3057\u3054\u3068\u7528') && key.includes('\u30B3\u30B9\u30C1\u30E5\u30FC\u30E0')) {
     normalized = normalized.replace(/\uc77c\uc6a9(?=<br>|\s*\ucf54\uc2a4\ud2ac)/g, '\uc5c5\ubb34\uc6a9')
   }
+  if (key.includes('\uFF11\uFF10\u5E74') || key.includes('\u5341\u5E74')) {
+    normalized = normalized.replace(/10년/g, '십 년')
+  }
   return normalized
     .replace(/닷트 어비스/g, '도트 어비스')
     .replace(/어비스을/g, '어비스를')
@@ -215,9 +252,10 @@ function normalizeTerminology(key, value) {
     .replace(/무\(無\)/g, '무')
     .replace(/업화\(業火\)/g, '업화')
     .replace(/환수\(幻獣\)/g, '환수')
+    .replace(/바부미이라는/g, '바부미라는')
     .replace(/오니가시마으로/g, '오니가시마로')
     .replace(/오니가시마을/g, '오니가시마를')
-    .replace(/오니가시마의 프로듀스/g, '오니가시마 프로듀스')
+    .replace(/오니가시마의 홍보/g, '오니가시마 홍보')
     .replace(/나리가라도/g, '나리라도')
     .replace(/나리가기에/g, '나리라서')
     .replace(/나리가세요/g, '나리세요')
