@@ -25,6 +25,7 @@
 - `ミル` is translated as `밀티` only when it is clearly a nickname for `ミルティーユ`.
 - `クルル` is always `쿠루루`; `크루루`, `크룰루`, and `쿠룰루` do not remain as active translations.
 - `ルクスノヴァ` is always `룩스노바`; `루크스노바`, `럭스노바`, `루크스 노바`, and `럭스 노바` do not remain as active translations.
+- `魔導炉` / `特殊魔導炉` is always `마도로` / `특수 마도로`; `마도 노심` and `마도노심` do not remain.
 - `マリナ` dialogue uses `旦那様/旦那さま=나리` unless the source clearly uses another address; `단나사마`, `주인님`, `남편님`, `남편`, `여보`, `사장님`, and `당신` do not remain as active translations.
 - `ベリサ` dialogue uses `兄さん/おにーさん=오빠`; never `형` or `형님`.
 - `ちゃん` is not left as `쨩` unless intentionally approved for a specific character voice.

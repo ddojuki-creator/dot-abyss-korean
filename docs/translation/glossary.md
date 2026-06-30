@@ -47,6 +47,7 @@ Use this table format:
 | 飢餓 / 飢餓の厄災 | 기아 / 기아의 재앙 | Disaster and status terminology. Always use `기아`; never use `굶주림`. |
 | 土 / 土属性 | 토 / 토 속성 | Attribute name. Use `토` in compact UI and `토 속성` in prose. Never use `흙` or `흙 속성` for the attribute. |
 | カノンコール | 캐논 콜 | Skill name. Never use `카논 콜`. |
+| 魔導炉 / 特殊魔導炉 | 마도로 / 특수 마도로 | Wendy automata core term. Always use `마도로`; never use `마도 노심` or `마도노심`. |
 | 選べる○○BOX / 選べる○○BOX交換券 | ○○ 선택 BOX | Selectable item names must put the target first, e.g. `SSR 캐릭터 선택 BOX`, `Rank4 무기 선택 BOX`, `초급 기술 원소 선택 BOX`. Do not use `선택 가능한 ○○ BOX`. |
 | フロア1 / フロア2 / フロア3 | 플로어1 / 플로어2 / 플로어3 | Brothel management area labels. Do not translate these labels as `1층`, `2층`, or `3층`. Actual building floors such as `1階` remain `1층`. |
 | 司令官 / 指揮官 | 사령관 | Commander title/address. Use `사령관` or `사령관님` as context requires; never use `지휘관`. |
