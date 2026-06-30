@@ -6,7 +6,8 @@ import path from 'node:path'
 import { ROOT, readJson, walk, writeJson } from './lib/ko-pipeline.mjs'
 
 const japanese = /[\u3041-\u3096\u30a1-\u30fa\u30fd-\u30ff]/
-const novelIdRe = /(?:evs|hmr|men)_\d{11}/g
+const novelIdPattern = String.raw`(?:evs|hmr|hmn|men)_\d{11}`
+const novelIdRe = new RegExp(novelIdPattern, 'g')
 
 function option(name) {
   const index = process.argv.indexOf(name)
@@ -44,8 +45,8 @@ function scanLogNovelIds(logFile) {
     return novelIds
   }
 
-  for (const match of text.matchAll(/NovelId:\s*((?:evs|hmr|men)_\d{11})/g)) novelIds.add(match[1])
-  for (const match of text.matchAll(/translations\/novels\/((?:evs|hmr|men)_\d{11})\/ko_KR\.json/g)) novelIds.add(match[1])
+  for (const match of text.matchAll(new RegExp(`NovelId:\\s*(${novelIdPattern})`, 'g'))) novelIds.add(match[1])
+  for (const match of text.matchAll(new RegExp(`translations\\/novels\\/(${novelIdPattern})\\/ko_KR\\.json`, 'g'))) novelIds.add(match[1])
   return novelIds
 }
 
@@ -55,8 +56,9 @@ function stripMessageMeta(text) {
     const before = message
     message = message
       .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),vc_[^,]*(?:,(?:\d+\/)?chara_\d+)?[,]?$/, '')
-      .replace(/,,vc_[^,]*(?:,(?:\d+\/)?chara_\d+)?[,]?$/, '')
-      .replace(/,{2,3}(?:\d+\/)?chara_\d+$/, '')
+      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),vc_[^,]*(?:,(?:on|off|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
+      .replace(/,,vc_[^,]*(?:,(?:on|off|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
+      .replace(/,{2,3}(?:\d+\/)?chara_\d+(?:\/chara_\d+)*$/, '')
       .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?)(?:,,[^,]+)?$/, '')
     if (message === before) return message
   }
@@ -153,7 +155,7 @@ for file in files_to_scan:
                 text = str(script or "")
             if "message," not in text:
                 continue
-            novel_ids = sorted(set(re.findall(r"(?:evs|hmr|men)_\d{11}", str(name) + "\n" + text)))
+            novel_ids = sorted(set(re.findall(r"(?:evs|hmr|hmn|men)_\d{11}", str(name) + "\n" + text)))
             for novel_id in novel_ids:
                 found.append({"id": novel_id, "file": file, "script": text})
         except Exception:
@@ -260,6 +262,7 @@ const unity = scanUnityTextAssets(cacheRoot, candidateFiles)
 const scripts = mergeScripts(unity.scripts)
 const logNovelIds = scanLogNovelIds(logFile)
 const issues = []
+const warnings = []
 let checked = 0
 
 const novelIds = [...new Set([...scripts.keys(), ...logNovelIds])].sort()
@@ -269,7 +272,9 @@ for (const novelId of novelIds) {
   checked++
   const target = path.join(ROOT, 'translations', 'novels', novelId, 'ko_KR.json')
   if (!fs.existsSync(target)) {
-    issues.push({ type: 'missing-file', novelId, file: info.file, count: info.messages.length, messages: info.messages })
+    const issue = { type: 'missing-file', novelId, file: info.file, count: info.messages.length, messages: info.messages }
+    if (info.messages.length) issues.push(issue)
+    else warnings.push({ ...issue, type: 'log-only-missing-file' })
     continue
   }
 
@@ -296,7 +301,7 @@ for (const novelId of novelIds) {
 console.log(`audit:cached-event-novels cacheRoot=${cacheRoot}`)
 console.log(`audit:cached-event-novels logFile=${logFile}`)
 console.log(`audit:cached-event-novels scanner=${unity.scanner} allCached=${allCached} bundles=${cachedBundles.size} files=${candidateFiles.length} unity=${unity.scripts.size} logIds=${logNovelIds.size}`)
-console.log(`audit:cached-event-novels checked=${checked} issues=${issues.length}`)
+console.log(`audit:cached-event-novels checked=${checked} issues=${issues.length} warnings=${warnings.length}`)
 if (writeMissingSource) {
   let written = 0
   for (const issue of issues) {
@@ -308,6 +313,10 @@ if (writeMissingSource) {
     written++
   }
   console.log(`audit:cached-event-novels wroteMissingSource=${written}`)
+}
+for (const warning of warnings.slice(0, 20)) {
+  console.log(`\n[warning:${warning.type}] ${warning.novelId} messages=${warning.count}`)
+  console.log(`cache: ${warning.file}`)
 }
 for (const issue of issues.slice(0, 40)) {
   if (issue.type === 'missing-file') {
