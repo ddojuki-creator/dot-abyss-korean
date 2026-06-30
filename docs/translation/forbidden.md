@@ -21,6 +21,8 @@
 - Do not translate Kureha's `旦那様` / `旦那さま` / `旦那` as Marina's `나리` or as `주인님`; use `서방님`.
 - Do not translate `兄さん` / `おにーさん` as `형` or `형님` for Berisa-style address; use `오빠`.
 - Do not translate `魔導炉` / `特殊魔導炉` as `마도 노심` or `마도노심`; use `마도로` / `특수 마도로`.
+- Do not mistranslate `肉棒` / `男根` / `陰茎` / `男性器` as `정액`, `고환`, `고기`, or `고기봉`; use `남근` or context-appropriate `음경`.
+- Do not translate `膣壁` or typo-like `膣癖` body-part context as `질 습관`; use `질벽`.
 - Do not leave Japanese honorifics such as `쨩`, `상`, `사마` in Korean unless the project has explicitly approved that specific case.
 - Do not keep `지휘관` as an active translation for `司令官`, `指揮官`, or commander address; use the approved `사령관` family.
 - Do not normalize explicit source honorifics such as `司令官殿=사령관공` or `司令官さん=사령관씨` to `사령관님`.

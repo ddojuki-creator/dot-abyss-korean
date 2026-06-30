@@ -19,6 +19,11 @@ const KUREHA_DANNA_KEYS = new Set([
   '旦那様と仲を深めるために',
   '旦那様のことを愛しています',
   '服に血がついたわ。旦那様に\n会う前に綺麗にしないと……',
+  '――旦那様。 <br>私がお力になりましょうか？',
+  '立ち聞きをするつもりはなかったのですが、 <br>旦那様の苦しげな声をお聞きして、つい……',
+  'もちろんです。 <br>だからこそ旦那様のお力になりたいと思うのです。',
+  'どんなことがあっても私の心が旦那様から離れることはありません。 <br>それを証明させてはいただけませんか。',
+  'はい……！<br>必ず旦那様の期待に応えてみせますね。',
 ])
 
 function normalizeKurehaDannaAddress(value) {
@@ -60,7 +65,7 @@ function normalize(key, value) {
   if (key.includes('\u30AF\u30EC\u30CF')) {
     result = result.replace(/크레하/g, '쿠레하')
   }
-  if (KUREHA_DANNA_KEYS.has(key)) {
+  if (KUREHA_DANNA_KEYS.has(key) || (/(?:クレハ|鬼ヶ島|鬼族|シラエス)/.test(key) && /旦那(?:様|さま)?/.test(key))) {
     result = normalizeKurehaDannaAddress(result)
   }
   if (key.includes('\u30B7\u30E9\u30A8\u30B9')) {
@@ -111,6 +116,17 @@ function normalize(key, value) {
   }
   if (key.includes('\u9B54\u5C0E\u7089')) {
     result = result.replace(/마도\s*노심|마도노심/g, '마도로')
+  }
+  if (/\u8089\u68D2|\u7537\u6839|\u9670\u830E|\u7537\u6027\u5668/.test(key)) {
+    result = result
+      .replace(/고기봉/g, '남근')
+      .replace(/정액 전체/g, '남근 전체')
+      .replace(/정액을 조여/g, '남근을 조여')
+      .replace(/정액에 힘/g, '남근에 힘')
+      .replace(/몸이 움찔하며 정액이 차오른다/g, '남근이 움찔 떨리고 만다')
+  }
+  if (/\u81A3(?:\u58C1|\u7656)/.test(key)) {
+    result = result.replace(/질 습관/g, '질벽')
   }
   if (key.includes('\u53F8\u4EE4\u5BA4') || key.includes('\u3057\u308C\u30FC\u3057\u3064')) {
     result = result.replace(/지휘실/g, '사령실')

@@ -12,6 +12,7 @@ let keyErrors = 0
 let emptyValues = 0
 let nonStringValues = 0
 let tokenErrors = 0
+let novelVoiceMarkerErrors = 0
 const samples = []
 
 for (const file of files) {
@@ -55,6 +56,10 @@ for (const file of files) {
       samples.push(`${fileRel} :: ${entry.path.join(' > ')}: non-string value`)
       continue
     }
+    if (fileRel.startsWith('translations/novels/') && /,{2,3}(?:vc|chara)_[^,]+$/.test(`${entry.key}${entry.value}`)) {
+      novelVoiceMarkerErrors += 1
+      samples.push(`${fileRel} :: ${entry.path.join(' > ')}: voice marker leaked into novel key/value`)
+    }
     if (entry.value === '') {
       emptyValues += 1
       samples.push(`${fileRel} :: ${entry.path.join(' > ')}: empty value`)
@@ -78,6 +83,7 @@ printSummary('validate:ko', {
   nonStringValues,
   emptyValues,
   tokenErrors,
+  novelVoiceMarkerErrors,
 })
 
 if (samples.length) {
@@ -85,4 +91,4 @@ if (samples.length) {
   for (const sample of samples.slice(0, 40)) console.log(`- ${sample}`)
 }
 
-if (parseErrors || invalidShape || keyErrors || nonStringValues || emptyValues || tokenErrors) process.exitCode = 1
+if (parseErrors || invalidShape || keyErrors || nonStringValues || emptyValues || tokenErrors || novelVoiceMarkerErrors) process.exitCode = 1

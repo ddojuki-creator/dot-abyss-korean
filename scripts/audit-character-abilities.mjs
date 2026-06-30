@@ -151,10 +151,38 @@ const snapshot = fs.existsSync(args.snapshot) ? readJson(args.snapshot) : { entr
 const snapshotSources = Object.entries(snapshot.entries || {})
   .filter(([location, source]) => isCharacterSnapshotLocation(location) && typeof source === 'string')
   .map(([, source]) => source)
+
+function stripPlaceholderBraces(source) {
+  return source.replace(/\{([^{}]+)\}/g, '$1')
+}
+
+function sourceLooksLikePicoShockAbility(source) {
+  return typeof source === 'string'
+    && source.includes('敵が戦闘不能になったとき、【25%】')
+    && source.includes('紋章：衝撃')
+    && source.includes('自身のスキルを')
+}
+
+function collectRuntimeAbilityVariants(entries) {
+  const variants = []
+  for (const [location, source] of Object.entries(entries || {})) {
+    if (!/^m_ability_details\/id:\d+\/4$/.test(location) || !sourceLooksLikePicoShockAbility(source)) continue
+    const concreteSource = stripPlaceholderBraces(source)
+    variants.push(concreteSource)
+
+    const awakeningSource = entries[location.replace(/\/4$/, '/5')]
+    if (typeof awakeningSource === 'string') {
+      variants.push(`${concreteSource}<br><color=#D7DEF8>【覚醒効果】</color>${stripPlaceholderBraces(awakeningSource)}`)
+    }
+  }
+  return variants
+}
+
 const sources = [
   ...new Set([
     ...Object.keys(collection).filter(isCharacterAbilitySource),
     ...snapshotSources,
+    ...collectRuntimeAbilityVariants(snapshot.entries || {}),
     ...Object.keys(translations).filter(isCharacterAbilitySource),
     ...Object.keys(abilityTranslations).filter(isCharacterAbilitySource),
   ]),
