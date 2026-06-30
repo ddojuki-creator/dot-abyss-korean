@@ -73,6 +73,9 @@ function normalize(key, value) {
   if (key.includes('\u9B54\u5C0E\u7089')) {
     result = result.replace(/마도\s*노심|마도노심/g, '마도로')
   }
+  if (key.includes('\u53F8\u4EE4\u5BA4') || key.includes('\u3057\u308C\u30FC\u3057\u3064')) {
+    result = result.replace(/지휘실/g, '사령실')
+  }
   if (key === '\u571F' || key.includes('\u571F\u5C5E\u6027') || key.includes('\u706B\u3001\u6C34\u3001\u571F') || key.includes('\u706B\u30FB\u6C34\u30FB\u571F')) {
     result = result
       .replace(/흙\s*속성/g, '토 속성')

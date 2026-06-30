@@ -23,3 +23,4 @@
 - Do not leave Japanese honorifics such as `쨩`, `상`, `사마` in Korean unless the project has explicitly approved that specific case.
 - Do not keep `지휘관` as an active translation for `司令官`, `指揮官`, or commander address; use the approved `사령관` family.
 - Do not normalize explicit source honorifics such as `司令官殿=사령관공` or `司令官さん=사령관씨` to `사령관님`.
+- Do not translate `司令室` or playful `しれーしつ` as `지휘실`; use `사령실`.

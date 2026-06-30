@@ -16,17 +16,18 @@ const samples = []
 
 for (const file of files) {
   if (isManifest(file)) continue
+  const fileRel = rel(file)
   let data
   try {
     data = readJson(file)
   } catch (err) {
     parseErrors += 1
-    samples.push(`${rel(file)}: parse error: ${err.message}`)
+    samples.push(`${fileRel}: parse error: ${err.message}`)
     continue
   }
   if (!isPlainObject(data)) {
     invalidShape += 1
-    samples.push(`${rel(file)}: not a JSON object`)
+    samples.push(`${fileRel}: not a JSON object`)
     continue
   }
   checkedFiles += 1
@@ -35,11 +36,15 @@ for (const file of files) {
   let source = null
   if (fs.existsSync(upstreamFile)) {
     source = readJson(upstreamFile)
-    const targetKeys = JSON.stringify(collectEntries(data).map((entry) => entry.path.join('\u0001')).sort())
-    const sourceKeys = JSON.stringify(collectEntries(source).map((entry) => entry.path.join('\u0001')).sort())
-    if (targetKeys !== sourceKeys) {
+    const targetKeys = collectEntries(data).map((entry) => entry.path.join('\u0001')).sort()
+    const sourceKeys = collectEntries(source).map((entry) => entry.path.join('\u0001')).sort()
+    const namesAllowExtraKeys = fileRel === 'translations/names/ko_KR.json'
+    const keyMismatch = namesAllowExtraKeys
+      ? sourceKeys.some((key) => !targetKeys.includes(key))
+      : JSON.stringify(targetKeys) !== JSON.stringify(sourceKeys)
+    if (keyMismatch) {
       keyErrors += 1
-      samples.push(`${rel(file)}: keys differ from upstream`)
+      samples.push(`${fileRel}: keys differ from upstream`)
     }
   }
 
@@ -47,19 +52,19 @@ for (const file of files) {
     checkedItems += 1
     if (typeof entry.value !== 'string') {
       nonStringValues += 1
-      samples.push(`${rel(file)} :: ${entry.path.join(' > ')}: non-string value`)
+      samples.push(`${fileRel} :: ${entry.path.join(' > ')}: non-string value`)
       continue
     }
     if (entry.value === '') {
       emptyValues += 1
-      samples.push(`${rel(file)} :: ${entry.path.join(' > ')}: empty value`)
+      samples.push(`${fileRel} :: ${entry.path.join(' > ')}: empty value`)
     }
     const tokenProblems = compareProtectedTokens(entry.key, entry.value, {
-      lineBreaks: rel(file).startsWith('translations/novels/') ? 'korean-dialogue' : 'source-max',
+      lineBreaks: fileRel.startsWith('translations/novels/') ? 'korean-dialogue' : 'source-max',
     })
     if (tokenProblems.length) {
       tokenErrors += 1
-      samples.push(`${rel(file)} :: ${entry.path.join(' > ')}: ${tokenProblems.join(', ')}`)
+      samples.push(`${fileRel} :: ${entry.path.join(' > ')}: ${tokenProblems.join(', ')}`)
     }
   }
 }

@@ -53,6 +53,7 @@ Use this table format:
 | 司令官 / 指揮官 | 사령관 | Commander title/address. Use `사령관` or `사령관님` as context requires; never use `지휘관`. |
 | 司令官殿 | 사령관공 | Formal knight/soldier address. Preserve this when the source explicitly uses `殿`; do not normalize it to `사령관님`. |
 | 司令官さん | 사령관씨 | Casual/soft address. Preserve this when the source explicitly uses `さん`; do not normalize it to `사령관님`. |
+| 司令室 / しれーしつ | 사령실 | Commander room/location term. Always use `사령실`; never use `지휘실`. Treat playful `しれーしつ` as the same room term. |
 | ざこざこ / ザコザコ / よわよわ + おにーさん·司令官 | 허접 오빠 / 허접 사령관 | Mesugaki-style taunt, especially in Berisa-like dialogue. Never soften it to `약한`, `약골`, `잔챙이`, or `쫄보`. Neutral narration using `弱い` or `弱々しい` is excluded. |
 | おしごと用コスチューム | 업무용 코스튬 | UI costume category. Never abbreviate it as `일용 코스튬`. Preserve an existing `<br>` between the words. |
 | 嘘 / ウソ / うそ | 거짓말 / 말도 안 돼 / 농담 | Translate naturally by context. Never transliterate it as `우소`. |
@@ -99,3 +100,4 @@ Use this table format:
 | 굶주림의 재앙 | 기아의 재앙 | `飢餓の厄災`은 `기아의 재앙`으로 통일한다. |
 | 흙 속성 | 토 속성 | `土属性`의 속성명 문맥에서는 `토 속성`으로 통일한다. |
 | 카논 콜 | 캐논 콜 | `カノンコール`의 스킬명 표기는 `캐논 콜`로 통일한다. |
+| 지휘실 | 사령실 | `司令室`/`しれーしつ`의 장소명은 `사령실`로 통일한다. |
