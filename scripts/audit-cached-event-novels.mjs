@@ -13,11 +13,35 @@ function option(name) {
 }
 
 function defaultCacheRoot() {
-  const game = process.env.DOTABYSS_GAME_DIR || 'F:\\DMMGamePlayer\\dotabyss_x_cl'
+  const game = defaultGameDir()
   const dataDir = path.join(game, 'ドットアビスX_Data', 'Caches')
   if (fs.existsSync(dataDir)) return dataDir
   const localLow = path.resolve(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), '..', 'LocalLow')
   return path.join(localLow, 'EXNOA LLC_', 'ドットアビスX')
+}
+
+function defaultGameDir() {
+  return process.env.DOTABYSS_GAME_DIR || 'F:\\DMMGamePlayer\\dotabyss_x_cl'
+}
+
+function defaultLogFile() {
+  return path.join(defaultGameDir(), 'BepInEx', 'LogOutput.log')
+}
+
+function scanLogNovelIds(logFile) {
+  const novelIds = new Set()
+  if (!fs.existsSync(logFile)) return novelIds
+
+  let text
+  try {
+    text = fs.readFileSync(logFile, 'utf8')
+  } catch {
+    return novelIds
+  }
+
+  for (const match of text.matchAll(/NovelId:\s*(evs_\d{11})/g)) novelIds.add(match[1])
+  for (const match of text.matchAll(/translations\/novels\/(evs_\d{11})\/ko_KR\.json/g)) novelIds.add(match[1])
+  return novelIds
 }
 
 function extractMessages(script) {
@@ -210,14 +234,19 @@ function mergeScripts(...maps) {
 }
 
 const cacheRoot = option('--cache-root') || defaultCacheRoot()
+const logFile = option('--log-file') || defaultLogFile()
 const cachedBundles = scanCachedBundleNames(cacheRoot)
 const candidateFiles = [...new Set([...cachedBundles.values()].map((info) => info.file))]
 const unity = scanUnityTextAssets(cacheRoot, candidateFiles)
 const scripts = mergeScripts(unity.scripts)
+const logNovelIds = scanLogNovelIds(logFile)
 const issues = []
 let checked = 0
 
-for (const [novelId, info] of [...scripts.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+const novelIds = [...new Set([...scripts.keys(), ...logNovelIds])].sort()
+
+for (const novelId of novelIds) {
+  const info = scripts.get(novelId) || { file: logFile, messages: [] }
   checked++
   const target = path.join(ROOT, 'translations', 'novels', novelId, 'ko_KR.json')
   if (!fs.existsSync(target)) {
@@ -234,10 +263,20 @@ for (const [novelId, info] of [...scripts.entries()].sort(([a], [b]) => a.locale
       issues.push({ type: 'untranslated', novelId, source, value })
     }
   }
+
+  if (!info.messages.length) {
+    const translations = readJson(target)
+    for (const [source, value] of Object.entries(translations)) {
+      if (typeof value === 'string' && (value === source || japanese.test(value))) {
+        issues.push({ type: 'untranslated', novelId, source, value })
+      }
+    }
+  }
 }
 
 console.log(`audit:cached-event-novels cacheRoot=${cacheRoot}`)
-console.log(`audit:cached-event-novels scanner=${unity.scanner} bundles=${cachedBundles.size} files=${candidateFiles.length} unity=${unity.scripts.size}`)
+console.log(`audit:cached-event-novels logFile=${logFile}`)
+console.log(`audit:cached-event-novels scanner=${unity.scanner} bundles=${cachedBundles.size} files=${candidateFiles.length} unity=${unity.scripts.size} logIds=${logNovelIds.size}`)
 console.log(`audit:cached-event-novels checked=${checked} issues=${issues.length}`)
 for (const issue of issues.slice(0, 40)) {
   if (issue.type === 'missing-file') {
