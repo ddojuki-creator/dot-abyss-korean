@@ -15,11 +15,11 @@ import {
 
 const API_KEY = process.env.OPENAI_API_KEY
 const API_URL = process.env.OPENAI_API_URL || 'https://api.openai.com/v1/chat/completions'
-const MODEL = process.env.OPENAI_DIALOGUE_REVIEW_MODEL || process.env.OPENAI_REVIEW_MODEL || process.env.OPENAI_MODEL || 'gpt-5.4-mini'
-const BATCH_SIZE = Number(process.env.DIALOGUE_REVIEW_BATCH_SIZE || 8)
+let MODEL = process.env.OPENAI_DIALOGUE_REVIEW_MODEL || process.env.OPENAI_REVIEW_MODEL || process.env.OPENAI_MODEL || 'gpt-5.4-mini'
+let BATCH_SIZE = Number(process.env.DIALOGUE_REVIEW_BATCH_SIZE || 8)
 const MAX_RETRIES = Number(process.env.TRANSLATE_MAX_RETRIES || 4)
 const CONTEXT_RADIUS = Number(process.env.DIALOGUE_REVIEW_CONTEXT_RADIUS || 2)
-const REVIEW_VERSION = '2026-06-28.1'
+const REVIEW_VERSION = '2026-06-30.1'
 const CACHE_DIR = path.join(ROOT, '.cache', 'dialogue-review')
 const STATE_FILE = path.join(CACHE_DIR, 'state.json')
 
@@ -46,6 +46,8 @@ function parseArgs(argv) {
     limit: null,
     maxItems: null,
     maxBatches: null,
+    batchSize: null,
+    model: null,
     output: null,
     dryRun: false,
     force: false,
@@ -67,6 +69,10 @@ function parseArgs(argv) {
     else if (arg.startsWith('--max-items=')) args.maxItems = Number(arg.slice('--max-items='.length))
     else if (arg === '--max-batches') args.maxBatches = Number(next())
     else if (arg.startsWith('--max-batches=')) args.maxBatches = Number(arg.slice('--max-batches='.length))
+    else if (arg === '--batch-size') args.batchSize = Number(next())
+    else if (arg.startsWith('--batch-size=')) args.batchSize = Number(arg.slice('--batch-size='.length))
+    else if (arg === '--model') args.model = next()
+    else if (arg.startsWith('--model=')) args.model = arg.slice('--model='.length)
     else if (arg === '--output') args.output = next()
     else if (arg.startsWith('--output=')) args.output = arg.slice('--output='.length)
     else if (arg === '--dry-run') args.dryRun = true
@@ -75,9 +81,10 @@ function parseArgs(argv) {
     else throw new Error(`Unknown argument: ${arg}`)
   }
 
-  for (const key of ['limit', 'maxItems', 'maxBatches']) {
+  for (const key of ['limit', 'maxItems', 'maxBatches', 'batchSize']) {
     if (args[key] != null && (!Number.isInteger(args[key]) || args[key] < 0)) throw new Error(`Invalid --${key}: ${args[key]}`)
   }
+  if (args.batchSize === 0) throw new Error('Invalid --batch-size: 0')
   return args
 }
 
@@ -92,6 +99,8 @@ Options:
   --limit <n>          Limit target files.
   --max-items <n>      Stop after selecting n pending entries.
   --max-batches <n>    Stop after n API batches. Useful for daily slices.
+  --batch-size <n>     Items per API batch. Larger values reduce repeated instruction tokens.
+  --model <model>      Override OPENAI_* model env vars for this run.
   --output <path>      JSONL suggestions output path.
   --force              Ignore saved done-state and review again.
   --dry-run            Print targets without calling OpenAI.
@@ -178,6 +187,8 @@ function buildPayload(targets) {
       'Do not rewrite a line that is already accurate and natural.',
       'If changed, suggested must be the full replacement Korean value.',
       'Preserve tags, placeholders, and control tokens. For novel dialogue, use at most one rendered line break.',
+      'Do not remove or replace existing <br>, \\n, or other line-break tokens; keep their count and form.',
+      'Do not propose style-only polish or line-break-only rewrites unless the current text is clearly wrong.',
       'Keep reasons short and concrete.',
     ],
     targets: targets.map(({ entry, index }, id) => {
@@ -251,7 +262,7 @@ async function callOpenAI(instructions, payload) {
       if (!content) throw new Error('OpenAI response has no message content')
       const parsed = JSON.parse(stripJsonFence(content))
       if (!Array.isArray(parsed.changes)) throw new Error('OpenAI response JSON has no changes array')
-      return parsed.changes
+      return { changes: parsed.changes, usage: data.usage || null }
     } catch (error) {
       lastError = error
       if (error.noRetry) throw error
@@ -267,12 +278,8 @@ function sanitizeChange(change, targets) {
   if (typeof change.suggested !== 'string' || change.suggested.length === 0) return null
   const target = targets[id]
   if (change.suggested === target.entry.value) return null
-  const tokenErrors = compareProtectedTokens(target.entry.key, change.suggested, { lineBreaks: 'korean-dialogue' })
-  if (tokenErrors.length) {
-    const error = new Error(`Protected token mismatch at id=${id}: ${tokenErrors.join(', ')}`)
-    error.target = target
-    throw error
-  }
+  const tokenErrors = compareProtectedTokens(target.entry.key, change.suggested, { lineBreaks: 'korean-dialogue', preserveLineBreakTokens: true })
+  if (tokenErrors.length) return null
   return {
     id,
     file: rel(target.file),
@@ -344,6 +351,8 @@ function markError(state, target, instructionsHash, error) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2))
+  if (args.model) MODEL = args.model
+  if (args.batchSize != null) BATCH_SIZE = args.batchSize
   if (args.help) {
     printHelp()
     return
@@ -376,6 +385,12 @@ async function main() {
   let suggestions = 0
   let failed = 0
   let batches = 0
+  let skipped = 0
+  const tokenUsage = {
+    prompt_tokens: 0,
+    completion_tokens: 0,
+    total_tokens: 0,
+  }
 
   for (let offset = 0; offset < pending.length; offset += BATCH_SIZE) {
     if (args.maxBatches != null && batches >= args.maxBatches) break
@@ -384,11 +399,20 @@ async function main() {
     const payload = buildPayload(targets)
     process.stdout.write(`\nbatch ${batches + 1} items=${targets.length} ... `)
     try {
-      const changes = await callOpenAI(instructions.text, payload)
+      const result = await callOpenAI(instructions.text, payload)
+      const changes = result.changes
+      if (result.usage) {
+        tokenUsage.prompt_tokens += result.usage.prompt_tokens || 0
+        tokenUsage.completion_tokens += result.usage.completion_tokens || 0
+        tokenUsage.total_tokens += result.usage.total_tokens || 0
+      }
       const byTargetId = new Map()
       for (const change of changes) {
         const sanitized = sanitizeChange(change, targets)
-        if (!sanitized) continue
+        if (!sanitized) {
+          skipped += 1
+          continue
+        }
         sanitized.runId = runId
         sanitized.model = MODEL
         sanitized.reviewVersion = REVIEW_VERSION
@@ -401,7 +425,7 @@ async function main() {
       for (let id = 0; id < targets.length; id += 1) markDone(state, targets[id], instructions.hash, outputFile, byTargetId.get(id) || 0)
       reviewed += targets.length
       saveState(state)
-      console.log(`ok suggestions=${suggestions}`)
+      console.log(`ok suggestions=${suggestions} skipped=${skipped} tokens=${tokenUsage.total_tokens}`)
     } catch (error) {
       failed += targets.length
       for (const target of targets) markError(state, target, instructions.hash, error)
@@ -422,11 +446,13 @@ async function main() {
     outputFile: rel(outputFile),
     reviewed,
     suggestions,
+    skipped,
     failed,
+    tokenUsage,
     at: new Date().toISOString(),
   }, null, 2)}\n`, 'utf8')
 
-  console.log(`\nreview:dialogue-openai reviewed=${reviewed} suggestions=${suggestions} failed=${failed}`)
+  console.log(`\nreview:dialogue-openai reviewed=${reviewed} suggestions=${suggestions} skipped=${skipped} failed=${failed} tokens=${tokenUsage.total_tokens}`)
   if (failed) process.exitCode = 1
 }
 
