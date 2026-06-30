@@ -20,4 +20,5 @@
 - Do not translate `旦那様` / `旦那さま` as `단나사마`, `주인님`, `서방님`, `남편님`, `남편`, `여보`, `사장님`, or `당신` in Marina dialogue unless the source context explicitly requires a different relationship.
 - Do not translate `兄さん` / `おにーさん` as `형` or `형님` for Berisa-style address; use `오빠`.
 - Do not leave Japanese honorifics such as `쨩`, `상`, `사마` in Korean unless the project has explicitly approved that specific case.
-- Do not keep `지휘관` as an active translation for `司令官`, `指揮官`, or commander address; use `사령관`.
+- Do not keep `지휘관` as an active translation for `司令官`, `指揮官`, or commander address; use the approved `사령관` family.
+- Do not normalize explicit source honorifics such as `司令官殿=사령관공` or `司令官さん=사령관씨` to `사령관님`.

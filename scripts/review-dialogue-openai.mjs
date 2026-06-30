@@ -19,7 +19,7 @@ let MODEL = process.env.OPENAI_DIALOGUE_REVIEW_MODEL || process.env.OPENAI_REVIE
 let BATCH_SIZE = Number(process.env.DIALOGUE_REVIEW_BATCH_SIZE || 8)
 const MAX_RETRIES = Number(process.env.TRANSLATE_MAX_RETRIES || 4)
 const CONTEXT_RADIUS = Number(process.env.DIALOGUE_REVIEW_CONTEXT_RADIUS || 2)
-const REVIEW_VERSION = '2026-06-30.1'
+const REVIEW_VERSION = '2026-06-30.2'
 const CACHE_DIR = path.join(ROOT, '.cache', 'dialogue-review')
 const STATE_FILE = path.join(CACHE_DIR, 'state.json')
 
@@ -185,6 +185,7 @@ function buildPayload(targets) {
       'Review Korean game dialogue and narration against the Japanese source.',
       'Return fixes only for clear issues: mistranslation, omitted meaning, broken Korean, wrong term, wrong address, inconsistent speech level, or layout risk.',
       'Do not rewrite a line that is already accurate and natural.',
+      'Preserve approved commander honorifics: 司令官殿=사령관공 and 司令官さん=사령관씨. Do not flatten them to 사령관님.',
       'If changed, suggested must be the full replacement Korean value.',
       'Preserve tags, placeholders, and control tokens. For novel dialogue, use at most one rendered line break.',
       'Do not remove or replace existing <br>, \\n, or other line-break tokens; keep their count and form.',

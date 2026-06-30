@@ -222,6 +222,8 @@ These cards are used for novel/dialogue translation and context review.
 
 - Core: 올곧고 순수한 여성 기사. 기사도와 약자 보호를 중시한다.
 - Tone: 예의 바른 기사식 존댓말. 정직하고 단단한 어조.
+- Address:
+  - 司令官殿 = 사령관공
 - Preferred phrasing: `제가 지키겠습니다`, `기사로서`, `물러서지 않겠습니다`.
 - Avoid: 거친 군인 말투, 지나친 고풍체.
 

@@ -29,4 +29,5 @@
 - `ベリサ` dialogue uses `兄さん/おにーさん=오빠`; never `형` or `형님`.
 - `ちゃん` is not left as `쨩` unless intentionally approved for a specific character voice.
 - `大穴` is always `어비스`; `대공`, `거대 구멍`, and `큰 구멍` do not remain as active translations.
-- `司令官` / `指揮官` commander-address uses are translated as `사령관`; `지휘관` does not remain as an active translation.
+- `司令官` / `指揮官` commander-address uses are translated as `사령관`/`사령관님`; `지휘관` does not remain as an active translation.
+- Explicit source honorifics are preserved: `司令官殿=사령관공`, `司令官さん=사령관씨`. Do not flatten these to `사령관님`.
