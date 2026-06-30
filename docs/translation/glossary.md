@@ -17,6 +17,7 @@ Use this table format:
 | 錬珍術 | 육봉연술 | Adult-pun localization. Always use `육봉연술`; do not use `연진술` or `연단술`. |
 | ご主人様 | 주인님 | Use only when the Japanese source actually says `ご主人様`. Do not substitute it for other address terms. |
 | マリナ의 旦那様 / 旦那さま | 나리 | Marina's merchant-style address. Do not translate as `단나사마`, `주인님`, `서방님`, `남편님`, `남편`, `여보`, `사장님`, or `당신`. |
+| クレハ의 旦那様 / 旦那さま / 旦那 | 서방님 | Kureha's romantic address for the protagonist. Do not use Marina's `나리` here. |
 | 베리사(1200002 / 102001)의 兄さん·おにーさん | 오빠 | Berisa is a woman addressing the male protagonist. Never translate her address as `형` or `형님`. |
 | 마뇨리아(1300019 / 102401)의 おにいさん | 오빠 | Manioria is a woman addressing the male protagonist. Mackun's `兄ちゃん` remains `형` because Mackun is male. |
 | 멜리사(1300041 / 107701)의 お兄さん | 오빠 | Melissa is a woman addressing the male protagonist. Do not use `형님`. |
@@ -123,3 +124,5 @@ Use this table format:
 | 강족 | 오니족 | `鬼族`은 `오니족`으로 통일한다. |
 | 귀족족 | 오니족 | `鬼族`은 `오니족`으로 통일한다. |
 | 라살 | 나찰 | `羅刹`은 `나찰`로 통일한다. |
+| 쿠레하 대사의 나리 | 서방님 | `クレハ`가 주인공을 부르는 `旦那様`/`旦那さま`/`旦那`는 `서방님`으로 통일한다. |
+| 쿠레하 대사의 주인님 | 서방님 | `クレハ`의 `旦那様`를 `ご主人様`처럼 번역하지 않는다. |

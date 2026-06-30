@@ -18,6 +18,7 @@
 - Do not keep obsolete `クルル` variants such as `크루루`, `크룰루`, or `쿠룰루`; use `쿠루루`.
 - Do not keep obsolete `ルクスノヴァ` variants such as `루크스노바`, `럭스노바`, `루크스 노바`, or `럭스 노바`; use `룩스노바`.
 - Do not translate `旦那様` / `旦那さま` as `단나사마`, `주인님`, `서방님`, `남편님`, `남편`, `여보`, `사장님`, or `당신` in Marina dialogue unless the source context explicitly requires a different relationship.
+- Do not translate Kureha's `旦那様` / `旦那さま` / `旦那` as Marina's `나리` or as `주인님`; use `서방님`.
 - Do not translate `兄さん` / `おにーさん` as `형` or `형님` for Berisa-style address; use `오빠`.
 - Do not translate `魔導炉` / `特殊魔導炉` as `마도 노심` or `마도노심`; use `마도로` / `특수 마도로`.
 - Do not leave Japanese honorifics such as `쨩`, `상`, `사마` in Korean unless the project has explicitly approved that specific case.

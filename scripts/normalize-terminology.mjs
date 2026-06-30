@@ -7,6 +7,33 @@ const translationsRoot = path.join(ROOT, 'translations')
 let changedFiles = 0
 let changedValues = 0
 
+const KUREHA_DANNA_KEYS = new Set([
+  'ありがとうございます、旦那様。\n鬼族と人が仲良くなれる日が\n来るなんて……夢のようですっ',
+  'それでは鬼族のみんな……！\n次は旦那様とシラエスママを\nもてなしますよ～♪',
+  '愛する旦那様のために……',
+  '私としたことが……これでは\n旦那様に顔向けできません……',
+  '私と旦那の愛のパワーで、\n必ずや鬼ヶ島のプロデュースを\n成功させてみせます！',
+  '旦那様',
+  '旦那様～♪　観光客のみなさまに\nお出しする料理ができました♪\n味見してください、あ～～ん♪',
+  '旦那様が私と一緒に鬼ヶ島へ\n里帰りしてくださるのですか！？\nもしや結婚の挨拶のために！？',
+  '旦那様と仲を深めるために',
+  '旦那様のことを愛しています',
+  '服に血がついたわ。旦那様に\n会う前に綺麗にしないと……',
+])
+
+function normalizeKurehaDannaAddress(value) {
+  return value
+    .replace(/나리님/g, '서방님')
+    .replace(/나리께서/g, '서방님께서')
+    .replace(/나리께/g, '서방님께')
+    .replace(/나리에게/g, '서방님께')
+    .replace(/나리와/g, '서방님과')
+    .replace(/나리의/g, '서방님의')
+    .replace(/나리를/g, '서방님을')
+    .replace(/주인님/g, '서방님')
+    .replace(/나리/g, '서방님')
+}
+
 function normalize(key, value) {
   let result = value
   if (key.includes('\u5927\u7A74')) {
@@ -32,6 +59,9 @@ function normalize(key, value) {
   }
   if (key.includes('\u30AF\u30EC\u30CF')) {
     result = result.replace(/크레하/g, '쿠레하')
+  }
+  if (KUREHA_DANNA_KEYS.has(key)) {
+    result = normalizeKurehaDannaAddress(result)
   }
   if (key.includes('\u30B7\u30E9\u30A8\u30B9')) {
     result = result.replace(/실라에스|시라이스|시라에쓰/g, '시라에스')
