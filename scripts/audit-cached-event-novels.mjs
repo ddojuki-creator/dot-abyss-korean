@@ -115,6 +115,7 @@ import sys
 
 cache_root = sys.argv[1]
 candidate_file = sys.argv[2] if len(sys.argv) > 2 else None
+target_ids = set(json.loads(sys.argv[3])) if len(sys.argv) > 3 and sys.argv[3] else set()
 found = []
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -156,6 +157,8 @@ for file in files_to_scan:
             if "message," not in text:
                 continue
             novel_ids = sorted(set(re.findall(r"(?:evs|hmr|hmn|men)_\d{11}", str(name) + "\n" + text)))
+            if target_ids and not (target_ids & set(novel_ids)):
+                continue
             for novel_id in novel_ids:
                 found.append({"id": novel_id, "file": file, "script": text})
         except Exception:
@@ -185,14 +188,29 @@ function withTempJson(data, callback) {
   }
 }
 
-function scanUnityTextAssets(cacheRoot, candidateFiles) {
+function listSmallCacheDataFiles(cacheRoot) {
+  const files = []
+  if (!fs.existsSync(cacheRoot)) return files
+
+  for (const file of walk(cacheRoot)) {
+    if (path.basename(file) !== '__data') continue
+    try {
+      const size = fs.statSync(file).size
+      if (size >= 1000 && size <= 250000) files.push(file)
+    } catch {}
+  }
+  return files
+}
+
+function scanUnityTextAssets(cacheRoot, candidateFiles, options = {}) {
   if (!fs.existsSync(cacheRoot) || !candidateFiles.length) return { scripts: new Map(), scanner: 'skipped' }
+  const targetArg = options.targetIds?.size ? JSON.stringify([...options.targetIds]) : ''
 
   const commands = []
   const candidateArg = (temp) => {
-    if (process.env.PYTHON) commands.push([process.env.PYTHON, '-c', unityPyScanner, cacheRoot, temp])
-    commands.push(['python', '-c', unityPyScanner, cacheRoot, temp])
-    commands.push(['py', '-3', '-c', unityPyScanner, cacheRoot, temp])
+    if (process.env.PYTHON) commands.push([process.env.PYTHON, '-c', unityPyScanner, cacheRoot, temp, targetArg])
+    commands.push(['python', '-c', unityPyScanner, cacheRoot, temp, targetArg])
+    commands.push(['py', '-3', '-c', unityPyScanner, cacheRoot, temp, targetArg])
   }
 
   return withTempJson(candidateFiles, (temp) => {
@@ -258,9 +276,21 @@ const allCached = hasFlag('--all-cached')
 const writeMissingSource = hasFlag('--write-missing-source')
 const cachedBundles = scanCachedBundleNames(cacheRoot, { allCached })
 const candidateFiles = [...new Set([...cachedBundles.values()].map((info) => info.file))]
-const unity = scanUnityTextAssets(cacheRoot, candidateFiles)
-const scripts = mergeScripts(unity.scripts)
 const logNovelIds = scanLogNovelIds(logFile)
+const unity = scanUnityTextAssets(cacheRoot, candidateFiles)
+let scripts = mergeScripts(unity.scripts)
+let fallback = { scripts: new Map(), scanner: 'skipped', files: 0 }
+
+const missingLogIds = [...logNovelIds].filter((novelId) => !scripts.has(novelId))
+if (allCached && missingLogIds.length) {
+  const smallFiles = listSmallCacheDataFiles(cacheRoot)
+  fallback = {
+    ...scanUnityTextAssets(cacheRoot, smallFiles, { targetIds: new Set(missingLogIds) }),
+    files: smallFiles.length,
+  }
+  scripts = mergeScripts(scripts, fallback.scripts)
+}
+
 const issues = []
 const warnings = []
 let checked = 0
@@ -301,6 +331,9 @@ for (const novelId of novelIds) {
 console.log(`audit:cached-event-novels cacheRoot=${cacheRoot}`)
 console.log(`audit:cached-event-novels logFile=${logFile}`)
 console.log(`audit:cached-event-novels scanner=${unity.scanner} allCached=${allCached} bundles=${cachedBundles.size} files=${candidateFiles.length} unity=${unity.scripts.size} logIds=${logNovelIds.size}`)
+if (fallback.scanner !== 'skipped') {
+  console.log(`audit:cached-event-novels fallbackScanner=${fallback.scanner} fallbackFiles=${fallback.files} fallbackUnity=${fallback.scripts.size} missingLogIds=${missingLogIds.length}`)
+}
 console.log(`audit:cached-event-novels checked=${checked} issues=${issues.length} warnings=${warnings.length}`)
 if (writeMissingSource) {
   let written = 0
