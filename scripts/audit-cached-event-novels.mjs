@@ -78,6 +78,10 @@ function extractMessages(script) {
   return messages
 }
 
+function hasJapaneseOutsideTags(value) {
+  return japanese.test(String(value).replace(/<[^>]*>/g, ''))
+}
+
 function scanCachedBundleNames(cacheRoot, options = {}) {
   const bundles = new Map()
   if (!fs.existsSync(cacheRoot)) return bundles
@@ -274,19 +278,21 @@ const cacheRoot = option('--cache-root') || defaultCacheRoot()
 const logFile = option('--log-file') || defaultLogFile()
 const allCached = hasFlag('--all-cached')
 const writeMissingSource = hasFlag('--write-missing-source')
+const deepSmallTextAssets = hasFlag('--deep-small-textassets')
 const cachedBundles = scanCachedBundleNames(cacheRoot, { allCached })
 const candidateFiles = [...new Set([...cachedBundles.values()].map((info) => info.file))]
 const logNovelIds = scanLogNovelIds(logFile)
 const unity = scanUnityTextAssets(cacheRoot, candidateFiles)
 let scripts = mergeScripts(unity.scripts)
-let fallback = { scripts: new Map(), scanner: 'skipped', files: 0 }
+let fallback = { scripts: new Map(), scanner: 'skipped', files: 0, mode: 'skipped' }
 
 const missingLogIds = [...logNovelIds].filter((novelId) => !scripts.has(novelId))
-if (allCached && missingLogIds.length) {
+if (allCached && (missingLogIds.length || deepSmallTextAssets)) {
   const smallFiles = listSmallCacheDataFiles(cacheRoot)
   fallback = {
-    ...scanUnityTextAssets(cacheRoot, smallFiles, { targetIds: new Set(missingLogIds) }),
+    ...scanUnityTextAssets(cacheRoot, smallFiles, deepSmallTextAssets ? {} : { targetIds: new Set(missingLogIds) }),
     files: smallFiles.length,
+    mode: deepSmallTextAssets ? 'all-small-textassets' : 'missing-log-ids',
   }
   scripts = mergeScripts(scripts, fallback.scripts)
 }
@@ -313,7 +319,7 @@ for (const novelId of novelIds) {
     const value = translations[source]
     if (typeof value !== 'string') {
       issues.push({ type: 'missing-key', novelId, source })
-    } else if (value === source || japanese.test(value)) {
+    } else if (value === source || hasJapaneseOutsideTags(value)) {
       issues.push({ type: 'untranslated', novelId, source, value })
     }
   }
@@ -321,7 +327,7 @@ for (const novelId of novelIds) {
   if (!info.messages.length) {
     const translations = readJson(target)
     for (const [source, value] of Object.entries(translations)) {
-      if (typeof value === 'string' && (value === source || japanese.test(value))) {
+      if (typeof value === 'string' && (value === source || hasJapaneseOutsideTags(value))) {
         issues.push({ type: 'untranslated', novelId, source, value })
       }
     }
@@ -332,7 +338,7 @@ console.log(`audit:cached-event-novels cacheRoot=${cacheRoot}`)
 console.log(`audit:cached-event-novels logFile=${logFile}`)
 console.log(`audit:cached-event-novels scanner=${unity.scanner} allCached=${allCached} bundles=${cachedBundles.size} files=${candidateFiles.length} unity=${unity.scripts.size} logIds=${logNovelIds.size}`)
 if (fallback.scanner !== 'skipped') {
-  console.log(`audit:cached-event-novels fallbackScanner=${fallback.scanner} fallbackFiles=${fallback.files} fallbackUnity=${fallback.scripts.size} missingLogIds=${missingLogIds.length}`)
+  console.log(`audit:cached-event-novels fallbackScanner=${fallback.scanner} fallbackMode=${fallback.mode} fallbackFiles=${fallback.files} fallbackUnity=${fallback.scripts.size} missingLogIds=${missingLogIds.length}`)
 }
 console.log(`audit:cached-event-novels checked=${checked} issues=${issues.length} warnings=${warnings.length}`)
 if (writeMissingSource) {

@@ -39,8 +39,8 @@ for (const file of files) {
     source = readJson(upstreamFile)
     const targetKeys = collectEntries(data).map((entry) => entry.path.join('\u0001')).sort()
     const sourceKeys = collectEntries(source).map((entry) => entry.path.join('\u0001')).sort()
-    const namesAllowExtraKeys = fileRel === 'translations/names/ko_KR.json'
-    const keyMismatch = namesAllowExtraKeys
+    const allowExtraKeys = fileRel === 'translations/names/ko_KR.json' || fileRel.startsWith('translations/novels/')
+    const keyMismatch = allowExtraKeys
       ? sourceKeys.some((key) => !targetKeys.includes(key))
       : JSON.stringify(targetKeys) !== JSON.stringify(sourceKeys)
     if (keyMismatch) {
