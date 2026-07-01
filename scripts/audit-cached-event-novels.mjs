@@ -55,6 +55,7 @@ function stripMessageMeta(text) {
   for (;;) {
     const before = message
     message = message
+      .replace(/,{2,3}(?:on|off)$/, '')
       .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),vc_[^,]*(?:,(?:\d+\/)?chara_\d+)?[,]?$/, '')
       .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),vc_[^,]*(?:,(?:on|off|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
       .replace(/,,vc_[^,]*(?:,(?:on|off|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
@@ -67,8 +68,13 @@ function stripMessageMeta(text) {
 function extractMessages(script) {
   const messages = []
   for (const line of script.split(/\r?\n/)) {
-    if (!line.startsWith('message,')) continue
-    let rest = line.slice('message,'.length)
+    const command = line.startsWith('message,')
+      ? 'message'
+      : line.startsWith('messageTextCenter,')
+        ? 'messageTextCenter'
+        : null
+    if (!command) continue
+    let rest = line.slice(`${command},`.length)
     const firstComma = rest.indexOf(',')
     if (firstComma < 0) continue
     rest = rest.slice(firstComma + 1)
