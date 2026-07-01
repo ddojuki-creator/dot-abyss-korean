@@ -156,6 +156,39 @@ function stripPlaceholderBraces(source) {
   return source.replace(/\{([^{}]+)\}/g, '$1')
 }
 
+function colorizePlaceholderBraces(source) {
+  return source.replace(/\{([^{}]+)\}/g, '<color=#4CF37B>$1</color>')
+}
+
+function isMeaningfulAbilityDetailSource(source) {
+  if (typeof source !== 'string') return false
+  const text = source.trim()
+  if (!text) return false
+  if (text === 'データ未設計') return false
+  if (text === 'テスト覚醒効果') return false
+  return true
+}
+
+function collectLimitBreakAbilityCombos(entries) {
+  const variants = []
+  const prefix = '<br><color=#D7DEF8>【覚醒効果】</color>'
+
+  for (const [location, base] of Object.entries(entries || {})) {
+    const match = location.match(/^m_ability_details\/id:(\d+)\/4$/)
+    if (!match || !isMeaningfulAbilityDetailSource(base)) continue
+
+    const awakening = entries[`m_ability_details/id:${match[1]}/5`]
+    if (!isMeaningfulAbilityDetailSource(awakening)) continue
+    if (!isCharacterAbilitySource(base) && !isCharacterAbilitySource(awakening)) continue
+
+    const concreteBase = stripPlaceholderBraces(base)
+    variants.push(`${concreteBase}${prefix}${stripPlaceholderBraces(awakening)}`)
+    variants.push(`${concreteBase}${prefix}${colorizePlaceholderBraces(awakening)}`)
+  }
+
+  return variants
+}
+
 function sourceLooksLikePicoShockAbility(source) {
   return typeof source === 'string'
     && source.includes('敵が戦闘不能になったとき、【25%】')
@@ -182,6 +215,7 @@ const sources = [
   ...new Set([
     ...Object.keys(collection).filter(isCharacterAbilitySource),
     ...snapshotSources,
+    ...collectLimitBreakAbilityCombos(snapshot.entries || {}),
     ...collectRuntimeAbilityVariants(snapshot.entries || {}),
     ...Object.keys(translations).filter(isCharacterAbilitySource),
     ...Object.keys(abilityTranslations).filter(isCharacterAbilitySource),

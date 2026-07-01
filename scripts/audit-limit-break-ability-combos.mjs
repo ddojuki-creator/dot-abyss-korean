@@ -84,6 +84,15 @@ function isAbilityDetailSource(source) {
   return plain.length >= 16 && terms.some((pattern) => pattern.test(source))
 }
 
+function isMeaningfulSource(source) {
+  if (typeof source !== 'string') return false
+  const text = source.trim()
+  if (!text) return false
+  if (text === 'データ未設計') return false
+  if (text === 'テスト覚醒効果') return false
+  return true
+}
+
 function locationId(location) {
   const match = location.match(/^m_ability_details\/id:(\d+)\/([45])$/)
   return match ? match[1] : null
@@ -148,7 +157,7 @@ const sources = []
 for (const id of ids) {
   const base = entries[`m_ability_details/id:${id}/4`]
   const awakening = entries[`m_ability_details/id:${id}/5`]
-  if (typeof base !== 'string' || typeof awakening !== 'string' || !awakening.trim()) continue
+  if (!isMeaningfulSource(base) || !isMeaningfulSource(awakening)) continue
   if (!isAbilityDetailSource(base) && !isAbilityDetailSource(awakening)) continue
   for (const source of comboVariants(base, awakening)) {
     sources.push({ id, source })
