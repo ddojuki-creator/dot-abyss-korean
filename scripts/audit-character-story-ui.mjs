@@ -7,6 +7,7 @@ const DEFAULT_COLLECTION = 'F:/DMMGamePlayer/dotabyss_x_cl/BepInEx/config/AbyssM
 const DEFAULT_SNAPSHOT = path.join(ROOT, 'snapshots', 'game-cache-ja_JP.json')
 const outgameFile = path.join(ROOT, 'translations', 'outgame', 'ko_KR.json')
 const titlesFile = path.join(ROOT, 'translations', 'titles', 'ko_KR.json')
+const descriptionsFile = path.join(ROOT, 'translations', 'descriptions', 'ko_KR.json')
 
 function parseArgs(argv) {
   const args = {
@@ -65,14 +66,26 @@ function isStoryMetadataLocation(location) {
   ].some((pattern) => pattern.test(location))
 }
 
+function isStoryDescriptionLocation(location) {
+  return [
+    /^m_novel_characters\/id:\d+\/4$/,
+    /^m_novel_character_skins\/id:\d+\/5$/,
+    /^m_novel_mains\/id:\d+\/5$/,
+    /^m_novel_others\/id:\d+\/5$/,
+    /^m_novel_prologues\/id:\d+\/4$/,
+  ].some((pattern) => pattern.test(location))
+}
+
 const args = parseArgs(process.argv.slice(2))
 if (!fs.existsSync(args.collection)) throw new Error(`Missing runtime collection: ${args.collection}`)
 if (!fs.existsSync(outgameFile)) throw new Error(`Missing outgame translation: ${outgameFile}`)
 if (!fs.existsSync(titlesFile)) throw new Error(`Missing title translation: ${titlesFile}`)
+if (!fs.existsSync(descriptionsFile)) throw new Error(`Missing description translation: ${descriptionsFile}`)
 
 const collection = readJson(args.collection)
 const outgame = readJson(outgameFile)
 const titles = readJson(titlesFile)
+const descriptions = readJson(descriptionsFile)
 const snapshot = fs.existsSync(args.snapshot) ? readJson(args.snapshot) : { entries: {} }
 
 const sources = new Set([
@@ -88,6 +101,7 @@ const sources = new Set([
   'キャラクターストーリーが解放されました。<br>閲覧しますか？',
   'キャラクターストーリーが開放されました。<br>閲覧しますか？',
 ])
+const descriptionSources = new Set()
 
 for (const source of Object.keys(collection)) {
   if (isRuntimeStoryUiSource(source)) sources.add(source)
@@ -97,6 +111,9 @@ for (const [location, source] of Object.entries(snapshot.entries || {})) {
   if (typeof source !== 'string') continue
   if (isStoryMetadataLocation(location)) {
     sources.add(source)
+  }
+  if (isStoryDescriptionLocation(location)) {
+    descriptionSources.add(source)
   }
   if (/^m_novel_characters\/id:\d+\/3$/.test(location)) {
     sources.add(storyRewardSource(source))
@@ -113,6 +130,19 @@ if (args.writeMissingSource) {
   if (seeded.length) {
     writeJson(outgameFile, outgame)
     console.log(`audit:character-story-ui seeded-missing=${seeded.length}`)
+  }
+
+  const seededDescriptions = []
+  for (const source of [...descriptionSources].sort()) {
+    if (typeof descriptions[source] === 'string') continue
+    descriptions[source] = typeof outgame[source] === 'string' && outgame[source] !== source
+      ? outgame[source]
+      : source
+    seededDescriptions.push(source)
+  }
+  if (seededDescriptions.length) {
+    writeJson(descriptionsFile, descriptions)
+    console.log(`audit:character-story-ui seeded-missing-descriptions=${seededDescriptions.length}`)
   }
 }
 
@@ -136,13 +166,22 @@ for (const source of [...sources].sort()) {
   }
 }
 
+for (const source of [...descriptionSources].sort()) {
+  const value = descriptions[source]
+  if (typeof value !== 'string') issues.push({ status: 'missing-description', source })
+  else if (value === source) issues.push({ status: 'untranslated-description', source, value })
+  else if (shouldTranslateValue(source, value) || hasJapaneseUiLeftover(value)) {
+    issues.push({ status: 'japanese-leftover-description', source, value })
+  }
+}
+
 const counts = issues.reduce((acc, issue) => {
   acc[issue.status] = (acc[issue.status] || 0) + 1
   return acc
 }, {})
 
 console.log(
-  `audit:character-story-ui checked=${sources.size} issues=${issues.length} missing=${counts.missing || 0} untranslated=${counts.untranslated || 0} japanese-leftover=${counts['japanese-leftover'] || 0} missing-title=${counts['missing-title-translation'] || 0}`,
+  `audit:character-story-ui checked=${sources.size} descriptions=${descriptionSources.size} issues=${issues.length} missing=${counts.missing || 0} untranslated=${counts.untranslated || 0} japanese-leftover=${counts['japanese-leftover'] || 0} missing-title=${counts['missing-title-translation'] || 0} missing-description=${counts['missing-description'] || 0}`,
 )
 
 for (const issue of issues.slice(0, 50)) {
