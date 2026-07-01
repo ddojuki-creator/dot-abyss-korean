@@ -96,6 +96,19 @@ function statusColorComboVariants(item) {
   return variants
 }
 
+function placeholderStylePairs(source, target) {
+  return [
+    {
+      source: stripPlaceholderBraces(source),
+      target: stripPlaceholderBraces(target),
+    },
+    {
+      source: colorizePlaceholderBraces(source),
+      target: colorizePlaceholderBraces(target),
+    },
+  ].filter((item, index, items) => items.findIndex((other) => other.source === item.source) === index)
+}
+
 function isMeaningfulSource(source) {
   if (typeof source !== 'string') return false
   const text = source.trim()
@@ -135,21 +148,19 @@ function isAbilityDetailSource(source) {
 function comboItems(id, baseSource, awakeningSource, baseTranslation, awakeningTranslation) {
   const sourcePrefix = '<br><color=#D7DEF8>【覚醒効果】</color>'
   const targetPrefix = '<br><color=#D7DEF8>【각성 효과】</color>'
-  const concreteBaseSource = stripPlaceholderBraces(baseSource)
-  const concreteBaseTarget = stripPlaceholderBraces(baseTranslation)
+  const basePairs = placeholderStylePairs(baseSource, baseTranslation)
+  const awakeningPairs = placeholderStylePairs(awakeningSource, awakeningTranslation)
 
-  const items = [
-    {
-      id,
-      source: `${concreteBaseSource}${sourcePrefix}${stripPlaceholderBraces(awakeningSource)}`,
-      target: `${concreteBaseTarget}${targetPrefix}${stripPlaceholderBraces(awakeningTranslation)}`,
-    },
-    {
-      id,
-      source: `${concreteBaseSource}${sourcePrefix}${colorizePlaceholderBraces(awakeningSource)}`,
-      target: `${concreteBaseTarget}${targetPrefix}${colorizePlaceholderBraces(awakeningTranslation)}`,
-    },
-  ]
+  const items = []
+  for (const base of basePairs) {
+    for (const awakening of awakeningPairs) {
+      items.push({
+        id,
+        source: `${base.source}${sourcePrefix}${awakening.source}`,
+        target: `${base.target}${targetPrefix}${awakening.target}`,
+      })
+    }
+  }
   return items.flatMap(statusColorComboVariants)
 }
 

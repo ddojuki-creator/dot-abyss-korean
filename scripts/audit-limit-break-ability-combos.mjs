@@ -61,6 +61,13 @@ function colorizePlaceholderBraces(source) {
   return source.replace(/\{([^{}]+)\}/g, '<color=#4CF37B>$1</color>')
 }
 
+function placeholderStyleVariants(source) {
+  return [...new Set([
+    stripPlaceholderBraces(source),
+    colorizePlaceholderBraces(source),
+  ])]
+}
+
 function replaceOutsideColorTags(value, term, replacement) {
   let output = ''
   let cursor = 0
@@ -152,14 +159,14 @@ function allAbilityDetailIds(entries) {
 }
 
 function comboVariants(base, awakening) {
-  const basePlain = stripPlaceholderBraces(base)
-  const awakeningPlain = stripPlaceholderBraces(awakening)
-  const awakeningColored = colorizePlaceholderBraces(awakening)
   const prefix = '<br><color=#D7DEF8>【覚醒効果】</color>'
-  return [
-    `${basePlain}${prefix}${awakeningPlain}`,
-    `${basePlain}${prefix}${awakeningColored}`,
-  ].flatMap(statusColorSourceVariants)
+  const variants = []
+  for (const baseVariant of placeholderStyleVariants(base)) {
+    for (const awakeningVariant of placeholderStyleVariants(awakening)) {
+      variants.push(`${baseVariant}${prefix}${awakeningVariant}`)
+    }
+  }
+  return variants.flatMap(statusColorSourceVariants)
 }
 
 function hasJapaneseLeftover(value) {

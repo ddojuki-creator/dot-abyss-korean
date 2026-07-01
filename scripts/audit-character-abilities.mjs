@@ -160,6 +160,13 @@ function colorizePlaceholderBraces(source) {
   return source.replace(/\{([^{}]+)\}/g, '<color=#4CF37B>$1</color>')
 }
 
+function placeholderStyleVariants(source) {
+  return [...new Set([
+    stripPlaceholderBraces(source),
+    colorizePlaceholderBraces(source),
+  ])]
+}
+
 function replaceOutsideColorTags(value, term, replacement) {
   let output = ''
   let cursor = 0
@@ -212,12 +219,10 @@ function collectLimitBreakAbilityCombos(entries) {
     if (!isMeaningfulAbilityDetailSource(awakening)) continue
     if (!isCharacterAbilitySource(base) && !isCharacterAbilitySource(awakening)) continue
 
-    const concreteBase = stripPlaceholderBraces(base)
-    for (const source of [
-      `${concreteBase}${prefix}${stripPlaceholderBraces(awakening)}`,
-      `${concreteBase}${prefix}${colorizePlaceholderBraces(awakening)}`,
-    ]) {
-      variants.push(...statusColorSourceVariants(source))
+    for (const baseVariant of placeholderStyleVariants(base)) {
+      for (const awakeningVariant of placeholderStyleVariants(awakening)) {
+        variants.push(...statusColorSourceVariants(`${baseVariant}${prefix}${awakeningVariant}`))
+      }
     }
   }
 
