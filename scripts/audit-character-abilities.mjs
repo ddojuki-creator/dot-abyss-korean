@@ -160,6 +160,37 @@ function colorizePlaceholderBraces(source) {
   return source.replace(/\{([^{}]+)\}/g, '<color=#4CF37B>$1</color>')
 }
 
+function replaceOutsideColorTags(value, term, replacement) {
+  let output = ''
+  let cursor = 0
+  const colorTagPattern = /<color=[^>]*>.*?<\/color>/gis
+  for (const match of value.matchAll(colorTagPattern)) {
+    output += value.slice(cursor, match.index).replaceAll(term, replacement)
+    output += match[0]
+    cursor = match.index + match[0].length
+  }
+  output += value.slice(cursor).replaceAll(term, replacement)
+  return output
+}
+
+const STATUS_COLOR_RULES = [
+  { source: '紋章：情熱', replacement: '<color=#FF5050>紋章：情熱</color>' },
+  { source: '紋章：衝撃', replacement: '<color=#6B8CFF>紋章：衝撃</color>' },
+]
+
+function statusColorSourceVariants(source) {
+  let variants = [source]
+  for (const rule of STATUS_COLOR_RULES) {
+    const next = [...variants]
+    for (const variant of variants) {
+      const replaced = replaceOutsideColorTags(variant, rule.source, rule.replacement)
+      if (replaced !== variant) next.push(replaced)
+    }
+    variants = [...new Set(next)]
+  }
+  return variants
+}
+
 function isMeaningfulAbilityDetailSource(source) {
   if (typeof source !== 'string') return false
   const text = source.trim()
@@ -182,8 +213,12 @@ function collectLimitBreakAbilityCombos(entries) {
     if (!isCharacterAbilitySource(base) && !isCharacterAbilitySource(awakening)) continue
 
     const concreteBase = stripPlaceholderBraces(base)
-    variants.push(`${concreteBase}${prefix}${stripPlaceholderBraces(awakening)}`)
-    variants.push(`${concreteBase}${prefix}${colorizePlaceholderBraces(awakening)}`)
+    for (const source of [
+      `${concreteBase}${prefix}${stripPlaceholderBraces(awakening)}`,
+      `${concreteBase}${prefix}${colorizePlaceholderBraces(awakening)}`,
+    ]) {
+      variants.push(...statusColorSourceVariants(source))
+    }
   }
 
   return variants

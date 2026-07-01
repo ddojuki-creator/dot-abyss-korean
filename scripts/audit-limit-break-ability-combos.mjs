@@ -61,6 +61,37 @@ function colorizePlaceholderBraces(source) {
   return source.replace(/\{([^{}]+)\}/g, '<color=#4CF37B>$1</color>')
 }
 
+function replaceOutsideColorTags(value, term, replacement) {
+  let output = ''
+  let cursor = 0
+  const colorTagPattern = /<color=[^>]*>.*?<\/color>/gis
+  for (const match of value.matchAll(colorTagPattern)) {
+    output += value.slice(cursor, match.index).replaceAll(term, replacement)
+    output += match[0]
+    cursor = match.index + match[0].length
+  }
+  output += value.slice(cursor).replaceAll(term, replacement)
+  return output
+}
+
+const STATUS_COLOR_RULES = [
+  { source: '紋章：情熱', replacement: '<color=#FF5050>紋章：情熱</color>' },
+  { source: '紋章：衝撃', replacement: '<color=#6B8CFF>紋章：衝撃</color>' },
+]
+
+function statusColorSourceVariants(source) {
+  let variants = [source]
+  for (const rule of STATUS_COLOR_RULES) {
+    const next = [...variants]
+    for (const variant of variants) {
+      const replaced = replaceOutsideColorTags(variant, rule.source, rule.replacement)
+      if (replaced !== variant) next.push(replaced)
+    }
+    variants = [...new Set(next)]
+  }
+  return variants
+}
+
 function isAbilityDetailSource(source) {
   const plain = stripTags(source)
   if (/[【](?:発動条件|効果|覚醒効果)[】]/.test(source)) return true
@@ -128,7 +159,7 @@ function comboVariants(base, awakening) {
   return [
     `${basePlain}${prefix}${awakeningPlain}`,
     `${basePlain}${prefix}${awakeningColored}`,
-  ]
+  ].flatMap(statusColorSourceVariants)
 }
 
 function hasJapaneseLeftover(value) {

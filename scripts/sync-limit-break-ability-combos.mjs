@@ -48,6 +48,54 @@ function colorizePlaceholderBraces(source) {
   return source.replace(/\{([^{}]+)\}/g, '<color=#4CF37B>$1</color>')
 }
 
+function replaceOutsideColorTags(value, term, replacement) {
+  let output = ''
+  let cursor = 0
+  const colorTagPattern = /<color=[^>]*>.*?<\/color>/gis
+  for (const match of value.matchAll(colorTagPattern)) {
+    output += value.slice(cursor, match.index).replaceAll(term, replacement)
+    output += match[0]
+    cursor = match.index + match[0].length
+  }
+  output += value.slice(cursor).replaceAll(term, replacement)
+  return output
+}
+
+const STATUS_COLOR_RULES = [
+  {
+    source: '紋章：情熱',
+    sourceReplacement: '<color=#FF5050>紋章：情熱</color>',
+    targetTerms: ['문장: 열정', '문장：열정', '문장: 정열', '문장：정열'],
+    targetReplacement: '<color=#FF5050>문장: 열정</color>',
+  },
+  {
+    source: '紋章：衝撃',
+    sourceReplacement: '<color=#6B8CFF>紋章：衝撃</color>',
+    targetTerms: ['문장: 충격', '문장：충격'],
+    targetReplacement: '<color=#6B8CFF>문장: 충격</color>',
+  },
+]
+
+function statusColorComboVariants(item) {
+  let variants = [item]
+  for (const rule of STATUS_COLOR_RULES) {
+    const next = [...variants]
+    for (const variant of variants) {
+      const source = replaceOutsideColorTags(variant.source, rule.source, rule.sourceReplacement)
+      if (source === variant.source) continue
+
+      let target = variant.target
+      for (const term of rule.targetTerms) {
+        target = replaceOutsideColorTags(target, term, rule.targetReplacement)
+      }
+      if (target === variant.target) continue
+      next.push({ ...variant, source, target })
+    }
+    variants = [...new Map(next.map((variant) => [variant.source, variant])).values()]
+  }
+  return variants
+}
+
 function isMeaningfulSource(source) {
   if (typeof source !== 'string') return false
   const text = source.trim()
@@ -90,7 +138,7 @@ function comboItems(id, baseSource, awakeningSource, baseTranslation, awakeningT
   const concreteBaseSource = stripPlaceholderBraces(baseSource)
   const concreteBaseTarget = stripPlaceholderBraces(baseTranslation)
 
-  return [
+  const items = [
     {
       id,
       source: `${concreteBaseSource}${sourcePrefix}${stripPlaceholderBraces(awakeningSource)}`,
@@ -102,6 +150,7 @@ function comboItems(id, baseSource, awakeningSource, baseTranslation, awakeningT
       target: `${concreteBaseTarget}${targetPrefix}${colorizePlaceholderBraces(awakeningTranslation)}`,
     },
   ]
+  return items.flatMap(statusColorComboVariants)
 }
 
 const args = parseArgs(process.argv.slice(2))
