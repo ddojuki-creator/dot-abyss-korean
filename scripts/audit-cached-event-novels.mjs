@@ -55,6 +55,7 @@ function stripMessageMeta(text) {
   for (;;) {
     const before = message
     message = message
+      .replace(/,{2,}$/, '')
       .replace(/,{2,3}(?:on|off)$/, '')
       .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),vc_[^,]*(?:,(?:\d+\/)?chara_\d+)?[,]?$/, '')
       .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),vc_[^,]*(?:,(?:on|off|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
@@ -72,7 +73,9 @@ function extractMessages(script) {
       ? 'message'
       : line.startsWith('messageTextCenter,')
         ? 'messageTextCenter'
-        : null
+        : line.startsWith('l2dmessage,')
+          ? 'l2dmessage'
+          : null
     if (!command) continue
     let rest = line.slice(`${command},`.length)
     const firstComma = rest.indexOf(',')
@@ -164,7 +167,7 @@ for file in files_to_scan:
                 text = script.decode("utf-8", "ignore")
             else:
                 text = str(script or "")
-            if "message," not in text:
+            if "message," not in text and "messageTextCenter," not in text and "l2dmessage," not in text:
                 continue
             novel_ids = sorted(set(re.findall(r"(?:evs|hmr|hmn|men)_\d{11}", str(name) + "\n" + text)))
             if target_ids and not (target_ids & set(novel_ids)):
@@ -349,15 +352,23 @@ if (fallback.scanner !== 'skipped') {
 console.log(`audit:cached-event-novels checked=${checked} issues=${issues.length} warnings=${warnings.length}`)
 if (writeMissingSource) {
   let written = 0
+  let addedKeys = 0
   for (const issue of issues) {
-    if (issue.type !== 'missing-file' || !issue.messages.length) continue
     const target = path.join(ROOT, 'translations', 'novels', issue.novelId, 'ko_KR.json')
-    if (fs.existsSync(target)) continue
-    const data = Object.fromEntries(issue.messages.map((message) => [message, message]))
-    writeJson(target, data)
-    written++
+    if (issue.type === 'missing-file' && issue.messages.length && !fs.existsSync(target)) {
+      const data = Object.fromEntries(issue.messages.map((message) => [message, message]))
+      writeJson(target, data)
+      written++
+    } else if (issue.type === 'missing-key' && fs.existsSync(target)) {
+      const data = readJson(target)
+      if (typeof data[issue.source] !== 'string') {
+        data[issue.source] = issue.source
+        writeJson(target, data)
+        addedKeys++
+      }
+    }
   }
-  console.log(`audit:cached-event-novels wroteMissingSource=${written}`)
+  console.log(`audit:cached-event-novels wroteMissingSource=${written} addedKeys=${addedKeys}`)
 }
 for (const warning of warnings.slice(0, 20)) {
   console.log(`\n[warning:${warning.type}] ${warning.novelId} messages=${warning.count}`)
