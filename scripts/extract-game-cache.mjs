@@ -112,15 +112,149 @@ function compareSnapshots(previous, current) {
   return { added, changed, removed }
 }
 
+function rowIdMap(rows) {
+  const map = new Map()
+  if (!Array.isArray(rows)) return map
+  for (const row of rows) {
+    if (!Array.isArray(row)) continue
+    const id = row[0]
+    if (['string', 'number', 'bigint'].includes(typeof id)) map.set(String(id), row)
+  }
+  return map
+}
+
+function buildCharacterSpecChanges(root, diff) {
+  const characterRows = rowIdMap(root.m_characters)
+  const abilityRows = rowIdMap(root.m_character_abilities)
+  const actionSkillRows = rowIdMap(root.m_character_action_skills)
+  const abilityDetailRows = rowIdMap(root.m_ability_details)
+  const characterName = (id) => {
+    const row = characterRows.get(String(id))
+    return Array.isArray(row) ? row[1] : undefined
+  }
+
+  const abilityByGroup = new Map()
+  for (const row of abilityRows.values()) {
+    const abilityGroup = row[4]
+    if (!['string', 'number', 'bigint'].includes(typeof abilityGroup)) continue
+    abilityByGroup.set(String(abilityGroup), row)
+  }
+
+  function attachPayload(base, change) {
+    if ('source' in change) return { ...base, source: change.source }
+    return { ...base, before: change.before, after: change.after }
+  }
+
+  function annotate(change, changeType) {
+    let match = change.location.match(/^m_character_action_skills\/id:([^/]+)\/(\d+)$/)
+    if (match) {
+      const row = actionSkillRows.get(match[1])
+      if (!row) return null
+      return attachPayload({
+        changeType,
+        location: change.location,
+        table: 'm_character_action_skills',
+        field: Number(match[2]),
+        characterId: row[1],
+        characterName: characterName(row[1]),
+        skillId: row[0],
+        skillName: row[3],
+      }, change)
+    }
+
+    match = change.location.match(/^m_character_abilities\/id:([^/]+)\/(\d+)$/)
+    if (match) {
+      const row = abilityRows.get(match[1])
+      if (!row) return null
+      return attachPayload({
+        changeType,
+        location: change.location,
+        table: 'm_character_abilities',
+        field: Number(match[2]),
+        characterId: row[1],
+        characterName: characterName(row[1]),
+        abilityId: row[0],
+        abilityName: row[3],
+        abilityGroup: row[4],
+        abilitySlot: row[5],
+      }, change)
+    }
+
+    match = change.location.match(/^m_ability_details\/id:([^/]+)\/(\d+)$/)
+    if (match) {
+      const row = abilityDetailRows.get(match[1])
+      if (!row) return null
+      const abilityRow = abilityByGroup.get(String(row[1]))
+      if (!abilityRow) return null
+      return attachPayload({
+        changeType,
+        location: change.location,
+        table: 'm_ability_details',
+        field: Number(match[2]),
+        characterId: abilityRow[1],
+        characterName: characterName(abilityRow[1]),
+        abilityId: abilityRow[0],
+        abilityName: abilityRow[3],
+        abilityGroup: row[1],
+        abilitySlot: abilityRow[5],
+        abilityDetailId: row[0],
+        limitBreakTier: row[2],
+        abilityLevel: row[3],
+      }, change)
+    }
+
+    return null
+  }
+
+  return [
+    ...(diff.added || []).map((change) => annotate(change, 'added')),
+    ...(diff.changed || []).map((change) => annotate(change, 'changed')),
+    ...(diff.removed || []).map((change) => annotate(change, 'removed')),
+  ].filter(Boolean)
+}
+
+function summarizeCharacterSpecChanges(changes) {
+  const summary = new Map()
+  for (const change of changes) {
+    const key = [
+      change.characterId ?? 'unknown',
+      change.characterName ?? 'unknown',
+      change.abilityName ?? change.skillName ?? 'unknown',
+      change.table,
+    ].join('\t')
+    const item = summary.get(key) || {
+      characterId: change.characterId,
+      characterName: change.characterName,
+      targetName: change.abilityName ?? change.skillName,
+      table: change.table,
+      changed: 0,
+      added: 0,
+      removed: 0,
+      locations: [],
+    }
+    item[change.changeType] = (item[change.changeType] || 0) + 1
+    if (item.locations.length < 8) item.locations.push(change.location)
+    summary.set(key, item)
+  }
+  return [...summary.values()].sort((a, b) => {
+    const aName = `${a.characterName ?? ''}\t${a.targetName ?? ''}\t${a.table ?? ''}`
+    const bName = `${b.characterName ?? ''}\t${b.targetName ?? ''}\t${b.table ?? ''}`
+    return aName.localeCompare(bName, 'ja')
+  })
+}
+
 const cacheFile = findCacheFile()
 const outputFile = path.join(ROOT, 'translations', 'outgame', 'ko_KR.json')
+const previousSnapshotFile = option('--previous-snapshot') || snapshotFile
 const existing = fs.existsSync(outputFile) ? readJson(outputFile) : {}
 const known = loadKnownTranslations(outputFile)
 const decoded = decodeMessagePack(fs.readFileSync(cacheFile))
 const { entries, tableReport } = extractLocations(decoded)
-const previousSnapshot = fs.existsSync(snapshotFile) ? readJson(snapshotFile) : { entries: {} }
+const previousSnapshot = fs.existsSync(previousSnapshotFile) ? readJson(previousSnapshotFile) : { entries: {} }
 const previousEntries = new Map(Object.entries(previousSnapshot.entries || {}))
 const diff = compareSnapshots(previousEntries, entries)
+const characterSpecChanges = buildCharacterSpecChanges(decoded, diff)
+const characterSpecSummary = summarizeCharacterSpecChanges(characterSpecChanges)
 const extracted = new Set(entries.values())
 const previouslyManaged = new Set(previousEntries.values())
 
@@ -155,6 +289,7 @@ const report = {
   generatedAt: snapshot.generatedAt,
   cacheFile,
   cacheSha256: snapshot.cacheSha256,
+  previousSnapshotFile,
   baselineCreated: previousEntries.size === 0,
   counts: {
     locations: entries.size,
@@ -162,12 +297,15 @@ const report = {
     addedLocations: diff.added.length,
     changedLocations: diff.changed.length,
     removedLocations: diff.removed.length,
+    characterSpecChanges: characterSpecChanges.length,
     runtimeOnly: runtimeOnly.size,
     outputStrings: Object.keys(merged).length,
     untranslated,
   },
   tableReport,
   changes: diff,
+  characterSpecChanges,
+  characterSpecSummary,
 }
 
 const dryRun = process.argv.includes('--dry-run')
@@ -190,6 +328,13 @@ console.log(`uniqueStrings=${extracted.size}`)
 console.log(`addedLocations=${diff.added.length}`)
 console.log(`changedLocations=${diff.changed.length}`)
 console.log(`removedLocations=${diff.removed.length}`)
+console.log(`characterSpecChanges=${characterSpecChanges.length}`)
+if (characterSpecSummary.length) {
+  console.log('characterSpecSummary=')
+  for (const item of characterSpecSummary) {
+    console.log(`- ${item.characterName ?? 'unknown'} / ${item.targetName ?? 'unknown'} / ${item.table}: added=${item.added} changed=${item.changed} removed=${item.removed}`)
+  }
+}
 console.log(`runtimeOnly=${runtimeOnly.size}`)
 console.log(`total=${Object.keys(merged).length}`)
 console.log(`preserved=${preserved}`)
