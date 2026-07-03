@@ -251,12 +251,24 @@ function collectRuntimeAbilityVariants(entries) {
   return variants
 }
 
+function collectBondRewardAbilityKeys(entries) {
+  const variants = []
+  for (const [location, source] of Object.entries(entries || {})) {
+    if (!/^m_character_abilities\/id:\d+\/3$/.test(location)) continue
+    if (typeof source !== 'string' || !source.trim() || source === 'データ未設計') continue
+    variants.push(`「${source}」の解放条件達成！`)
+    variants.push(`「${source}」の最大Lvが10に上昇！`)
+  }
+  return variants
+}
+
 const sources = [
   ...new Set([
     ...Object.keys(collection).filter(isCharacterAbilitySource),
     ...snapshotSources,
     ...collectLimitBreakAbilityCombos(snapshot.entries || {}),
     ...collectRuntimeAbilityVariants(snapshot.entries || {}),
+    ...collectBondRewardAbilityKeys(snapshot.entries || {}),
     ...Object.keys(translations).filter(isCharacterAbilitySource),
     ...Object.keys(abilityTranslations).filter(isCharacterAbilitySource),
   ]),
