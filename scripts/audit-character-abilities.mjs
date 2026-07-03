@@ -98,6 +98,11 @@ function hasJapaneseAbilityLeftover(value) {
   return /発動条件|覚醒効果|自身|味方|敵|通常|攻撃|防御|最大|上昇|減少|付与|状態異常|紋章|会心|回復|秒|確率|対象|喪失|炎上|戦闘不能|バトル|クエスト|スキルチャージ|被ダメージ|ノワール|憑依/.test(text)
 }
 
+function hasLocalizedHitToken(source, value) {
+  if (!/HIT|ＨＩＴ/i.test(source)) return false
+  return /\d+\s*(?:회\s*타격|히트|타(?=\b|[·\/％%】]))/.test(value)
+}
+
 function locationTable(location) {
   return location.split('/', 1)[0]
 }
@@ -289,6 +294,8 @@ for (const source of sources) {
     issues.push({ status: 'untranslated', source, value })
   } else if (shouldTranslateValue(source, value) || hasJapaneseAbilityLeftover(value)) {
     issues.push({ status: 'japanese-leftover', source, value })
+  } else if (hasLocalizedHitToken(source, value)) {
+    issues.push({ status: 'localized-hit-token', source, value })
   } else if (
     hasBareRuntimeToken(source) &&
     !(safeDynamicSkeletons.get(dynamicSkeleton(source)) || []).some((candidate) => candidate !== source)
@@ -309,7 +316,7 @@ const counts = issues.reduce((acc, issue) => {
 }, {})
 
 console.log(
-  `audit:character-abilities checked=${sources.length} issues=${issues.length} missing=${counts.missing || 0} untranslated=${counts.untranslated || 0} japanese-leftover=${counts['japanese-leftover'] || 0} unsafe-dynamic=${counts['unsafe-dynamic-template'] || 0} ability-only=${counts['ability-only-not-in-outgame'] || 0}`,
+  `audit:character-abilities checked=${sources.length} issues=${issues.length} missing=${counts.missing || 0} untranslated=${counts.untranslated || 0} japanese-leftover=${counts['japanese-leftover'] || 0} localized-hit=${counts['localized-hit-token'] || 0} unsafe-dynamic=${counts['unsafe-dynamic-template'] || 0} ability-only=${counts['ability-only-not-in-outgame'] || 0}`,
 )
 
 for (const issue of issues.slice(0, 50)) {
