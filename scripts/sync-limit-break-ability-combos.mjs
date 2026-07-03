@@ -44,8 +44,10 @@ function stripPlaceholderBraces(source) {
   return source.replace(/\{([^{}]+)\}/g, '$1')
 }
 
-function colorizePlaceholderBraces(source) {
-  return source.replace(/\{([^{}]+)\}/g, '<color=#4CF37B>$1</color>')
+const VALUE_COLOR_CODES = ['4CF37B', 'F4FF00']
+
+function colorizePlaceholderBraces(source, colorCode) {
+  return source.replace(/\{([^{}]+)\}/g, `<color=#${colorCode}>$1</color>`)
 }
 
 function replaceOutsideColorTags(value, term, replacement) {
@@ -97,16 +99,19 @@ function statusColorComboVariants(item) {
 }
 
 function placeholderStylePairs(source, target) {
-  return [
+  const pairs = [
     {
       source: stripPlaceholderBraces(source),
       target: stripPlaceholderBraces(target),
     },
-    {
-      source: colorizePlaceholderBraces(source),
-      target: colorizePlaceholderBraces(target),
-    },
-  ].filter((item, index, items) => items.findIndex((other) => other.source === item.source) === index)
+  ]
+  for (const colorCode of VALUE_COLOR_CODES) {
+    pairs.push({
+      source: colorizePlaceholderBraces(source, colorCode),
+      target: colorizePlaceholderBraces(target, colorCode),
+    })
+  }
+  return pairs.filter((item, index, items) => items.findIndex((other) => other.source === item.source) === index)
 }
 
 function isMeaningfulSource(source) {

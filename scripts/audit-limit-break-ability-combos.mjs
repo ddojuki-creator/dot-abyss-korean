@@ -57,15 +57,20 @@ function stripPlaceholderBraces(source) {
   return source.replace(/\{([^{}]+)\}/g, '$1')
 }
 
-function colorizePlaceholderBraces(source) {
-  return source.replace(/\{([^{}]+)\}/g, '<color=#4CF37B>$1</color>')
+const VALUE_COLOR_CODES = ['4CF37B', 'F4FF00']
+
+function colorizePlaceholderBraces(source, colorCode) {
+  return source.replace(/\{([^{}]+)\}/g, `<color=#${colorCode}>$1</color>`)
 }
 
 function placeholderStyleVariants(source) {
-  return [...new Set([
+  const variants = [
     stripPlaceholderBraces(source),
-    colorizePlaceholderBraces(source),
-  ])]
+  ]
+  for (const colorCode of VALUE_COLOR_CODES) {
+    variants.push(colorizePlaceholderBraces(source, colorCode))
+  }
+  return [...new Set(variants)]
 }
 
 function replaceOutsideColorTags(value, term, replacement) {
