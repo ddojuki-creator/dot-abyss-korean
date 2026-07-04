@@ -27,6 +27,7 @@
     "normalize:ko": "node scripts/normalize-terminology.mjs",
     "review:layout": "node scripts/review-layout.mjs",
     "review:novel-layout": "node scripts/review-novel-layout.mjs",
+    "reflow:novel-layout": "node scripts/reflow-novel-layout-openai.mjs",
     "review:context": "node scripts/review-context.mjs",
     "review:dialogue-openai": "node scripts/review-dialogue-openai.mjs",
     "publish": "node scripts/publish.mjs",
