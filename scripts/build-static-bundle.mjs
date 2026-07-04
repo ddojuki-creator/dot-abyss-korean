@@ -29,7 +29,22 @@ function writeJson(file, value) {
 }
 
 function isJapaneseLike(value) {
+    if (/[가-힣]/u.test(value)) return false
     return /[\u3040-\u30ff\u3400-\u9fff]/u.test(value)
+}
+
+function colorSealTerms(value) {
+    const passionToken = '\u0000PASSION_SEAL\u0000'
+    const shockToken = '\u0000SHOCK_SEAL\u0000'
+    return value
+        .replace(/<color=#ff5050>\s*문장\s*[:：]\s*열정\s*<\/color>/giu, passionToken)
+        .replace(/<color=#6b8cff>\s*문장\s*[:：]\s*충격\s*<\/color>/giu, shockToken)
+        .replace(/문장\s*[:：]\s*열정/gu, passionToken)
+        .replace(/문장\s*[:：]\s*충격/gu, shockToken)
+        .replace(/紋章\s*[:：]\s*情熱/gu, passionToken)
+        .replace(/紋章\s*[:：]\s*衝撃/gu, shockToken)
+        .replaceAll(passionToken, '<color=#FF5050>문장: 열정</color>')
+        .replaceAll(shockToken, '<color=#6B8CFF>문장: 충격</color>')
 }
 
 function collectLegacyTranslations() {
@@ -42,7 +57,7 @@ function collectLegacyTranslations() {
         for (const [key, value] of Object.entries(dict)) {
             if (typeof value !== 'string' || value.length === 0) continue
             if (isJapaneseLike(value) && !writeMissingSource) continue
-            merged.set(key, value)
+            merged.set(key, colorSealTerms(value))
         }
     }
     return merged
