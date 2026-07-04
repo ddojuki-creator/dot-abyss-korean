@@ -6,6 +6,7 @@
 - Do not remove meaning because it is difficult.
 - Do not over-sanitize adult text; preserve the source level while making it natural Korean.
 - Do not translate female-genital source terms such as `おまんこ`, `まんこ`, or `マンコ` as `자지`; use `보지`.
+- Do not translate `素股` / `スマタ` / `すまた` as `스오마`, `스오마타`, `소마타`, `스타마`, `겉치기`, or `겉으로만 하는 코스`; use `스마타`.
 - Do not make UI text unnecessarily long.
 - Do not push changes if validation fails.
 

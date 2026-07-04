@@ -104,6 +104,7 @@
 3. `translations/manifest/ko_KR.json`의 `novels`에 신규 소설 ID가 포함됐는지 확인한다.
 4. 게임 로컬 캐시를 갱신할 때 `cache/ko_KR/novels/<id>.json`도 같이 반영됐는지 확인한다.
 5. 스샷에서 대사가 일본어로 나오면 먼저 CDN 누락보다 로컬 `novels` 캐시 누락을 의심한다.
+6. `scripts\audit-novel-dialogue-metadata.mjs --all-cached --deep-small-textassets --write-index`로 원본 대사의 화자 메타데이터를 추출하고, 화자 기준 호칭/용어 검수를 통과시킨다. 이벤트 본편 `evs_...`에 캐릭터가 등장해도 파일 ID가 캐릭터 ID로 시작하지 않을 수 있으므로, `message,<speaker>,...`와 `l2dmessage,<speaker>,...`의 speaker를 기준으로 character card를 적용한다.
 
 로컬 캐시 수동 반영이 필요한 경우 repo 구조와 게임 캐시 구조가 다르다.
 
@@ -130,6 +131,7 @@ git push origin test
 - 캐릭터명과 어빌리티명 value가 한국어인지 확인
 - 신규 캐릭터 관련 `names`, `titles`, `descriptions`, `outgame`, `novels`, `another_name` key 누락이 없는지 확인
 - 신규 캐릭터의 주인공 호칭이 기존 캐릭터 호칭 규칙과 충돌하지 않는지 확인한다. 특히 `旦那様`/`旦那さま`/`旦那`처럼 같은 원문이 캐릭터별로 다른 번역을 요구할 수 있다.
+- 캐릭터 호칭 검수는 파일명만 보지 않고 원본 대사의 speaker 메타데이터를 기준으로 한다. 예: 쿠레하가 `evs_...` 이벤트 본편에서 말하는 `旦那様`도 `서방님`으로 고정한다.
 - `ドリンク`는 `음료`가 아니라 `드링크`로 번역했는지 확인
 - `<br>`와 색상 태그 보존
 - 한계돌파 강화 설명의 `【覚醒効果】`, 수치, 색상 태그 보존

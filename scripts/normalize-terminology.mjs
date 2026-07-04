@@ -54,6 +54,18 @@ function normalizeOnigashimaProduce(value) {
     .replace(/프로듀스/g, '홍보')
 }
 
+function normalizeSumata(value, key) {
+  let result = value
+    .replace(/스오마타|스오마|소마타|스타마/g, '스마타')
+    .replace(/스마타\([^)]*\)/g, '스마타')
+    .replace(/겉치기만으로도/g, '스마타만으로도')
+    .replace(/겉치기만/g, '스마타만')
+    .replace(/그냥\s*겉으로만 하는 코스/g, '스마타까지의 코스')
+    .replace(/겉으로만 하는 코스/g, '스마타까지의 코스')
+  if (key === 'まずは素股からでいい？') result = '먼저 스마타부터 할까?'
+  return result
+}
+
 function isKurehaNovelFile(file) {
   return /[\\/](?:hmr|men)_105801\d{5}[\\/]ko_KR\.json$/.test(file)
 }
@@ -162,6 +174,9 @@ function normalize(key, value, file = '') {
   }
   if (key.includes('\u30D7\u30ED\u30C7\u30E5\u30FC\u30B9')) {
     result = normalizeOnigashimaProduce(result)
+  }
+  if (/素股|スマタ|すまた/.test(key)) {
+    result = normalizeSumata(result, key)
   }
   if (key.includes('\u982D\u3092\u60A9\u307E\u305B')) {
     result = result

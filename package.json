@@ -22,6 +22,7 @@
     "audit:outgame-ui-hotspots": "node scripts/audit-outgame-ui-hotspots.mjs",
     "audit:outgame-proposal-colors": "node scripts/audit-outgame-proposal-colors.mjs",
     "audit:novel-location-titles": "node scripts/audit-novel-location-titles.mjs",
+    "audit:novel-dialogue-metadata": "node scripts/audit-novel-dialogue-metadata.mjs --all-cached --deep-small-textassets --write-index",
     "outgame:update": "node scripts/outgame-update.mjs",
     "game:update": "node scripts/outgame-update.mjs",
     "normalize:ko": "node scripts/normalize-terminology.mjs",

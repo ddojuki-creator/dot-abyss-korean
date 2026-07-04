@@ -11,6 +11,7 @@ Use this table format:
 | 娼館 | 창관 | Always use `창관`. Do not use `매음굴` or `매음관`. |
 | おちんちん / オチンチン | 자지 | Adult dialogue term. Do not transliterate as `오칭칭` or `오징징`. |
 | おまんこ / まんこ / マンコ | 보지 | Adult female-genital dialogue term. Never translate these as `자지`. |
+| 素股 / スマタ / すまた | 스마타 | Adult sexual term. Always use `스마타`; never use `스오마`, `스오마타`, `소마타`, `스타마`, or paraphrases such as `겉치기`/`겉으로만 하는 코스`. |
 | 肉棒 | 남근 | Adult narration term. Always use `남근`; do not translate as `음경`, `육봉`, `정액`, `고환`, `고기`, or `고기봉`. |
 | 男根 / 陰茎 / 男性器 | 남근 / 음경 | Adult narration term. Use `남근` for narration unless a more clinical `음경` fits the sentence. Do not mistranslate as `정액`, `고환`, `고기`, or `고기봉`. |
 | キョンシー | 강시 | Always use `강시`. Do not transliterate as `경시` or translate as `좀비`. |
@@ -95,6 +96,10 @@ Use this table format:
 | 큰 구멍 | 어비스 | `大穴`은 프로젝트 기준상 `어비스`로 통일한다. |
 | 아리시아 | 알리시아 | `アリシア`의 표기는 `알리시아`로 통일한다. |
 | 지휘관 | 사령관 | `司令官`/`指揮官` 계열 호칭은 프로젝트 기준상 `사령관`으로 통일한다. |
+| 스오마 / 스오마타 | 스마타 | `素股`/`スマタ`/`すまた`는 성인 대화 용어 `스마타`로 통일한다. |
+| 소마타 | 스마타 | `素股`/`スマタ`/`すまた` 오역 금지. |
+| 스타마 | 스마타 | `素股`/`スマタ`/`すまた` 오역 금지. |
+| 겉치기 | 스마타 | 원문이 `素股`/`スマタ`/`すまた`이면 설명식 번역으로 바꾸지 말고 `스마타`를 쓴다. |
 | 크루루 | 쿠루루 | `クルル`의 표기는 `쿠루루`로 통일한다. |
 | 크룰루 | 쿠루루 | `クルル`의 표기는 `쿠루루`로 통일한다. |
 | 쿠룰루 | 쿠루루 | `クルル`의 표기는 `쿠루루`로 통일한다. |
