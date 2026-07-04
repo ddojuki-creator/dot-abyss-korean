@@ -6,6 +6,7 @@ const separator = '\0'
 const pathSeparator = '\x01'
 const root = process.cwd()
 const staticPath = path.join(root, 'translations', 'static', 'ko_KR.json')
+const outgamePath = path.join(root, 'translations', 'outgame', 'ko_KR.json')
 const manifestPath = path.join(root, 'translations', 'manifest', 'ko_KR.json')
 
 function readJson(file) {
@@ -38,6 +39,7 @@ function objectHash(obj) {
 }
 
 const bundle = readJson(staticPath)
+const outgame = readJson(outgamePath)
 const manifest = readJson(manifestPath)
 const errors = []
 
@@ -73,9 +75,29 @@ if (japaneseValues.length > 0) {
     errors.push(`static bundle has Japanese-looking values:\n${japaneseValues.join('\n')}`)
 }
 
+const outgameConflicts = []
+let outgameOverlapCount = 0
+for (const [table, fields] of Object.entries(bundle)) {
+    for (const [field, dict] of Object.entries(fields)) {
+        for (const [source, translated] of Object.entries(dict)) {
+            if (!Object.hasOwn(outgame, source)) continue
+            outgameOverlapCount += 1
+            if (String(outgame[source]) !== String(translated)) {
+                outgameConflicts.push(`${table}.${field}: ${source}`)
+                if (outgameConflicts.length >= 20) break
+            }
+        }
+        if (outgameConflicts.length >= 20) break
+    }
+    if (outgameConflicts.length >= 20) break
+}
+if (outgameConflicts.length > 0) {
+    errors.push(`static/outgame value conflicts:\n${outgameConflicts.join('\n')}`)
+}
+
 if (errors.length > 0) {
     console.error(errors.join('\n'))
     process.exit(1)
 }
 
-console.log(`static bundle audit ok: tables=${Object.keys(bundle).length}`)
+console.log(`static bundle audit ok: tables=${Object.keys(bundle).length}, outgameOverlaps=${outgameOverlapCount}`)

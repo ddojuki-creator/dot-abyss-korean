@@ -88,6 +88,10 @@ function isCharacterAbilitySource(source) {
   return plain.length >= 28 && hitCount >= 2 && /【[^】]+】/.test(source)
 }
 
+function isLocalizedRuntimeCollectionSource(source) {
+  return /[가-힣]/u.test(source)
+}
+
 function truncate(value, max = 180) {
   return value.length > max ? `${value.slice(0, max - 1)}…` : value
 }
@@ -274,7 +278,7 @@ function collectBondRewardAbilityKeys(entries) {
 
 const sources = [
   ...new Set([
-    ...Object.keys(collection).filter(isCharacterAbilitySource),
+    ...Object.keys(collection).filter((source) => isCharacterAbilitySource(source) && !isLocalizedRuntimeCollectionSource(source)),
     ...snapshotSources,
     ...collectLimitBreakAbilityCombos(snapshot.entries || {}),
     ...collectRuntimeAbilityVariants(snapshot.entries || {}),

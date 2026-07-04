@@ -15,8 +15,8 @@ const legacyTypes = [
     'titles',
     'descriptions',
     'another_name',
-    'outgame',
     'ability_descriptions',
+    'outgame',
 ]
 
 function readJson(file) {
