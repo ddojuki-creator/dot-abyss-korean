@@ -86,7 +86,13 @@ export function readJson(file) {
 
 export function writeJson(file, data) {
   ensureDir(path.dirname(file))
-  fs.writeFileSync(file, `${JSON.stringify(data, null, 4)}\n`, 'utf8')
+  fs.writeFileSync(file, `${JSON.stringify(data, null, detectJsonIndent(file))}\n`, 'utf8')
+}
+
+export function detectJsonIndent(file, fallback = 4) {
+  if (!fs.existsSync(file)) return fallback
+  const match = readText(file).match(/\n( +)"/)
+  return match ? match[1].length : fallback
 }
 
 export function walk(dir) {
@@ -266,6 +272,17 @@ export function countValues(values) {
   return map
 }
 
+function extractLineBreakTokens(value) {
+  if (typeof value !== 'string') return []
+  const pattern = /<br(?:\s+[^>]*)?>|\\r\\n|\\[nr]|\r\n|\r|\n/gi
+  return [...value.matchAll(pattern)].map((match) => {
+    const token = match[0]
+    if (/^<br/i.test(token)) return '<br>'
+    if (token === '\r\n' || token === '\r' || token === '\n') return '\n'
+    return token
+  })
+}
+
 export function compareProtectedTokens(source, target, options = {}) {
   const a = countValues(extractProtectedTokens(source))
   const b = countValues(extractProtectedTokens(target))
@@ -284,6 +301,18 @@ export function compareProtectedTokens(source, target, options = {}) {
     if (targetBreaks > 1) errors.push(`line-breaks: target=${targetBreaks}, max=1`)
   } else if (targetBreaks > sourceBreaks) {
     errors.push(`line-breaks: source=${sourceBreaks} target=${targetBreaks}, max=${sourceBreaks}`)
+  }
+  if (options.preserveLineBreakTokens && sourceBreaks > 0) {
+    const sourceTokens = countValues(extractLineBreakTokens(source))
+    const targetTokens = countValues(extractLineBreakTokens(target))
+    for (const [token, count] of sourceTokens) {
+      const actual = targetTokens.get(token) || 0
+      if (actual !== count) errors.push(`line-break-token ${JSON.stringify(token)}: source=${count} target=${actual}`)
+    }
+    for (const [token, count] of targetTokens) {
+      const actual = sourceTokens.get(token) || 0
+      if (actual !== count) errors.push(`line-break-token ${JSON.stringify(token)}: source=${actual} target=${count}`)
+    }
   }
   return errors
 }

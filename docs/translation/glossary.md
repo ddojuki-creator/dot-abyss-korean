@@ -11,12 +11,16 @@ Use this table format:
 | 娼館 | 창관 | Always use `창관`. Do not use `매음굴` or `매음관`. |
 | おちんちん / オチンチン | 자지 | Adult dialogue term. Do not transliterate as `오칭칭` or `오징징`. |
 | おまんこ / まんこ / マンコ | 보지 | Adult female-genital dialogue term. Never translate these as `자지`. |
+| 素股 / スマタ / すまた | 스마타 | Adult sexual term. Always use `스마타`; never use `스오마`, `스오마타`, `소마타`, `스타마`, or paraphrases such as `겉치기`/`겉으로만 하는 코스`. |
+| 肉棒 | 남근 | Adult narration term. Always use `남근`; do not translate as `음경`, `육봉`, `정액`, `고환`, `고기`, or `고기봉`. |
+| 男根 / 陰茎 / 男性器 | 남근 / 음경 | Adult narration term. Use `남근` for narration unless a more clinical `음경` fits the sentence. Do not mistranslate as `정액`, `고환`, `고기`, or `고기봉`. |
 | キョンシー | 강시 | Always use `강시`. Do not transliterate as `경시` or translate as `좀비`. |
 | 大穴 | 어비스 | Core world-location and title term. Always use `어비스`; do not use `대공`, `대공동`, `대구멍`, `거대 구멍`, `큰 구멍`, or `대동굴`. |
 | ドットアビス | 도트어비스 | Project/game title. Always use `도트어비스`. |
 | 錬珍術 | 육봉연술 | Adult-pun localization. Always use `육봉연술`; do not use `연진술` or `연단술`. |
 | ご主人様 | 주인님 | Use only when the Japanese source actually says `ご主人様`. Do not substitute it for other address terms. |
 | マリナ의 旦那様 / 旦那さま | 나리 | Marina's merchant-style address. Do not translate as `단나사마`, `주인님`, `서방님`, `남편님`, `남편`, `여보`, `사장님`, or `당신`. |
+| クレハ의 旦那様 / 旦那さま / 旦那 | 서방님 | Kureha's romantic address for the protagonist. Do not use Marina's `나리` here. |
 | 베리사(1200002 / 102001)의 兄さん·おにーさん | 오빠 | Berisa is a woman addressing the male protagonist. Never translate her address as `형` or `형님`. |
 | 마뇨리아(1300019 / 102401)의 おにいさん | 오빠 | Manioria is a woman addressing the male protagonist. Mackun's `兄ちゃん` remains `형` because Mackun is male. |
 | 멜리사(1300041 / 107701)의 お兄さん | 오빠 | Melissa is a woman addressing the male protagonist. Do not use `형님`. |
@@ -37,11 +41,29 @@ Use this table format:
 | エルドラーナ | 엘드라나 | Region/faction name. Never use `엘도라나`. |
 | メレム | 메렘 | Character name. Never use `멜렘`. |
 | メリッサ | 멜리사 | Character name. Never use `메리사`. |
+| ゴレイヌ | 고레이누 | Robot/NPC name from `G.O.L.E.I.N.U`. Always use `고레이누`; never use `고레인`, `고레누`, `고레인느`, `고레인누`, or `골레누`. |
+| サンクチュエール女学園 | 생크추어리 여학원 | School name. Always use `생크추어리 여학원`; never use `생츄에르 여자학원`, `생츄에를 여자학원`, or `생츄에르 여학원`. |
+| サン女 | 생크학원 | Abbreviated name for `サンクチュエール女学園`. Always use `생크학원`; never use `산여` or `생여`. |
 | バック (formation role) | 백 | Formation role. Always use `백`; never use `가방` or `후위`. Note that バッグ means a physical bag and is unrelated. |
 | フロント (formation role) | 프론트 | Formation role. Always use `프론트`; never use `전위`. |
 | クイック選択 | 빠른 선택 | Formation UI action. Never use `퀵 선택`. |
+| ピッケル | 곡갱이 | Weapon/equipment type. Always use `곡갱이`; never use `픽켈` or `피켈`. |
+| 飢餓 / 飢餓の厄災 | 기아 / 기아의 재앙 | Disaster and status terminology. Always use `기아`; never use `굶주림`. |
+| 土 / 土属性 | 토 / 토 속성 | Attribute name. Use `토` in compact UI and `토 속성` in prose. Never use `흙` or `흙 속성` for the attribute. |
+| カノンコール / キャノン コール / キャノンコール | 캐논 콜 | Skill name. Always use `캐논 콜`; never use `카논 콜`, `카논콜`, `캐넌 콜`, or `캐논콜`. |
+| 魔導炉 / 特殊魔導炉 | 마도로 / 특수 마도로 | Wendy automata core term. Always use `마도로`; never use `마도 노심` or `마도노심`. |
+| 選べる○○BOX / 選べる○○BOX交換券 | ○○ 선택 BOX | Selectable item names must put the target first, e.g. `SSR 캐릭터 선택 BOX`, `Rank4 무기 선택 BOX`, `초급 기술 원소 선택 BOX`. Do not use `선택 가능한 ○○ BOX`. |
 | フロア1 / フロア2 / フロア3 | 플로어1 / 플로어2 / 플로어3 | Brothel management area labels. Do not translate these labels as `1층`, `2층`, or `3층`. Actual building floors such as `1階` remain `1층`. |
 | 司令官 / 指揮官 | 사령관 | Commander title/address. Use `사령관` or `사령관님` as context requires; never use `지휘관`. |
+| 司令官殿 | 사령관공 | Formal knight/soldier address. Preserve this when the source explicitly uses `殿`; do not normalize it to `사령관님`. |
+| 司令官さん | 사령관씨 | Casual/soft address. Preserve this when the source explicitly uses `さん`; do not normalize it to `사령관님`. |
+| 司令室 / しれーしつ | 사령실 | Commander room/location term. Always use `사령실`; never use `지휘실`. Treat playful `しれーしつ` as the same room term. |
+| グラディア / グラティア | 글라디아 | Character name. Always use `글라디아`; treat stray source spelling `グラティア` as the same character. Never use `그라디아`, `그라티아`, or `글라티아`. |
+| クレハ | 쿠레하 | Character name. Always use `쿠레하`; never use `크레하`. |
+| シラエス | 시라에스 | Character name. Always use `시라에스`; never use `실라에스`, `시라이스`, or `시라에쓰`. |
+| 鬼ヶ島 | 오니가시마 | Place/event name. Always use `오니가시마`; never translate it as `귀신섬` or `귀가섬`. |
+| 鬼族 | 오니족 | Race/faction term. Always use `오니족`; distinguish it from `貴族`=`귀족`. Never use `강족`, `귀족족`, or `귀족` for `鬼族`. |
+| 羅刹 | 나찰 | Weapon/name component. Always use `나찰`; never use `라살`. |
 | ざこざこ / ザコザコ / よわよわ + おにーさん·司令官 | 허접 오빠 / 허접 사령관 | Mesugaki-style taunt, especially in Berisa-like dialogue. Never soften it to `약한`, `약골`, `잔챙이`, or `쫄보`. Neutral narration using `弱い` or `弱々しい` is excluded. |
 | おしごと用コスチューム | 업무용 코스튬 | UI costume category. Never abbreviate it as `일용 코스튬`. Preserve an existing `<br>` between the words. |
 | 嘘 / ウソ / うそ | 거짓말 / 말도 안 돼 / 농담 | Translate naturally by context. Never transliterate it as `우소`. |
@@ -59,11 +81,25 @@ Use this table format:
 | 엘도라나 | 엘드라나 | `エルドラーナ`의 표기는 `엘드라나`로 통일한다. |
 | 멜렘 | 메렘 | `メレム`의 표기는 `메렘`으로 통일한다. |
 | 메리사 | 멜리사 | `メリッサ`의 표기는 `멜리사`로 통일한다. |
+| 고레인 | 고레이누 | `ゴレイヌ`의 표기는 `고레이누`로 통일한다. |
+| 고레누 | 고레이누 | `ゴレイヌ`의 표기는 `고레이누`로 통일한다. |
+| 고레인느 | 고레이누 | `ゴレイヌ`의 표기는 `고레이누`로 통일한다. |
+| 고레인누 | 고레이누 | `ゴレイヌ`의 표기는 `고레이누`로 통일한다. |
+| 골레누 | 고레이누 | `ゴレイヌ`의 표기는 `고레이누`로 통일한다. |
+| 생츄에르 여자학원 | 생크추어리 여학원 | `サンクチュエール女学園`의 표기는 `생크추어리 여학원`으로 통일한다. |
+| 생츄에를 여자학원 | 생크추어리 여학원 | `サンクチュエール女学園`의 표기는 `생크추어리 여학원`으로 통일한다. |
+| 생츄에르 여학원 | 생크추어리 여학원 | `サンクチュエール女学園`의 표기는 `생크추어리 여학원`으로 통일한다. |
+| 산여 | 생크학원 | `サン女` 약칭은 `생크학원`으로 통일한다. |
+| 생여 | 생크학원 | `サン女` 약칭은 `생크학원`으로 통일한다. |
 | 대공 | 어비스 | `大穴`은 프로젝트 기준상 `어비스`로 통일한다. |
 | 거대 구멍 | 어비스 | `大穴`은 프로젝트 기준상 `어비스`로 통일한다. |
 | 큰 구멍 | 어비스 | `大穴`은 프로젝트 기준상 `어비스`로 통일한다. |
 | 아리시아 | 알리시아 | `アリシア`의 표기는 `알리시아`로 통일한다. |
 | 지휘관 | 사령관 | `司令官`/`指揮官` 계열 호칭은 프로젝트 기준상 `사령관`으로 통일한다. |
+| 스오마 / 스오마타 | 스마타 | `素股`/`スマタ`/`すまた`는 성인 대화 용어 `스마타`로 통일한다. |
+| 소마타 | 스마타 | `素股`/`スマタ`/`すまた` 오역 금지. |
+| 스타마 | 스마타 | `素股`/`スマタ`/`すまた` 오역 금지. |
+| 겉치기 | 스마타 | 원문이 `素股`/`スマタ`/`すまた`이면 설명식 번역으로 바꾸지 말고 `스마타`를 쓴다. |
 | 크루루 | 쿠루루 | `クルル`의 표기는 `쿠루루`로 통일한다. |
 | 크룰루 | 쿠루루 | `クルル`의 표기는 `쿠루루`로 통일한다. |
 | 쿠룰루 | 쿠루루 | `クルル`의 표기는 `쿠루루`로 통일한다. |
@@ -71,3 +107,32 @@ Use this table format:
 | 럭스노바 | 룩스노바 | `ルクスノヴァ`의 표기는 `룩스노바`로 통일한다. |
 | 루크스 노바 | 룩스노바 | `ルクスノヴァ`의 표기는 띄어 쓰지 않고 `룩스노바`로 통일한다. |
 | 럭스 노바 | 룩스노바 | `ルクスノヴァ`의 표기는 띄어 쓰지 않고 `룩스노바`로 통일한다. |
+| 픽켈 | 곡갱이 | `ピッケル`의 표기는 `곡갱이`로 통일한다. |
+| 피켈 | 곡갱이 | `ピッケル`의 표기는 `곡갱이`로 통일한다. |
+| 곡괭이 | 곡갱이 | `ピッケル`의 표기는 `곡갱이`로 통일한다. |
+| 굶주림 | 기아 | `飢餓` 상태/재앙명은 `기아`로 통일한다. |
+| 굶주림의 재앙 | 기아의 재앙 | `飢餓の厄災`은 `기아의 재앙`으로 통일한다. |
+| 흙 속성 | 토 속성 | `土属性`의 속성명 문맥에서는 `토 속성`으로 통일한다. |
+| 카논 콜 | 캐논 콜 | `カノンコール`/`キャノン コール`/`キャノンコール`의 스킬명 표기는 `캐논 콜`로 통일한다. |
+| 카논콜 | 캐논 콜 | `カノンコール`/`キャノン コール`/`キャノンコール`의 스킬명 표기는 띄어 쓴 `캐논 콜`로 통일한다. |
+| 캐넌 콜 | 캐논 콜 | `カノンコール`/`キャノン コール`/`キャノンコール`의 스킬명 표기는 `캐논 콜`로 통일한다. |
+| 캐넌콜 | 캐논 콜 | `カノンコール`/`キャノン コール`/`キャノンコール`의 스킬명 표기는 띄어 쓴 `캐논 콜`로 통일한다. |
+| 캐논콜 | 캐논 콜 | `カノンコール`/`キャノン コール`/`キャノンコール`의 스킬명 표기는 띄어 쓴 `캐논 콜`로 통일한다. |
+| 지휘실 | 사령실 | `司令室`/`しれーしつ`의 장소명은 `사령실`로 통일한다. |
+| 그라디아 | 글라디아 | `グラディア`의 표기는 `글라디아`로 통일한다. |
+| 그라티아 | 글라디아 | 원문이 `グラティア`로 흔들린 경우도 캐릭터명은 `글라디아`로 통일한다. |
+| 글라티아 | 글라디아 | 원문이 `グラティア`로 흔들린 경우도 캐릭터명은 `글라디아`로 통일한다. |
+| 크레하 | 쿠레하 | `クレハ`의 표기는 `쿠레하`로 통일한다. |
+| 실라에스 | 시라에스 | `シラエス`의 표기는 `시라에스`로 통일한다. |
+| 시라이스 | 시라에스 | `シラエス`의 표기는 `시라에스`로 통일한다. |
+| 시라에쓰 | 시라에스 | `シラエス`의 표기는 `시라에스`로 통일한다. |
+| 귀신섬 | 오니가시마 | `鬼ヶ島`는 고유명사 `오니가시마`로 통일한다. |
+| 귀가섬 | 오니가시마 | `鬼ヶ島`는 고유명사 `오니가시마`로 통일한다. |
+| 강족 | 오니족 | `鬼族`은 `오니족`으로 통일한다. |
+| 귀족족 | 오니족 | `鬼族`은 `오니족`으로 통일한다. |
+| 라살 | 나찰 | `羅刹`은 `나찰`로 통일한다. |
+| 쿠레하 대사의 나리 | 서방님 | `クレハ`가 주인공을 부르는 `旦那様`/`旦那さま`/`旦那`는 `서방님`으로 통일한다. |
+| 쿠레하 대사의 주인님 | 서방님 | `クレハ`의 `旦那様`를 `ご主人様`처럼 번역하지 않는다. |
+| 고기 / 고기봉 / 육봉 | 남근 | `肉棒`은 일반 성인 서술에서 반드시 `남근`으로 번역한다. 단, 별도 고유 스킬명으로 확정된 `육봉연술`은 예외. |
+| 정액 전체 / 정액에 힘 / 정액을 조여 | 남근 전체 / 남근에 힘 / 남근을 조여 | `肉棒`을 `精液`처럼 오역하지 않는다. |
+| 질 습관 | 질벽 | `膣壁` 또는 원문 오탈자 `膣癖` 문맥은 신체 부위 `질벽`으로 처리한다. |

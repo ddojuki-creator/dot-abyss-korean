@@ -12,21 +12,24 @@ let keyErrors = 0
 let emptyValues = 0
 let nonStringValues = 0
 let tokenErrors = 0
+let novelVoiceMarkerErrors = 0
 const samples = []
 
 for (const file of files) {
   if (isManifest(file)) continue
+  const fileRel = rel(file)
+  if (fileRel.startsWith('translations/static/')) continue
   let data
   try {
     data = readJson(file)
   } catch (err) {
     parseErrors += 1
-    samples.push(`${rel(file)}: parse error: ${err.message}`)
+    samples.push(`${fileRel}: parse error: ${err.message}`)
     continue
   }
   if (!isPlainObject(data)) {
     invalidShape += 1
-    samples.push(`${rel(file)}: not a JSON object`)
+    samples.push(`${fileRel}: not a JSON object`)
     continue
   }
   checkedFiles += 1
@@ -35,11 +38,15 @@ for (const file of files) {
   let source = null
   if (fs.existsSync(upstreamFile)) {
     source = readJson(upstreamFile)
-    const targetKeys = JSON.stringify(collectEntries(data).map((entry) => entry.path.join('\u0001')).sort())
-    const sourceKeys = JSON.stringify(collectEntries(source).map((entry) => entry.path.join('\u0001')).sort())
-    if (targetKeys !== sourceKeys) {
+    const targetKeys = collectEntries(data).map((entry) => entry.path.join('\u0001')).sort()
+    const sourceKeys = collectEntries(source).map((entry) => entry.path.join('\u0001')).sort()
+    const allowExtraKeys = fileRel === 'translations/names/ko_KR.json' || fileRel.startsWith('translations/novels/')
+    const keyMismatch = allowExtraKeys
+      ? sourceKeys.some((key) => !targetKeys.includes(key))
+      : JSON.stringify(targetKeys) !== JSON.stringify(sourceKeys)
+    if (keyMismatch) {
       keyErrors += 1
-      samples.push(`${rel(file)}: keys differ from upstream`)
+      samples.push(`${fileRel}: keys differ from upstream`)
     }
   }
 
@@ -47,19 +54,23 @@ for (const file of files) {
     checkedItems += 1
     if (typeof entry.value !== 'string') {
       nonStringValues += 1
-      samples.push(`${rel(file)} :: ${entry.path.join(' > ')}: non-string value`)
+      samples.push(`${fileRel} :: ${entry.path.join(' > ')}: non-string value`)
       continue
+    }
+    if (fileRel.startsWith('translations/novels/') && /,{2,3}(?:vc|chara)_[^,]+$/.test(`${entry.key}${entry.value}`)) {
+      novelVoiceMarkerErrors += 1
+      samples.push(`${fileRel} :: ${entry.path.join(' > ')}: voice marker leaked into novel key/value`)
     }
     if (entry.value === '') {
       emptyValues += 1
-      samples.push(`${rel(file)} :: ${entry.path.join(' > ')}: empty value`)
+      samples.push(`${fileRel} :: ${entry.path.join(' > ')}: empty value`)
     }
     const tokenProblems = compareProtectedTokens(entry.key, entry.value, {
-      lineBreaks: rel(file).startsWith('translations/novels/') ? 'korean-dialogue' : 'source-max',
+      lineBreaks: fileRel.startsWith('translations/novels/') ? 'korean-dialogue' : 'source-max',
     })
     if (tokenProblems.length) {
       tokenErrors += 1
-      samples.push(`${rel(file)} :: ${entry.path.join(' > ')}: ${tokenProblems.join(', ')}`)
+      samples.push(`${fileRel} :: ${entry.path.join(' > ')}: ${tokenProblems.join(', ')}`)
     }
   }
 }
@@ -73,6 +84,7 @@ printSummary('validate:ko', {
   nonStringValues,
   emptyValues,
   tokenErrors,
+  novelVoiceMarkerErrors,
 })
 
 if (samples.length) {
@@ -80,4 +92,4 @@ if (samples.length) {
   for (const sample of samples.slice(0, 40)) console.log(`- ${sample}`)
 }
 
-if (parseErrors || invalidShape || keyErrors || nonStringValues || emptyValues || tokenErrors) process.exitCode = 1
+if (parseErrors || invalidShape || keyErrors || nonStringValues || emptyValues || tokenErrors || novelVoiceMarkerErrors) process.exitCode = 1

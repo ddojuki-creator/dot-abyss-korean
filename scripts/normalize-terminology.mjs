@@ -1,13 +1,76 @@
 #!/usr/bin/env node
 import fs from 'node:fs'
 import path from 'node:path'
-import { ROOT } from './lib/ko-pipeline.mjs'
+import { ROOT, writeJson } from './lib/ko-pipeline.mjs'
 
 const translationsRoot = path.join(ROOT, 'translations')
 let changedFiles = 0
 let changedValues = 0
 
-function normalize(key, value) {
+const KUREHA_DANNA_KEYS = new Set([
+  'ありがとうございます、旦那様。\n鬼族と人が仲良くなれる日が\n来るなんて……夢のようですっ',
+  'それでは鬼族のみんな……！\n次は旦那様とシラエスママを\nもてなしますよ～♪',
+  '愛する旦那様のために……',
+  '私としたことが……これでは\n旦那様に顔向けできません……',
+  '私と旦那の愛のパワーで、\n必ずや鬼ヶ島のプロデュースを\n成功させてみせます！',
+  '旦那様',
+  '旦那様～♪　観光客のみなさまに\nお出しする料理ができました♪\n味見してください、あ～～ん♪',
+  '旦那様が私と一緒に鬼ヶ島へ\n里帰りしてくださるのですか！？\nもしや結婚の挨拶のために！？',
+  '旦那様と仲を深めるために',
+  '旦那様のことを愛しています',
+  '服に血がついたわ。旦那様に\n会う前に綺麗にしないと……',
+  '――旦那様。 <br>私がお力になりましょうか？',
+  '立ち聞きをするつもりはなかったのですが、 <br>旦那様の苦しげな声をお聞きして、つい……',
+  'もちろんです。 <br>だからこそ旦那様のお力になりたいと思うのです。',
+  'どんなことがあっても私の心が旦那様から離れることはありません。 <br>それを証明させてはいただけませんか。',
+  'はい……！<br>必ず旦那様の期待に応えてみせますね。',
+])
+
+function normalizeKurehaDannaAddress(value) {
+  return value
+    .replace(/나리님/g, '서방님')
+    .replace(/나리께서/g, '서방님께서')
+    .replace(/나리께/g, '서방님께')
+    .replace(/나리에게/g, '서방님께')
+    .replace(/나리와/g, '서방님과')
+    .replace(/나리의/g, '서방님의')
+    .replace(/나리를/g, '서방님을')
+    .replace(/주인님/g, '서방님')
+    .replace(/나리/g, '서방님')
+}
+
+function normalizeOnigashimaProduce(value) {
+  return value
+    .replace(/프로듀스 계획/g, '홍보 계획')
+    .replace(/프로듀스 대작전/g, '홍보 대작전')
+    .replace(/프로듀스한다는/g, '홍보한다는')
+    .replace(/프로듀스하는/g, '홍보하는')
+    .replace(/프로듀스하기/g, '홍보하기')
+    .replace(/프로듀스하려/g, '홍보하려')
+    .replace(/프로듀스할/g, '홍보할')
+    .replace(/프로듀스는/g, '홍보는')
+    .replace(/프로듀스를/g, '홍보를')
+    .replace(/프로듀스에/g, '홍보에')
+    .replace(/프로듀스/g, '홍보')
+}
+
+function normalizeSumata(value, key) {
+  let result = value
+    .replace(/스오마타|스오마|소마타|스타마/g, '스마타')
+    .replace(/스마타\([^)]*\)/g, '스마타')
+    .replace(/겉치기만으로도/g, '스마타만으로도')
+    .replace(/겉치기만/g, '스마타만')
+    .replace(/그냥\s*겉으로만 하는 코스/g, '스마타까지의 코스')
+    .replace(/겉으로만 하는 코스/g, '스마타까지의 코스')
+  if (key === 'まずは素股からでいい？') result = '먼저 스마타부터 할까?'
+  return result
+}
+
+function isKurehaNovelFile(file) {
+  return /[\\/](?:hmr|men)_105801\d{5}[\\/]ko_KR\.json$/.test(file)
+}
+
+function normalize(key, value, file = '') {
   let result = value
   if (key.includes('\u5927\u7A74')) {
     result = result.replace(/\ub300\uacf5\ub3d9|\ub300\uad6c\uba4d|\ud070 \uad6c\uba4d|\ub300\ub3d9\uad74/g, '\uc5b4\ube44스')
@@ -26,6 +89,25 @@ function normalize(key, value) {
   }
   if (/\u30DF\u30EB\u30C6\u30A3(?:\u30FC?\u30E6|\u30FC\u30E6)/.test(key)) {
     result = result.replace(/밀피유|미르티유/g, '밀티유')
+  }
+  if (key.includes('\u30B0\u30E9\u30C7\u30A3\u30A2') || key.includes('\u30B0\u30E9\u30C6\u30A3\u30A2')) {
+    result = result.replace(/그라디아|그라티아|글라티아/g, '글라디아')
+  }
+  if (key.includes('\u30AF\u30EC\u30CF')) {
+    result = result.replace(/크레하/g, '쿠레하')
+  }
+  if (key.includes('\u30D0\u30D6\u307F')) {
+    result = result.replace(/바붐/g, '바부미')
+  }
+  if (
+    KUREHA_DANNA_KEYS.has(key)
+    || (isKurehaNovelFile(file) && /旦那(?:様|さま)?/.test(key))
+    || (/(?:クレハ|鬼ヶ島|鬼族|シラエス)/.test(key) && /旦那(?:様|さま)?/.test(key))
+  ) {
+    result = normalizeKurehaDannaAddress(result)
+  }
+  if (key.includes('\u30B7\u30E9\u30A8\u30B9')) {
+    result = result.replace(/실라에스|시라이스|시라에쓰/g, '시라에스')
   }
   if (key.includes('\u30DE\u30C3\u30AF\u30F3')) {
     result = result.replace(/맛쿤/g, '마쿤')
@@ -61,6 +143,92 @@ function normalize(key, value) {
   if (key.includes('\u30AF\u30A4\u30C3\u30AF\u9078\u629E')) {
     result = result.replace(/퀵 선택/g, '빠른 선택')
   }
+  if (key.includes('\u30D4\u30C3\u30B1\u30EB')) {
+    result = result.replace(/픽켈|피켈|곡괭이/g, '곡갱이')
+  }
+  if (key.includes('\u98E2\u9913')) {
+    result = result.replace(/굶주림/g, '기아')
+  }
+  if (key.includes('\u30AB\u30CE\u30F3\u30B3\u30FC\u30EB') || /\u30AD\u30E3\u30CE\u30F3\s*\u30B3\u30FC\u30EB/.test(key)) {
+    result = result.replace(/카논\s*콜|카논콜|캐넌\s*콜|캐넌콜|캐논콜/g, '캐논 콜')
+  }
+  if (key.includes('\u9B54\u5C0E\u7089')) {
+    result = result.replace(/마도\s*노심|마도노심/g, '마도로')
+  }
+  if (/\u8089\u68D2|\u7537\u6839|\u9670\u830E|\u7537\u6027\u5668/.test(key)) {
+    result = result
+      .replace(/고기봉/g, '남근')
+      .replace(/정액 전체/g, '남근 전체')
+      .replace(/정액을 조여/g, '남근을 조여')
+      .replace(/정액에 힘/g, '남근에 힘')
+      .replace(/몸이 움찔하며 정액이 차오른다/g, '남근이 움찔 떨리고 만다')
+  }
+  if (/\u81A3(?:\u58C1|\u7656)/.test(key)) {
+    result = result.replace(/질 습관/g, '질벽')
+  }
+  if (key.includes('\u53F8\u4EE4\u5BA4') || key.includes('\u3057\u308C\u30FC\u3057\u3064')) {
+    result = result.replace(/지휘실/g, '사령실')
+  }
+  if (key.includes('\u9B3C\u30F6\u5CF6')) {
+    result = result.replace(/귀신\s*섬|귀신섬|귀가섬|오니가\s*섬/g, '오니가시마')
+  }
+  if (key.includes('\u30D7\u30ED\u30C7\u30E5\u30FC\u30B9')) {
+    result = normalizeOnigashimaProduce(result)
+  }
+  if (/素股|スマタ|すまた/.test(key)) {
+    result = normalizeSumata(result, key)
+  }
+  if (key.includes('\u982D\u3092\u60A9\u307E\u305B')) {
+    result = result
+      .replace(/골머리를 앓고/g, '골치를 썩이고')
+      .replace(/머리를 앓고/g, '골치를 썩이고')
+  }
+  if (key.includes('\u9B3C\u9000\u6CBB') || key.includes('\u9B3C\u3068\u5354\u529B')) {
+    result = result
+      .replace(/귀퇴치/g, '오니 퇴치')
+      .replace(/귀 퇴치/g, '오니 퇴치')
+      .replace(/귀와 협력/g, '오니와 협력')
+  }
+  if (key === '\u9B3C') {
+    result = result.replace(/^귀$/g, '오니')
+  }
+  if (key.includes('\u9B3C\u65CF')) {
+    result = result
+      .replace(/귀족족|강족/g, '오니족')
+      .replace(/귀족/g, '오니족')
+  }
+  if (key.includes('\u9B3C\u65CF\u3068\u4EBA\u9593\u3068')) {
+    result = result.replace(/오니족과 인간과/g, '오니족과 인간')
+  }
+  if (key.includes('\u7F85\u5239')) {
+    result = result.replace(/라살/g, '나찰')
+  }
+  if (key.includes('\u706B')) {
+    result = result.replace(/\(火\)/g, '(화)')
+  }
+  if (key.includes('\u5473\u65B9')) {
+    result = result.replace(/味方/g, '아군')
+  }
+  if (
+    (key.includes('\u524D\u885B') || key.includes('\u5F8C\u885B'))
+    && /\u5473\u65B9|\u6575|\u30AD\u30E3\u30E9|\u653B\u6483\u529B|\u9632\u5FA1\u529B|\u8010\u6027|\u30B9\u30AD\u30EB|\u7DE8\u6210|\u52B9\u679C|\u4ED8\u4E0E|\u4E0A\u6607/.test(key)
+  ) {
+    result = result
+      .replace(/전위/g, '프론트')
+      .replace(/후위/g, '백')
+  }
+  if (key === '\u571F' || key.includes('\u571F\u5C5E\u6027') || key.includes('\u706B\u3001\u6C34\u3001\u571F') || key.includes('\u706B\u30FB\u6C34\u30FB\u571F')) {
+    result = result
+      .replace(/흙\s*속성/g, '토 속성')
+      .replace(/흙속성/g, '토속성')
+      .replace(/\[흙\]/g, '[토]')
+  }
+  if (key.includes('\u9078\u3079\u308B') && /BOX|\u30DC\u30C3\u30AF\u30B9/.test(key)) {
+    result = result
+      .replace(/선택 가능한 ([^\n]*?) BOX/g, '$1 선택 BOX')
+      .replace(/선택 가능한 ([^\n]*?) 상자/g, '$1 선택 BOX')
+      .replace(/SSR 캐릭터 선택 BOX 교환권/g, 'SSR 캐릭터 선택 BOX')
+  }
   const floorLabel = key.match(/^\u30D5\u30ED\u30A2([123])$/)
   if (floorLabel) {
     result = `플로어${floorLabel[1]}`
@@ -94,6 +262,9 @@ function normalize(key, value) {
   if (key.includes('\u304A\u3057\u3054\u3068\u7528') && key.includes('\u30B3\u30B9\u30C1\u30E5\u30FC\u30E0')) {
     result = result.replace(/\uc77c\uc6a9(?=<br>|\s*\ucf54\uc2a4\ud2ac)/g, '\uc5c5\ubb34\uc6a9')
   }
+  if (key.includes('\uFF11\uFF10\u5E74') || key.includes('\u5341\u5E74')) {
+    result = result.replace(/10년/g, '십 년')
+  }
   result = result
     .replace(/닷트 어비스/g, '도트 어비스')
     .replace(/어비스을/g, '어비스를')
@@ -104,6 +275,19 @@ function normalize(key, value) {
     .replace(/어비스이(?=구나|군)/g, '어비스')
     .replace(/어비스이(?=니까)/g, '어비스')
     .replace(/어비스이(?=라면|라서|라도|라\?|라는|라고)/g, '어비스')
+    .replace(/<ruby=大穴>어비스<\/ruby>/g, '어비스')
+    .replace(/무\(無\)/g, '무')
+    .replace(/업화\(業火\)/g, '업화')
+    .replace(/환수\(幻獣\)/g, '환수')
+    .replace(/바부미이라는/g, '바부미라는')
+    .replace(/오니가시마으로/g, '오니가시마로')
+    .replace(/오니가시마을/g, '오니가시마를')
+    .replace(/오니가시마의 홍보/g, '오니가시마 홍보')
+    .replace(/나리가라도/g, '나리라도')
+    .replace(/나리가기에/g, '나리라서')
+    .replace(/나리가세요/g, '나리세요')
+    .replace(/나리가었으면/g, '나리였으면')
+    .replace(/나리가라면/g, '나리라면')
     .replace(/고마움으로 베리사쨩의/g, '보답으로 베리사쨩의')
     .replace(/가게에서 대인기예요/g, '가게에서 큰 인기예요')
     .replace(/형님은 누구를 데리고 갈 건가요~/g, '오빠는 누구를 데리고 갈 건가요~')
@@ -123,14 +307,14 @@ function visit(directory) {
     let fileChanged = false
     for (const [key, value] of Object.entries(data)) {
       if (typeof value !== 'string') continue
-      const normalized = normalize(key, value)
+      const normalized = normalize(key, value, file)
       if (normalized === value) continue
       data[key] = normalized
       changedValues += 1
       fileChanged = true
     }
     if (fileChanged) {
-      fs.writeFileSync(file, `${JSON.stringify(data, null, 4)}\n`, 'utf8')
+      writeJson(file, data)
       changedFiles += 1
     }
   }
