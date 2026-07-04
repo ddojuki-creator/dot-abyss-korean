@@ -71,6 +71,20 @@ for (const required of [
     }
 }
 
+const fistWeaponTitle = '武器：拳'
+const fistWeaponDescription =
+    '拳や体術を用いる戦闘を助ける武器。回避や\n連撃が得意な探索者が愛用する。地上の敵に\n3連撃を行い、回避時には後方にステップする。'
+const expectedFistWeaponDescription =
+    '권과 체술을 활용하는 전투를 돕는 무기.\n회피와 연격에 능한 탐색자가 애용한다.\n지상 적에게 3연격을 가하고, 회피 시 뒤로 스텝한다.'
+for (const field of ['title', 'flavor_text']) {
+    if (bundle.m_transition_tips?.[field]?.[fistWeaponTitle] !== '무기: 권') {
+        errors.push(`m_transition_tips.${field} must translate 武器：拳 as 무기: 권`)
+    }
+    if (bundle.m_transition_tips?.[field]?.[fistWeaponDescription] !== expectedFistWeaponDescription) {
+        errors.push(`m_transition_tips.${field} has invalid 武器：拳 description reflow`)
+    }
+}
+
 const japaneseValues = []
 for (const [table, fields] of Object.entries(bundle)) {
     for (const [field, dict] of Object.entries(fields)) {
