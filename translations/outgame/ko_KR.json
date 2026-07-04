@@ -1602,6 +1602,8 @@
   "VIPに「料理」を付与し満足度+50%": "VIP에게 <color=#AC83FD>「요리」</color>를 부여하여 만족도 +<color=#4CF37B>50%</color>",
   "VIPに「料理」を付与し満足度+80%": "VIP에게 <color=#AC83FD>「요리」</color>를 부여하여 만족도 +<color=#4CF37B>80%</color>",
   "VIPの満足度": "VIP 만족도",
+  "{[area]} の満足度": "{[area]} 만족도",
+  "{[area]}の満足度": "{[area]} 만족도",
   "VIPランク": "VIP 랭크",
   "VIP席の設置": "VIP석 설치",
   "VIP席の設置1": "VIP석 설치1",
