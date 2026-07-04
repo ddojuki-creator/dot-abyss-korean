@@ -4,8 +4,8 @@ import path from 'node:path'
 import { collectEntries, parseArgs, rel, ROOT, setByPath, walk, writeJson } from './lib/ko-pipeline.mjs'
 
 const args = parseArgs(process.argv.slice(2))
-const TARGET = Number(process.env.NOVEL_LAYOUT_TARGET ?? 38)
-const HARD_LIMIT = Number(process.env.NOVEL_LAYOUT_HARD_LIMIT ?? 40)
+const TARGET = Number(process.env.NOVEL_LAYOUT_TARGET ?? 34)
+const HARD_LIMIT = Number(process.env.NOVEL_LAYOUT_HARD_LIMIT ?? 36)
 const REPORT_FILE = path.join(ROOT, '.cache', 'novel-layout-review.json')
 
 function visibleLength(value) {

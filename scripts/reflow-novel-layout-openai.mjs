@@ -17,8 +17,8 @@ const API_URL = process.env.OPENAI_API_URL || 'https://api.openai.com/v1/chat/co
 const MODEL = process.env.OPENAI_LAYOUT_MODEL || process.env.OPENAI_MODEL || 'gpt-4.1-mini'
 const BATCH_SIZE = Number(process.env.NOVEL_LAYOUT_BATCH_SIZE || 10)
 const MAX_RETRIES = Number(process.env.TRANSLATE_MAX_RETRIES || 4)
-const TARGET = Number(process.env.NOVEL_LAYOUT_TARGET || 38)
-const HARD_LIMIT = Number(process.env.NOVEL_LAYOUT_HARD_LIMIT || 40)
+const TARGET = Number(process.env.NOVEL_LAYOUT_TARGET || 34)
+const HARD_LIMIT = Number(process.env.NOVEL_LAYOUT_HARD_LIMIT || 36)
 const REPORT_FILE = path.join(ROOT, '.cache', 'novel-layout-review.json')
 
 function sleep(ms) {
@@ -116,8 +116,11 @@ function buildMessages(items, retryNotes = []) {
         `Each displayed Korean line must be <= ${HARD_LIMIT} visible Korean characters after removing tags. Target about ${TARGET} characters.`,
         `Spaces and punctuation count as visible characters. The whole value usually must be <= ${HARD_LIMIT * 2} visible characters to fit two lines.`,
         'Use at most one rendered line break: <br>. One line is allowed if it fits.',
-        'The 40-character limit is per displayed line, not per whole value.',
-        'A 23/52 split is invalid because the second line is over 40. Return balanced lengths like 35/38, 38/39, or one line under 40.',
+        `The ${HARD_LIMIT}-character limit is per displayed line, not per whole value.`,
+        `A 23/${HARD_LIMIT + 12} split is invalid because the second line is over ${HARD_LIMIT}. Return balanced lengths like ${TARGET - 2}/${TARGET}, ${TARGET}/${HARD_LIMIT}, or one line under ${HARD_LIMIT}.`,
+        `Never return three displayed lines. The value may contain zero or one <br> only.`,
+        `If a faithful full sentence cannot fit within two ${HARD_LIMIT}-character lines, shorten wording while preserving the core meaning and voice.`,
+        'Prefer concise Korean phrasing over literal Japanese structure when layout is tight.',
         'Do not split words, particles, endings, or short word tails across <br>.',
         'Preserve meaning, emotional tone, speaker voice, honorifics, adult nuance, tags, placeholders, and symbols.',
         'Do not add new story information. Do not censor explicit adult text.',
@@ -206,18 +209,20 @@ async function rewriteWithValidation(batch) {
   }
 
   for (const fail of failed) {
-    const notes = [
-      `Previous suggestion failed validation: ${fail.errors.join(', ')}`,
-      `Invalid previous suggestion: ${fail.value}`,
-      'Rewrite again so it passes all rules. Prefer stronger compression if needed.',
-    ]
-    const [retryValue] = await rewriteBatch([fail.item], notes)
-    const retryErrors = validateSuggestion(fail.item, retryValue)
-    if (retryErrors.length) {
-      result.push({ item: fail.item, value: retryValue, errors: retryErrors })
-    } else {
-      result.push({ item: fail.item, value: retryValue })
+    let retryValue = fail.value
+    let retryErrors = fail.errors
+    for (let attempt = 1; attempt <= MAX_RETRIES && retryErrors.length; attempt += 1) {
+      const notes = [
+        `Previous suggestion failed validation: ${retryErrors.join(', ')}`,
+        `Invalid previous suggestion: ${retryValue}`,
+        `Rewrite again with stronger compression. Absolute rules: max 2 displayed lines, max 1 <br>, each line <= ${HARD_LIMIT} visible chars.`,
+        'It is acceptable to trim redundant modifiers, shorten clauses, and combine repeated ideas.',
+      ]
+      ;[retryValue] = await rewriteBatch([fail.item], notes)
+      retryErrors = validateSuggestion(fail.item, retryValue)
     }
+    if (retryErrors.length) result.push({ item: fail.item, value: retryValue, errors: retryErrors })
+    else result.push({ item: fail.item, value: retryValue })
   }
 
   return result
