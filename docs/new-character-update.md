@@ -10,7 +10,7 @@
 2. 일본어 캐릭터명은 `translations/names/ko_KR.json`과 `translations/outgame/ko_KR.json` 양쪽에 등록한다.
 3. 신규 어빌리티명은 `translations/outgame/ko_KR.json`에 독립 key로 등록한다.
 4. `<br>`, `<color>`, TMP 태그와 특수기호를 변경하지 않는다.
-5. CDN 변경은 항상 `test` 브랜치에 commit/push한다.
+5. CDN 변경은 항상 `main` 브랜치에 commit/push한다.
 6. `旦那様`, `お兄さん`, `ご主人様`처럼 여러 캐릭터가 공유하는 호칭은 기존 캐릭터 규칙을 그대로 덮어쓰지 말고, 신규 캐릭터의 프로필/스토리 문맥으로 별도 고정한다. 예: 마리나 `旦那様=나리`, 쿠레하 `旦那様=서방님`.
 
 ## 수집 화면
@@ -25,6 +25,7 @@
 - 한계 돌파 내용 화면
 - 강화 효과 확인 팝업
 - 스킬 / 어빌리티 상세 정보 화면
+- 스킬 / 어빌리티 상세 정보 화면 오른쪽의 `어빌리티 강화` 카드 전체
 - 어빌리티 각성 화면의 한계돌파 단계별 카드
 - 등급 상승 전/후 스킬 설명
 - 등급 상승 전/후 어빌리티 설명
@@ -74,6 +75,7 @@
 - `<color=#...>` 태그가 포함된 수치 강조 설명
 - `m_ability_details`의 본문 필드와 각성 효과 필드가 합쳐져 화면에 나온 전체 설명
 - 숫자 치환 완료 후 `<color=#4CF37B>`가 들어간 런타임 exact key
+- `스킬 & 어빌리티 상세` 오른쪽 `어빌리티 강화` 카드의 이름, 본문, 발동 조건, 효과, 각성 효과
 - `紋章`, `状態異常`, `クエスト中1回まで`, `バトル開始時`가 포함된 복합 설명
 
 등록 원칙:
@@ -86,6 +88,10 @@
 6. 한 캐릭터에서 발견된 패턴은 다른 캐릭터의 등급 상승 설명에도 재사용되는지 검색한다.
 7. 화면 하나가 한국어로 보여도 끝내지 말고, 강화 전/후, MAX, 각성, 한계돌파, 상세 팝업의 별도 key를 모두 확인한다.
 8. `キャノン コール`/`カノンコール`, 반각 `&`/전각 `＆`처럼 공백/전각/반각 차이가 있으면 실제 수집 key와 스크린샷 표기를 모두 등록한다.
+9. `自身の攻撃力と防御力と最大HP`와 `自身の攻撃力と防御力、最大HP`처럼 조사/쉼표 차이만 있는 런타임 변형도 별도 key로 등록한다.
+10. 화면에는 줄바꿈으로만 보이더라도 실제 key는 `<br><color=#D7DEF8>【覚醒効果】</color>`를 포함할 수 있다. 태그 포함 key와 화면에 보이는 `\n【覚醒効果】` key를 모두 확인한다.
+11. `outgame-ja_JP.json`에 한국어와 일본어가 섞인 key가 수집되면 정상 번역이 일부만 먼저 적용된 상태다. 한국어가 섞였다고 제외하지 말고, 남은 일본어가 있는지 확인한 뒤 전체 key를 한국어 value로 등록한다.
+12. `outgame-ja_JP.json`에 `ã€`, `ã`, `ãƒ`, `ç™`, `è¦`, `æ”`, `é˜` 같은 깨진 문자열이 보이면 수집 인코딩이 깨진 것이다. 스크린샷과 masterdata를 기준으로 정상 일본어 key를 복원해 등록하고, 깨진 key만 보고 완료 처리하지 않는다.
 
 예시:
 
@@ -119,10 +125,12 @@ game: BepInEx/plugins/AbyssMod/cache/ko_KR/novels/<id>.json
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\update-manifest.mjs
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\validate-translations.mjs
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-character-abilities.mjs
+& "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-character-ability-upgrade-matrix.mjs
+& "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-limit-break-ability-combos.mjs --all
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-novel-location-titles.mjs
 git add translations/names/ko_KR.json translations/outgame/ko_KR.json translations/manifest/ko_KR.json docs/new-character-update.md
 git commit -m "Update new character translation guide"
-git push origin test
+git push origin main
 ```
 
 검증 항목:
@@ -136,6 +144,8 @@ git push origin test
 - `<br>`와 색상 태그 보존
 - 한계돌파 강화 설명의 `【覚醒効果】`, 수치, 색상 태그 보존
 - `m_ability_details`와 런타임 exact key의 한계돌파/각성 설명 일본어 잔존 0건
+- `스킬 & 어빌리티 상세` 오른쪽 `어빌리티 강화` 카드의 `バトル開始時`, `発動条件`, `効果`, `覚醒効果` 일본어 잔존 0건
+- 한국어가 섞인 runtime key와 mojibake key를 정상 일본어/한국어 기준으로 다시 확인
 - `scripts\audit-character-abilities.mjs` 통과
 - `translations/novels/**/ko_KR.json` value 안에 일본어 잔존이 없는지 확인
 - 게임 로컬 캐시의 `cache\ko_KR\novels`가 manifest의 신규 소설을 모두 포함하는지 확인
@@ -150,7 +160,7 @@ git push origin test
 5. 스토리 대사 일본어: `translations/novels/<id>/ko_KR.json`에 번역이 있는지, 게임 캐시 `cache\ko_KR\novels\<id>.json`에 복사됐는지 확인한다.
 6. 재시작 후에도 일본어: 실제 문장이 기존 템플릿과 같은지 비교한다.
 7. 태그 또는 색상 오류: 원문의 `<color>` 범위와 템플릿 토큰 위치를 확인한다.
-8. CDN 미반영: manifest hash와 `test` 브랜치 push 여부를 확인한다.
+8. CDN 미반영: manifest hash와 `main` 브랜치 push 여부를 확인한다.
 
 ## 완료 기준
 
