@@ -278,7 +278,10 @@ function collectBondRewardAbilityKeys(entries) {
 
 const sources = [
   ...new Set([
-    ...Object.keys(collection).filter((source) => isCharacterAbilitySource(source) && !isLocalizedRuntimeCollectionSource(source)),
+    ...Object.keys(collection).filter((source) =>
+      isCharacterAbilitySource(source) &&
+      (!isLocalizedRuntimeCollectionSource(source) || hasJapaneseAbilityLeftover(source)),
+    ),
     ...snapshotSources,
     ...collectLimitBreakAbilityCombos(snapshot.entries || {}),
     ...collectRuntimeAbilityVariants(snapshot.entries || {}),
