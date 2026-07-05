@@ -44,3 +44,32 @@
 - `司令官` / `指揮官` commander-address uses are translated as `사령관`/`사령관님`; `지휘관` does not remain as an active translation.
 - Explicit source honorifics are preserved: `司令官殿=사령관공`, `司令官さん=사령관씨`. Do not flatten these to `사령관님`.
 - `司令室` / `しれーしつ` location uses are translated as `사령실`; `지휘실` does not remain for these source terms.
+- Skill/ability hit-count units keep source `HIT` as `HIT`. Do not translate them as `회 타격`, `히트`, or `타`.
+- `ノックバック` is always `넉백`; `노크백` does not remain.
+- Brothel/service `ドリンク` remains `드링크`, not `음료`.
+
+## Character Ability / Limit-Break QA
+
+- New character updates must check `translations/names`, `titles`, `descriptions`, `outgame`, `novels`, `another_name`, `ability_descriptions`, and generated `static`, not only the file where the first Japanese string was found.
+- Cached novel IDs can include `evs`, `hmn`, `hmr`, `mas`, and `men`; all new files must be translated and included in manifest/cache.
+- Cache update reviews must inspect `.cache/game-cache-extract-report.json` `characterSpecSummary`. `m_ability_details` IDs do not include character IDs, so map them through `m_character_abilities` before deciding which character changed.
+- Limit-break abilities usually have 3 abilities, each upgraded twice. Verify all 3 abilities across base, first-upgrade, and second-upgrade states, and check both exact keys and translated values.
+- Limit-break/awakening ability cards must check combined `m_ability_details` field 4 + `【覚醒効果】` field 5 exact keys. A translated base skill and a translated awakening line are not enough if the runtime combined string is missing.
+- Character bond reward messages are runtime-composed from `m_character_abilities` field 3 ability names. Verify both exact key patterns for every ability name: `「ability」の解放条件達成！` and `「ability」の最大Lvが10に上昇！`.
+- Before auditing limit-break/awakening ability cards, run `scripts/sync-limit-break-ability-combos.mjs` if the script is present and relevant. It composes field 4 + field 5 exact keys from existing translations and creates plain numeric, green `<color=#4CF37B>` numeric, yellow `<color=#F4FF00>` numeric, and status-name color variants.
+- Run `scripts/audit-character-ability-upgrade-matrix.mjs` to verify the base/first-upgrade/second-upgrade ability matrix has no missing translation keys, untranslated values, or Japanese leftovers.
+- Run `scripts/audit-limit-break-ability-combos.mjs --all` for character updates. `missing`, untranslated, and Japanese-leftover counts must be 0.
+- Check plain numeric, green numeric, and yellow numeric combinations such as `<color=#4CF37B>15%</color>`, `<color=#F4FF00>15%</color>`, `<color=#4CF37B>5%</color>`, and `<color=#F4FF00>5%</color>` because base-effect values and awakening values can both be colorized at runtime.
+- Gacha shop / pickup character previews can render the same character skill and ability descriptions with yellow `<color=#F4FF00>` values, while normal character detail / upgrade screens often render green `<color=#4CF37B>` values. Treat both as separate exact keys.
+- Check status-name color variants too: `紋章：情熱` can become `<color=#FF5050>紋章：情熱</color>`, and `紋章：衝撃` can become `<color=#6B8CFF>紋章：衝撃</color>`.
+- Runtime exact keys can be mixed Korean/Japanese intermediate strings, not only pure Japanese source strings. If a key contains Korean text plus leftovers such as `上昇`, `【覚醒効果】`, `自身`, `会心`, `付与`, or `紋章`, register that exact key and translate the value fully.
+- Check independent colorized count variants too, such as `【4】`, `【<color=#4CF37B>4</color>】`, and `【<color=#F4FF00>4</color>】`; a translated plain-count key does not cover colored-count keys.
+
+## MasterData / Static QA
+
+- When `Config/master.json` changes, rebuild the DLL and confirm the embedded resource remains `AbyssMod.config.master.json`.
+- When source MasterData text changes, rebuild `translations/static/ko_KR.json`, keep `translations/static/ko_KR.missing.json` at `{}`, and update the manifest.
+- Static and outgame can intentionally overlap, but conflicting values should be reviewed. Status-color differences for `문장: 열정` and `문장: 충격` are expected when static requires color tags.
+- `m_ability_details.description` and `awake_description` must not have missing Korean values.
+- `m_character_action_skills.name` and `description` must not have missing Korean values.
+- `m_transition_tips.title` and `flavor_text` require layout review; `武器：拳` is `무기: 권`, not `무기: 주먹`.

@@ -28,3 +28,9 @@
 - Do not keep `지휘관` as an active translation for `司令官`, `指揮官`, or commander address; use the approved `사령관` family.
 - Do not normalize explicit source honorifics such as `司令官殿=사령관공` or `司令官さん=사령관씨` to `사령관님`.
 - Do not translate `司令室` or playful `しれーしつ` as `지휘실`; use `사령실`.
+- Do not translate skill/ability hit-count `HIT` as `히트`, `회 타격`, or `타`; preserve `HIT`.
+- Do not translate `ノックバック` as `노크백`; use `넉백`.
+- Do not translate brothel/service-card `ドリンク` as `음료`; use `드링크`.
+- Do not translate brothel auto-assignment button `任せる` literally as `맡기기`; use `자동 배치`.
+- Do not leave mixed malformed `巡회` for `巡回`; use `순찰`.
+- Do not translate Onigashima event UI `プロデュース` as `프로듀스` when glyph safety matters; use `홍보`.
