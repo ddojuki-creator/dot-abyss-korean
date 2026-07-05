@@ -59,6 +59,7 @@ Dialogue work also needs `character-voice.md`, `context-review.md`, and `adult-c
 | --- | --- |
 | New or changed character, skill, ability, awakening, limit-break, pure crystal | `../new-character-update.md` |
 | Outgame UI, popup, runtime collection, mixed Korean/Japanese UI | `../outgame-update-qa.md` |
+| New or changed story, novel body, story title, replay popup, unlock condition | `../story-novel-check.md` |
 | MasterData/static bundle refresh | Root handoff plus `qa-checklist.md` |
 | Novel/story text | This folder plus novel audit scripts |
 

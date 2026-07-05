@@ -52,6 +52,7 @@ function storyRewardSource(title) {
 }
 
 function isRuntimeStoryUiSource(source) {
+  if (/^【\d+話】.+をクリア$/.test(source)) return true
   return /ストーリー|閲覧しますか|再生しますか|재생하시겠습니까|初回報酬|クリアで解放|鬼退治|鬼と協力|追加データ.*ボイス/s.test(source)
 }
 
@@ -149,7 +150,7 @@ if (args.writeMissingSource) {
 const issues = []
 for (const source of [...sources].sort()) {
   const rewardTitle = source.match(/^ストーリー解放：「(.+)」が解放！$/)?.[1]
-  if (rewardTitle) {
+  if (rewardTitle && hasJapaneseUiLeftover(rewardTitle)) {
     const titleValue = titles[rewardTitle] || outgame[rewardTitle]
     if (typeof titleValue !== 'string') {
       issues.push({ status: 'missing-title-translation', source: rewardTitle })
