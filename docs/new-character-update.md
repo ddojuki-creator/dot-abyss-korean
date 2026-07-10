@@ -26,9 +26,10 @@
 클라이언트 추출 필수 순서:
 
 1. 최신 `DownloadCache/*.dat`에서 MasterData 스냅샷을 갱신한다.
-2. 업데이트 시각 이후 Unity 캐시의 TextAsset을 `--cache-since`로 추출해 신규 `evs_`, `hmn_`, `hmr_`, `men_` 노벨을 찾는다.
-3. `audit-novel-dialogue-metadata.mjs --write-index`로 화자 메타데이터를 만든 뒤 캐릭터 카드를 적용한다.
-4. 런타임 `outgame-ja_JP.json`을 병합해 클라이언트 추출 밖의 동적 UI 문자열을 보강한다.
+2. 업데이트 시각 이후 Unity 캐시의 TextAsset을 `--cache-since`로 추출하되, 메인 스토리 `mas_`는 접두사 뒤 숫자가 10자리이고 캐릭터/이벤트 스토리는 보통 11자리이므로 두 형식을 모두 검사한다. 신규 `mas_`, `evs_`, `hmn_`, `hmr_`, `men_` 노벨을 찾는다.
+3. 신규 장을 실제로 한 번 열어 시나리오 ID가 로그에 기록된 뒤에는 `--cache-since` 검사만으로 끝내지 말고 전체 캐시 검사도 실행한다. 기존 캐시 파일이 재사용되면 본문 `__data`의 수정 시각이 업데이트 시각보다 오래될 수 있다.
+4. `audit-novel-dialogue-metadata.mjs --write-index`로 화자 메타데이터를 만든 뒤 캐릭터 카드를 적용한다. 메인 스토리 음성 메타데이터는 `mcv_`, 캐릭터/이벤트 음성은 `vc_`일 수 있으므로 둘 다 제거·검수한다.
+5. 런타임 `outgame-ja_JP.json`을 병합해 클라이언트 추출 밖의 동적 UI 문자열을 보강한다.
 
 ## 수집 화면
 
@@ -77,7 +78,7 @@
 - `translations/novels/<id>/ko_KR.json`: 신규 캐릭터 일상, 만남, 창관, 이벤트 스토리 대사
 - `translations/another_name/ko_KR.json`: 이명/별칭이 추가된 경우
 
-특히 신규 캐릭터의 `men_`, `hmn_`, `hmr_` 소설 파일이 추가되면 CDN에 번역이 있어도 게임 로컬 캐시에 해당 `novels/<id>.json`이 없으면 화면에서 일본어 원문으로 fallback 될 수 있다. 신규 캐릭터 반영 후에는 manifest의 novels 수와 게임 로컬 캐시의 novels 파일 수/해시를 반드시 확인한다.
+특히 신규 캐릭터의 `men_`, `hmn_`, `hmr_`뿐 아니라 메인 스토리의 `mas_`와 이벤트의 `evs_` 소설 파일이 추가되면 CDN에 번역이 있어도 게임 로컬 캐시에 해당 `novels/<id>.json`이 없으면 불러오기 실패 또는 일본어 원문 fallback이 발생할 수 있다. `mas_1001070101`처럼 메인 스토리 ID는 10자리 숫자 형식이므로 일반 11자리 노벨 정규식에 의존하지 않는다. 신규 장/이벤트 반영 후에는 manifest의 novels 수와 게임 로컬 캐시의 novels 파일 수/해시를 반드시 확인한다.
 
 ## 한계돌파 강화 문구 확인
 
@@ -127,7 +128,8 @@
 3. `translations/manifest/ko_KR.json`의 `novels`에 신규 소설 ID가 포함됐는지 확인한다.
 4. 게임 로컬 캐시를 갱신할 때 `cache/ko_KR/novels/<id>.json`도 같이 반영됐는지 확인한다.
 5. 스샷에서 대사가 일본어로 나오면 먼저 CDN 누락보다 로컬 `novels` 캐시 누락을 의심한다.
-6. `scripts\audit-novel-dialogue-metadata.mjs --all-cached --deep-small-textassets --write-index`로 원본 대사의 화자 메타데이터를 추출하고, 화자 기준 호칭/용어 검수를 통과시킨다. 이벤트 본편 `evs_...`에 캐릭터가 등장해도 파일 ID가 캐릭터 ID로 시작하지 않을 수 있으므로, `message,<speaker>,...`와 `l2dmessage,<speaker>,...`의 speaker를 기준으로 character card를 적용한다.
+6. `scripts\audit-cached-event-novels.mjs --all-cached`로 전체 캐시를 검사하고, `scripts\audit-novel-dialogue-metadata.mjs --all-cached --deep-small-textassets --write-index --write-missing-source`로 원본 대사의 화자 메타데이터를 추출하면서 누락된 `mas_` 원문 파일과 키를 먼저 생성한다. 메인 스토리 ID와 `mcv_` 음성 메타데이터가 감사 결과에 포함되는지 확인한 뒤, 번역 후에는 `--write-missing-source` 없이 재검사한다.
+7. 화자 기준 호칭/용어 검수를 통과시킨다. 이벤트 본편 `evs_...`나 메인 본편 `mas_...`에 캐릭터가 등장해도 파일 ID가 캐릭터 ID로 시작하지 않을 수 있으므로, `message,<speaker>,...`와 `l2dmessage,<speaker>,...`의 speaker를 기준으로 character card를 적용한다.
 
 로컬 캐시 수동 반영이 필요한 경우 repo 구조와 게임 캐시 구조가 다르다.
 

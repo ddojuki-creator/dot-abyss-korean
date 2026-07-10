@@ -6,7 +6,7 @@ import path from 'node:path'
 import { CACHE_DIR, ROOT, readJson, walk, writeJson } from './lib/ko-pipeline.mjs'
 
 const japanese = /[\u3041-\u3096\u30a1-\u30fa\u30fd-\u30ff]/
-const novelIdPattern = String.raw`(?:evs|hmr|hmn|men)_\d{11}`
+const novelIdPattern = String.raw`(?:mas_\d{10}|(?:evs|hmr|hmn|men)_\d{11})`
 const novelIdRe = new RegExp(novelIdPattern, 'g')
 const sumataSourceRe = /素股|スマタ|すまた/
 const dannaSourceRe = /旦那(?:様|さま)?/
@@ -45,11 +45,13 @@ function stripMessageMeta(text) {
     const before = message
     message = message
       .replace(/,{2,}$/, '')
-      .replace(/,{2,3}(?:on|off)$/, '')
-      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),vc_[^,]*(?:,(?:\d+\/)?chara_\d+)?[,]?$/, '')
-      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),vc_[^,]*(?:,(?:on|off|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
+      .replace(/,{2,3}(?:on|off|ALLON)$/, '')
+      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),(?:vc|mcv)_[^,]*(?:,(?:\d+\/)?chara_\d+)?[,]?$/, '')
+      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),(?:vc|mcv)_[^,]*(?:,(?:on|off|ALLON|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
       .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?)(?:,,[^,]+)?$/, '')
-      .replace(/,,vc_[^,]*(?:,(?:on|off|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
+      .replace(/,,(?:vc|mcv)_[^,]*(?:,(?:on|off|ALLON|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
+      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),(?:vc|mcv)_[^,\r\n]*(?:,[^\r\n]*)?$/, '')
+      .replace(/,,(?:vc|mcv)_[^,\r\n]*(?:,[^\r\n]*)?$/, '')
       .replace(/,{2,3}(?:\d+\/)?chara_\d+(?:\/chara_\d+)*$/, '')
     if (message === before) return message
   }
@@ -73,7 +75,7 @@ function parseMessageLine(line, lineNumber) {
   const message = stripMessageMeta(payload)
   if (!message) return null
 
-  const voice = payload.match(/vc_[^,]*/)?.[0] || null
+  const voice = payload.match(/(?:vc|mcv)_[^,]*/)?.[0] || null
   const chara = payload.match(/(?:\d+\/)?chara_\d+(?:\/chara_\d+)*/)?.[0] || null
   return { line: lineNumber, command, speaker, source: message, voice, chara }
 }
@@ -176,7 +178,7 @@ for file in files_to_scan:
                 text = str(script or "")
             if "message," not in text and "messageTextCenter," not in text and "l2dmessage," not in text:
                 continue
-            novel_ids = sorted(set(re.findall(r"(?:evs|hmr|hmn|men)_\d{11}", str(name) + "\n" + text)))
+            novel_ids = sorted(set(re.findall(r"(?:mas_\d{10}|(?:evs|hmr|hmn|men)_\d{11})", str(name) + "\n" + text)))
             for novel_id in novel_ids:
                 found.append({"id": novel_id, "file": file, "script": text})
         except Exception:
@@ -319,6 +321,7 @@ const allCached = hasFlag('--all-cached')
 const deepSmallTextAssets = hasFlag('--deep-small-textassets')
 const cacheSince = parseSince(option('--cache-since'))
 const fix = hasFlag('--fix')
+const writeMissingSource = hasFlag('--write-missing-source')
 const writeIndex = hasFlag('--write-index') || fix
 const indexFile = option('--index-file') || path.join(CACHE_DIR, 'novel-message-index.json')
 
@@ -348,11 +351,11 @@ const fixes = []
 
 for (const [novelId, novelRecords] of grouped) {
   const file = path.join(ROOT, 'translations', 'novels', novelId, 'ko_KR.json')
-  if (!fs.existsSync(file)) {
+  if (!fs.existsSync(file) && !writeMissingSource) {
     issues.push({ type: 'missing-file', novelId, count: novelRecords.length })
     continue
   }
-  const data = readJson(file)
+  const data = fs.existsSync(file) ? readJson(file) : {}
   let changed = false
 
   for (const record of novelRecords) {
@@ -360,8 +363,14 @@ for (const [novelId, novelRecords] of grouped) {
     if (!japanese.test(source)) continue
     let value = data[source]
     if (typeof value !== 'string') {
-      issues.push({ type: 'missing-key', novelId, source, speaker: record.speaker, command: record.command })
-      continue
+      if (writeMissingSource) {
+        data[source] = source
+        value = source
+        changed = true
+      } else {
+        issues.push({ type: 'missing-key', novelId, source, speaker: record.speaker, command: record.command })
+        continue
+      }
     }
 
     if (fix) {

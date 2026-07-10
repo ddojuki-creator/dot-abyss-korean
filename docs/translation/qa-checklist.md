@@ -52,6 +52,9 @@
 
 - New character updates must check `translations/names`, `titles`, `descriptions`, `outgame`, `novels`, `another_name`, `ability_descriptions`, and generated `static`, not only the file where the first Japanese string was found.
 - Cached novel IDs can include `evs`, `hmn`, `hmr`, `mas`, and `men`; all new files must be translated and included in manifest/cache.
+- Main-story `mas_` IDs use a 10-digit numeric suffix, while most other novel IDs use 11 digits. The audit regex must support both; do not validate only by the `--cache-since` window because reused Unity `__data` files can have older modification times.
+- Main-story dialogue may carry `mcv_` voice metadata while other dialogue uses `vc_`. Strip both before creating translation keys and fail QA if either metadata form remains in a source key.
+- After opening a new chapter once, run an all-cache audit so every logged `mas_` scenario ID is present in the CDN and local `novels` cache.
 - Cache update reviews must inspect `.cache/game-cache-extract-report.json` `characterSpecSummary`. `m_ability_details` IDs do not include character IDs, so map them through `m_character_abilities` before deciding which character changed.
 - Limit-break abilities usually have 3 abilities, each upgraded twice. Verify all 3 abilities across base, first-upgrade, and second-upgrade states, and check both exact keys and translated values.
 - Limit-break/awakening ability cards must check combined `m_ability_details` field 4 + `【覚醒効果】` field 5 exact keys. A translated base skill and a translated awakening line are not enough if the runtime combined string is missing.

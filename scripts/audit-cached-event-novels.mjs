@@ -6,7 +6,7 @@ import path from 'node:path'
 import { ROOT, readJson, walk, writeJson } from './lib/ko-pipeline.mjs'
 
 const japanese = /[\u3041-\u3096\u30a1-\u30fa\u30fd-\u30ff]/
-const novelIdPattern = String.raw`(?:evs|hmr|hmn|men)_\d{11}`
+const novelIdPattern = String.raw`(?:mas_\d{10}|(?:evs|hmr|hmn|men)_\d{11})`
 const novelIdRe = new RegExp(novelIdPattern, 'g')
 
 function option(name) {
@@ -63,10 +63,12 @@ function stripMessageMeta(text) {
     const before = message
     message = message
       .replace(/,{2,}$/, '')
-      .replace(/,{2,3}(?:on|off)$/, '')
-      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),vc_[^,]*(?:,(?:\d+\/)?chara_\d+)?[,]?$/, '')
-      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),vc_[^,]*(?:,(?:on|off|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
-      .replace(/,,vc_[^,]*(?:,(?:on|off|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
+      .replace(/,{2,3}(?:on|off|ALLON)$/, '')
+      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),(?:vc|mcv)_[^,]*(?:,(?:\d+\/)?chara_\d+)?[,]?$/, '')
+      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),(?:vc|mcv)_[^,]*(?:,(?:on|off|ALLON|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
+      .replace(/,,(?:vc|mcv)_[^,]*(?:,(?:on|off|ALLON|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
+      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),(?:vc|mcv)_[^,\r\n]*(?:,[^\r\n]*)?$/, '')
+      .replace(/,,(?:vc|mcv)_[^,\r\n]*(?:,[^\r\n]*)?$/, '')
       .replace(/,{2,3}(?:\d+\/)?chara_\d+(?:\/chara_\d+)*$/, '')
       .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?)(?:,,[^,]+)?$/, '')
     if (message === before) return message
@@ -183,7 +185,7 @@ for file in files_to_scan:
                 text = str(script or "")
             if "message," not in text and "messageTextCenter," not in text and "l2dmessage," not in text:
                 continue
-            novel_ids = sorted(set(re.findall(r"(?:evs|hmr|hmn|men)_\d{11}", str(name) + "\n" + text)))
+            novel_ids = sorted(set(re.findall(r"(?:mas_\d{10}|(?:evs|hmr|hmn|men)_\d{11})", str(name) + "\n" + text)))
             if target_ids and not (target_ids & set(novel_ids)):
                 continue
             for novel_id in novel_ids:
