@@ -169,6 +169,21 @@ function comboItems(id, baseSource, awakeningSource, baseTranslation, awakeningT
   return items.flatMap(statusColorComboVariants)
 }
 
+function bondRewardItems(id, source, translation) {
+  return [
+    {
+      id,
+      source: `「${source}」の解放条件達成！`,
+      target: `「${translation}」의 해방 조건 달성!`,
+    },
+    {
+      id,
+      source: `「${source}」の最大Lvが10に上昇！`,
+      target: `「${translation}」의 최대 Lv가 10으로 상승!`,
+    },
+  ]
+}
+
 const args = parseArgs(process.argv.slice(2))
 if (args.help) {
   usage()
@@ -206,6 +221,28 @@ for (const [location, baseSource] of Object.entries(entries)) {
     if (seen.has(item.source)) continue
     seen.add(item.source)
 
+    const current = translations[item.source]
+    if (typeof current !== 'string') {
+      translations[item.source] = item.target
+      additions.push(item)
+    } else if (args.force && current !== item.target) {
+      translations[item.source] = item.target
+      updates.push({ ...item, previous: current })
+    }
+  }
+}
+
+for (const [location, source] of Object.entries(entries)) {
+  const match = location.match(/^m_character_abilities\/id:(\d+)\/3$/)
+  if (!match || !isMeaningfulSource(source)) continue
+
+  const translation = translations[source]
+  if (typeof translation !== 'string' || translation === source) {
+    skipped.push({ id: match[1], missingBase: true, missingAwakening: false })
+    continue
+  }
+
+  for (const item of bondRewardItems(match[1], source, translation)) {
     const current = translations[item.source]
     if (typeof current !== 'string') {
       translations[item.source] = item.target

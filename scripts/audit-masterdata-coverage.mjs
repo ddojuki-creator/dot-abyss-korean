@@ -15,6 +15,30 @@ function readJson(file) {
 const master = readJson(masterPath)
 const bundle = readJson(staticPath)
 const missing = fs.existsSync(missingPath) ? readJson(missingPath) : {}
+const snapshot = readJson(path.join(root, 'snapshots', 'game-cache-ja_JP.json'))
+
+// m_serials only contains internal test labels and has no runtime MasterData class.
+const unmappedTableAllowlist = new Set(['m_serials'])
+const configuredTables = new Set(Object.keys(master.tables ?? {}))
+const sourceTables = new Map()
+for (const [location, source] of Object.entries(snapshot.entries ?? snapshot)) {
+    if (typeof source !== 'string' || !location.startsWith('m_')) continue
+    const table = location.split('/')[0]
+    if (!sourceTables.has(table)) sourceTables.set(table, [])
+    const samples = sourceTables.get(table)
+    if (samples.length < 3 && !samples.includes(source)) samples.push(source)
+}
+
+const unmappedTables = [...sourceTables]
+    .filter(([table]) => !configuredTables.has(table) && !unmappedTableAllowlist.has(table))
+    .sort(([a], [b]) => a.localeCompare(b))
+
+if (unmappedTables.length > 0) {
+    const details = unmappedTables
+        .map(([table, samples]) => `${table}: ${samples.join(' | ')}`)
+        .join('\n')
+    throw new Error(`MasterData tables with Japanese text are not configured:\n${details}`)
+}
 
 const warnings = []
 for (const [table, rule] of Object.entries(master.tables ?? {})) {

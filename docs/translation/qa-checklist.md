@@ -68,6 +68,8 @@
 ## MasterData / Static QA
 
 - When `Config/master.json` changes, rebuild the DLL and confirm the embedded resource remains `AbyssMod.config.master.json`.
+- Compare every Japanese-bearing table in the latest game-cache snapshot against `Config/master.json`. A newly added table must fail the coverage audit until its real runtime class and translatable field names are verified from the updated client.
+- Keep internal-only tables such as `m_serials` on an explicit allowlist instead of silently ignoring every unknown table.
 - When source MasterData text changes, rebuild `translations/static/ko_KR.json`, keep `translations/static/ko_KR.missing.json` at `{}`, and update the manifest.
 - Static and outgame can intentionally overlap, but conflicting values should be reviewed. Status-color differences for `문장: 열정` and `문장: 충격` are expected when static requires color tags.
 - `m_ability_details.description` and `awake_description` must not have missing Korean values.

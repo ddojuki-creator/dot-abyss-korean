@@ -25,6 +25,8 @@ export function parseArgs(argv, defaults = {}) {
     changed: false,
     dir: null,
     removeDeleted: false,
+    gitAdded: false,
+    failedOnly: false,
     fix: false,
     ...defaults,
   }
@@ -40,6 +42,8 @@ export function parseArgs(argv, defaults = {}) {
     else if (a === '--fix') args.fix = true
     else if (a === '--changed') args.changed = true
     else if (a === '--remove-deleted') args.removeDeleted = true
+    else if (a === '--git-added') args.gitAdded = true
+    else if (a === '--failed-only') args.failedOnly = true
     else if (a === '--scope') args.scope = next()
     else if (a.startsWith('--scope=')) args.scope = a.slice('--scope='.length)
     else if (a === '--limit') args.limit = Number(next())

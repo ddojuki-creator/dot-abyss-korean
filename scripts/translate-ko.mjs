@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
+import fs from 'node:fs'
 import path from 'node:path'
-import { collectEntries, compareProtectedTokens, getTargetFiles, loadPrompt, loadState, parseArgs, printSummary, readJson, readPromptVersion, rel, saveState, setByPath, sha1, shouldTranslateValue, stableHash, writeJson, ROOT } from './lib/ko-pipeline.mjs'
+import { collectEntries, compareProtectedTokens, getByPath, getTargetFiles, loadPrompt, loadState, parseArgs, printSummary, readJson, readPromptVersion, rel, saveState, setByPath, sha1, shouldTranslateValue, stableHash, writeJson, ROOT } from './lib/ko-pipeline.mjs'
 
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4.1-mini'
 const API_KEY = process.env.OPENAI_API_KEY
 const BATCH_SIZE = Number(process.env.TRANSLATE_BATCH_SIZE || 20)
+const BATCH_DELAY_MS = Number(process.env.TRANSLATE_BATCH_DELAY_MS || 0)
 const MAX_RETRIES = Number(process.env.TRANSLATE_MAX_RETRIES || 4)
 const API_URL = process.env.OPENAI_API_URL || 'https://api.openai.com/v1/chat/completions'
 
@@ -21,6 +23,31 @@ function chunk(items, size) {
 
 function stripJsonFence(text) {
   return text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+}
+
+function loadGitHeadData(file) {
+  const result = spawnSync('git', ['-c', `safe.directory=${ROOT}`, 'show', `HEAD:${rel(file)}`], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+    shell: false,
+  })
+  if (result.status !== 0) return {}
+  return JSON.parse(result.stdout)
+}
+
+function loadNovelSpeakerIndex() {
+  const indexFile = path.join(ROOT, '.cache', 'novel-message-index.json')
+  if (!fs.existsSync(indexFile)) return new Map()
+
+  const result = new Map()
+  for (const record of readJson(indexFile)) {
+    if (!record?.novelId || typeof record.source !== 'string') continue
+    const key = `${record.novelId}\u0000${record.source}`
+    if (!result.has(key)) result.set(key, new Set())
+    if (record.speaker) result.get(key).add(record.speaker)
+  }
+  return result
 }
 
 const KUREHA_DANNA_KEYS = new Set([
@@ -284,7 +311,9 @@ function buildMessages(prompt, items) {
         'You are a professional Korean localizer for a Japanese 2D subculture game.',
         'Translate only JSON values into natural Korean.',
         'Never modify JSON keys, IDs, tags, or placeholders. Source line breaks may only be reduced according to the Korean layout rules.',
+        'Preserve the exact number and type of line-break tokens for common/UI resources. Never add literal newlines or <br> tags that are not present in the source value.',
         'Do not leave any Japanese kana outside protected tags; fully rewrite mixed Japanese-Korean values in Korean.',
+        'For novel dialogue, speaker metadata is authoritative. Apply a character card only when exactly one speaker is listed; if speakers are empty or ambiguous, use neutral natural Korean.',
         'Japanese text inside tag syntax such as <ruby=...> is protected and must remain unchanged.',
         'Return JSON only with this schema: {"items":[{"id":0,"value":"..."}]}.',
         prompt,
@@ -297,13 +326,15 @@ function buildMessages(prompt, items) {
           id,
           source_key: item.key,
           current_value: item.value,
+          novel_id: item.novelId || null,
+          speakers: item.speakers || [],
         })),
       }, null, 2),
     },
   ]
 }
 
-async function callOpenAI(prompt, items) {
+async function callOpenAI(prompt, items, options = {}) {
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
@@ -357,7 +388,14 @@ async function callOpenAI(prompt, items) {
       err.splitBatch = true
       throw err
     }
-    const value = normalizeTerminology(item.key, responseValue)
+    let value = normalizeTerminology(item.key, responseValue)
+    if (options.removeAddedLineBreaks) {
+      value = value
+        .replace(/<br(?:\s+[^>]*)?>/gi, ' ')
+        .replace(/\\r\\n|\\[nr]|\r\n|\r|\n/g, ' ')
+        .replace(/[ \t]{2,}/g, ' ')
+        .trim()
+    }
     const tokenErrors = compareProtectedTokens(item.value, value)
     if (tokenErrors.length) {
       const err = new Error(`Protected token mismatch at id=${id}: ${tokenErrors.join(', ')}`)
@@ -374,23 +412,25 @@ async function callOpenAI(prompt, items) {
 }
 
 async function translateByLineBreaks(prompt, item) {
-  const breakPattern = /(<br(?:\s+[^>]*)?>)/gi
+  const breakPattern = /(<br(?:\s+[^>]*)?>|\\r\\n|\\[nr]|\r\n|\r|\n)/gi
   const valueParts = item.value.split(breakPattern)
-  if (valueParts.length < 3) return null
-
   const keyParts = item.key.split(breakPattern)
   const segmentItems = []
   const segmentIndexes = []
   for (let i = 0; i < valueParts.length; i += 2) {
-    if (valueParts[i] === '') continue
+    const segmentKey = keyParts[i] || item.key
+    if (valueParts[i] === '' || !shouldTranslateValue(segmentKey, valueParts[i])) continue
     segmentIndexes.push(i)
     segmentItems.push({
-      key: keyParts[i] || item.key,
+      key: segmentKey,
       value: valueParts[i],
     })
   }
 
-  const translatedSegments = await callOpenAI(prompt, segmentItems)
+  const translatedSegments = []
+  for (const batch of chunk(segmentItems, BATCH_SIZE)) {
+    translatedSegments.push(...await callOpenAI(prompt, batch, { removeAddedLineBreaks: true }))
+  }
   for (let i = 0; i < segmentIndexes.length; i++) {
     valueParts[segmentIndexes[i]] = translatedSegments[i]
   }
@@ -417,10 +457,10 @@ async function translateWithRetry(prompt, items) {
     }
   }
 
-  if (items.length === 1 && lastError?.splitBatch && /<br(?:\s+[^>]*)?>/i.test(items[0].value)) {
-    console.warn('retrying as <br>-separated segments')
+  if (items.length === 1 && lastError?.splitBatch) {
+    console.warn('retrying as line-break-preserving segments')
     const value = await translateByLineBreaks(prompt, items[0])
-    if (value !== null) return [value]
+    return [value]
   }
 
   throw lastError
@@ -433,6 +473,7 @@ async function main() {
   const prompt = loadPrompt(promptScope)
   const files = getTargetFiles(args)
   const state = loadState()
+  const novelSpeakers = promptScope === 'novels' ? loadNovelSpeakerIndex() : new Map()
   state.promptVersion = promptVersion
 
   if (!args.dryRun && !API_KEY) throw new Error('OPENAI_API_KEY is required unless --dry-run is used')
@@ -449,6 +490,24 @@ async function main() {
   for (const file of files) {
     const data = readJson(file)
     let entries = collectEntries(data).filter((entry) => shouldTranslateValue(entry.key, entry.value, args))
+    if (promptScope === 'novels') {
+      const novelId = path.basename(path.dirname(file))
+      entries = entries.map((entry) => ({
+        ...entry,
+        novelId,
+        speakers: [...(novelSpeakers.get(`${novelId}\u0000${entry.key}`) || [])].sort(),
+      }))
+    }
+    if (args.gitAdded) {
+      const headData = loadGitHeadData(file)
+      entries = entries.filter((entry) => getByPath(headData, entry.path) === undefined)
+    }
+    if (args.failedOnly) {
+      entries = entries.filter((entry) => {
+        const failed = state.failed[stateKey(file, entry)]
+        return failed?.model === MODEL && failed?.promptVersion === promptVersion
+      })
+    }
     if (args.changed) {
       const before = entries.length
       entries = entries.filter((entry) => !isDoneInState(state, file, entry, promptVersion))
@@ -484,6 +543,7 @@ async function main() {
         saveState(state)
         translated += batch.length
         console.log('ok')
+        if (BATCH_DELAY_MS > 0) await sleep(BATCH_DELAY_MS)
       } catch (err) {
         if (err.splitBatch && batch.length > 1) {
           const middle = Math.ceil(batch.length / 2)

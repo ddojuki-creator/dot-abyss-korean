@@ -18,6 +18,13 @@ function hasFlag(name) {
   return process.argv.includes(name)
 }
 
+function parseSince(value) {
+  if (!value) return null
+  const timestamp = Date.parse(value)
+  if (!Number.isFinite(timestamp)) throw new Error(`Invalid --cache-since value: ${value}`)
+  return timestamp
+}
+
 function defaultCacheRoot() {
   const game = defaultGameDir()
   const dataDir = path.join(game, 'ドットアビスX_Data', 'Caches')
@@ -98,6 +105,13 @@ function scanCachedBundleNames(cacheRoot, options = {}) {
 
   for (const file of walk(cacheRoot)) {
     if (path.basename(file) !== '__data') continue
+    if (options.since != null) {
+      try {
+        if (fs.statSync(file).mtimeMs < options.since) continue
+      } catch {
+        continue
+      }
+    }
     let header
     try {
       const fd = fs.openSync(file, 'r')
@@ -201,14 +215,16 @@ function withTempJson(data, callback) {
   }
 }
 
-function listSmallCacheDataFiles(cacheRoot) {
+function listSmallCacheDataFiles(cacheRoot, since = null) {
   const files = []
   if (!fs.existsSync(cacheRoot)) return files
 
   for (const file of walk(cacheRoot)) {
     if (path.basename(file) !== '__data') continue
     try {
-      const size = fs.statSync(file).size
+      const stat = fs.statSync(file)
+      if (since != null && stat.mtimeMs < since) continue
+      const size = stat.size
       if (size >= 1000 && size <= 250000) files.push(file)
     } catch {}
   }
@@ -288,7 +304,8 @@ const logFile = option('--log-file') || defaultLogFile()
 const allCached = hasFlag('--all-cached')
 const writeMissingSource = hasFlag('--write-missing-source')
 const deepSmallTextAssets = hasFlag('--deep-small-textassets')
-const cachedBundles = scanCachedBundleNames(cacheRoot, { allCached })
+const cacheSince = parseSince(option('--cache-since'))
+const cachedBundles = scanCachedBundleNames(cacheRoot, { allCached, since: cacheSince })
 const candidateFiles = [...new Set([...cachedBundles.values()].map((info) => info.file))]
 const logNovelIds = scanLogNovelIds(logFile)
 const unity = scanUnityTextAssets(cacheRoot, candidateFiles)
@@ -297,7 +314,7 @@ let fallback = { scripts: new Map(), scanner: 'skipped', files: 0, mode: 'skippe
 
 const missingLogIds = [...logNovelIds].filter((novelId) => !scripts.has(novelId))
 if (allCached && (missingLogIds.length || deepSmallTextAssets)) {
-  const smallFiles = listSmallCacheDataFiles(cacheRoot)
+  const smallFiles = listSmallCacheDataFiles(cacheRoot, cacheSince)
   fallback = {
     ...scanUnityTextAssets(cacheRoot, smallFiles, deepSmallTextAssets ? {} : { targetIds: new Set(missingLogIds) }),
     files: smallFiles.length,
@@ -345,6 +362,7 @@ for (const novelId of novelIds) {
 
 console.log(`audit:cached-event-novels cacheRoot=${cacheRoot}`)
 console.log(`audit:cached-event-novels logFile=${logFile}`)
+if (cacheSince != null) console.log(`audit:cached-event-novels cacheSince=${new Date(cacheSince).toISOString()}`)
 console.log(`audit:cached-event-novels scanner=${unity.scanner} allCached=${allCached} bundles=${cachedBundles.size} files=${candidateFiles.length} unity=${unity.scripts.size} logIds=${logNovelIds.size}`)
 if (fallback.scanner !== 'skipped') {
   console.log(`audit:cached-event-novels fallbackScanner=${fallback.scanner} fallbackMode=${fallback.mode} fallbackFiles=${fallback.files} fallbackUnity=${fallback.scripts.size} missingLogIds=${missingLogIds.length}`)

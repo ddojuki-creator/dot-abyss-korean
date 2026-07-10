@@ -73,6 +73,22 @@ Use this table format:
 | グラディア / グラティア | 글라디아 | Character name. Always use `글라디아`; treat stray source spelling `グラティア` as the same character. Never use `그라디아`, `그라티아`, or `글라티아`. |
 | クレハ | 쿠레하 | Character name. Always use `쿠레하`; never use `크레하`. |
 | シラエス | 시라에스 | Character name. Always use `시라에스`; never use `실라에스`, `시라이스`, or `시라에쓰`. |
+| リエラ | 리에라 | Character name. Always use `리에라`; never use `리엘라` or `리에르라`. |
+| しーちゃん | 시짱 | Riera's nickname for the commander. Always use `시짱`; never use `시이짱`, `시-짱`, or `시 짱`. |
+| アイシャ | 아이샤 | Character name. Always use `아이샤`; never use `아샤` or `아이샤아`. |
+| ルシータ | 루시타 | Character name. Always use `루시타`; never use `루시다`. |
+| 快活！小悪魔ギャルちゃん | 쾌활한 소악마 갸루 | Riera title. Do not leave `ちゃん` as `짱`; use a natural title without it. |
+| 黒き翼の召喚士 | 검은 날개의 소환사 | Aisha title. |
+| 嵐を呼ぶ海賊娘 | 폭풍을 부르는 해적 소녀 | Lucita title. |
+| 小悪魔 | 소악마 | Riera-related descriptor. |
+| ギャル | 갸루 | Character-style term. Do not replace it with current Korean memes. |
+| 魅了 | 매료 | Status effect. |
+| 魔族 | 마족 | Aisha-related race term. |
+| 召喚士 | 소환사 | Aisha title/job term. |
+| 石化 | 석화 | Status effect. |
+| 海賊王 | 해적왕 | Lucita-related term. |
+| 商船 | 상선 | Lucita-related term. |
+| アウラ | 아우라 | Name used in Lucita-related profile text. |
 | 鬼ヶ島 | 오니가시마 | Place/event name. Always use `오니가시마`; never translate it as `귀신섬` or `귀가섬`. |
 | 鬼族 | 오니족 | Race/faction term. Always use `오니족`; distinguish it from `貴族`=`귀족`. Never use `강족`, `귀족족`, or `귀족` for `鬼族`. |
 | 鬼 | 오니 | Use in Onigashima event context, including `鬼退治` and `鬼と協力`; do not translate as `귀` there. |

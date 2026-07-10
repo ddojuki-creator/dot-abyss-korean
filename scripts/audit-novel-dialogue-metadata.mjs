@@ -20,6 +20,13 @@ function hasFlag(name) {
   return process.argv.includes(name)
 }
 
+function parseSince(value) {
+  if (!value) return null
+  const timestamp = Date.parse(value)
+  if (!Number.isFinite(timestamp)) throw new Error(`Invalid --cache-since value: ${value}`)
+  return timestamp
+}
+
 function defaultGameDir() {
   return process.env.DOTABYSS_GAME_DIR || 'F:\\DMMGamePlayer\\dotabyss_x_cl'
 }
@@ -89,6 +96,13 @@ function scanCachedBundleNames(cacheRoot, options = {}) {
 
   for (const file of walk(cacheRoot)) {
     if (path.basename(file) !== '__data') continue
+    if (options.since != null) {
+      try {
+        if (fs.statSync(file).mtimeMs < options.since) continue
+      } catch {
+        continue
+      }
+    }
     let header
     try {
       const fd = fs.openSync(file, 'r')
@@ -105,13 +119,15 @@ function scanCachedBundleNames(cacheRoot, options = {}) {
   return bundles
 }
 
-function listSmallCacheDataFiles(cacheRoot) {
+function listSmallCacheDataFiles(cacheRoot, since = null) {
   const files = []
   if (!fs.existsSync(cacheRoot)) return files
   for (const file of walk(cacheRoot)) {
     if (path.basename(file) !== '__data') continue
     try {
-      const size = fs.statSync(file).size
+      const stat = fs.statSync(file)
+      if (since != null && stat.mtimeMs < since) continue
+      const size = stat.size
       if (size >= 1000 && size <= 250000) files.push(file)
     } catch {}
   }
@@ -301,17 +317,18 @@ function dedupeRecords(records) {
 const cacheRoot = option('--cache-root') || defaultCacheRoot()
 const allCached = hasFlag('--all-cached')
 const deepSmallTextAssets = hasFlag('--deep-small-textassets')
+const cacheSince = parseSince(option('--cache-since'))
 const fix = hasFlag('--fix')
 const writeIndex = hasFlag('--write-index') || fix
 const indexFile = option('--index-file') || path.join(CACHE_DIR, 'novel-message-index.json')
 
-const cachedBundles = scanCachedBundleNames(cacheRoot, { allCached })
+const cachedBundles = scanCachedBundleNames(cacheRoot, { allCached, since: cacheSince })
 const candidateFiles = [...new Set([...cachedBundles.values()].map((info) => info.file))]
 const unity = scanUnityTextAssets(cacheRoot, candidateFiles)
 let records = unity.records
 let fallback = { records: [], scanner: 'skipped', files: 0 }
 if (allCached && deepSmallTextAssets) {
-  const smallFiles = listSmallCacheDataFiles(cacheRoot)
+  const smallFiles = listSmallCacheDataFiles(cacheRoot, cacheSince)
   fallback = { ...scanUnityTextAssets(cacheRoot, smallFiles), files: smallFiles.length }
   records = [...records, ...fallback.records]
 }
@@ -398,6 +415,7 @@ for (const [source, speakers] of sourceSpeakers) {
 }
 
 console.log(`audit:novel-dialogue-metadata cacheRoot=${cacheRoot}`)
+if (cacheSince != null) console.log(`audit:novel-dialogue-metadata cacheSince=${new Date(cacheSince).toISOString()}`)
 console.log(`audit:novel-dialogue-metadata scanner=${unity.scanner} allCached=${allCached} bundles=${cachedBundles.size} files=${candidateFiles.length} records=${records.length}`)
 if (fallback.scanner !== 'skipped') {
   console.log(`audit:novel-dialogue-metadata fallbackScanner=${fallback.scanner} fallbackFiles=${fallback.files} fallbackRecords=${fallback.records.length}`)

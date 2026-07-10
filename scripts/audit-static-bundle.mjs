@@ -52,6 +52,8 @@ function uncolorSealTerms(value) {
     return String(value)
         .replace(/<color=#ff5050>\s*문장\s*[:：]\s*열정\s*<\/color>/giu, '문장: 열정')
         .replace(/<color=#6b8cff>\s*문장\s*[:：]\s*충격\s*<\/color>/giu, '문장: 충격')
+        .replace(/문장\s*[:：]\s*열정/gu, '문장: 열정')
+        .replace(/문장\s*[:：]\s*충격/gu, '문장: 충격')
 }
 
 if (!manifest.static) errors.push('manifest is missing static hash')

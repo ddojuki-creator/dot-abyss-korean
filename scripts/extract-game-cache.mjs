@@ -265,7 +265,13 @@ const merged = {}
 let preserved = 0
 let reused = 0
 let untranslated = 0
-for (const key of [...targetKeys].sort((a, b) => a.localeCompare(b, 'ja'))) {
+const orderedKeys = [
+  ...Object.keys(existing).filter((key) => targetKeys.has(key)),
+  ...[...targetKeys]
+    .filter((key) => !Object.hasOwn(existing, key))
+    .sort((a, b) => a.localeCompare(b, 'ja')),
+]
+for (const key of orderedKeys) {
   if (existing[key] && existing[key] !== key) {
     merged[key] = existing[key]
     preserved += 1
