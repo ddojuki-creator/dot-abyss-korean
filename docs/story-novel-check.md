@@ -17,6 +17,15 @@
 
 특히 메인 스토리의 월드 말풍선은 `dotmessage,`로, H스토리/Live2D 연출은 본문 narration이 `message,`로, 캐릭터 음성 대사가 `l2dmessage,`로 분리될 수 있다. `dotmessage` 또는 `message`만 번역하면 다른 말풍선/발화가 일본어로 남는다. 신규 스토리 검수에서는 `message`, `dotmessage`, `messageTextCenter`, `l2dmessage` 4종을 모두 추출해 누락 0건인지 확인한다.
 
+### `dotmessage` 전체 추출 규칙
+
+- 런타임 로그에 수집된 말풍선 몇 개를 전체 대사로 간주하지 않는다. 로그의 `Runtime balloon audit` 항목은 플레이어가 실제로 진행한 장면의 표본일 뿐이며, 같은 스토리의 나머지 장면은 아직 로그에 없을 수 있다.
+- 원본 TextAsset에서 `dotmessage,<speaker>,<text>,<balloon/voice metadata...>` 행을 모두 추출한다. `,,` 뒤의 음성/표정/위치/캐릭터 메타데이터는 번역 key에 넣지 않고 `<text>`만 key로 사용한다.
+- `dotmessage` 개수와 `translations/novels/<NOVEL_ID>/ko_KR.json`의 해당 원문 key 개수를 직접 대조한다. 원문 대사 수보다 번역 key 수가 적으면 번역 완료로 보지 않는다.
+- `dotmessage`에는 루디아, 마리나, 소피아, 주인공, 교주, 사제, 신도처럼 파일 ID와 다른 화자가 섞일 수 있다. `speaker`를 기준으로 character card, 호칭, 말투를 적용한다.
+- `audit-cached-event-novels.mjs --all-cached --deep-small-textassets`와 `audit-novel-dialogue-metadata.mjs --all-cached --deep-small-textassets --write-index`가 `dotmessage`를 포함하는지 확인한 뒤 번역한다. 감사 결과가 `dotmessage`를 0개로 보고하면 스크립트 범위를 먼저 의심한다.
+- 원본 전체 대조를 통과한 뒤에만 실제 스토리를 진행해 런타임 말풍선과 `outgame-ja_JP.json`을 추가 확인한다. 런타임 수집 4개, 10개 등 일부 항목만으로 완료 처리하지 않는다.
+
 캐릭터 호칭 규칙은 파일 ID만으로 판단하지 않는다. 원본 스크립트의 `message,<speaker>,...`, `l2dmessage,<speaker>,...`에서 화자 메타데이터를 함께 추출하고, 그 화자 기준으로 `character-cards.md`와 glossary를 적용한다. 예: 이벤트 본편 `evs_...`에 쿠레하가 등장하면 파일명이 `hmr_105801...`가 아니어도 `旦那様/旦那さま/旦那=서방님` 규칙을 적용한다. 마리나의 `旦那様=나리` 규칙을 다른 캐릭터에게 전파하지 않는다.
 
 스토리 건너뛰기 확인 팝업의 긴 요약 본문은 일반 소설 본문(`translations/novels`)이 아니라 스토리 메타데이터 요약이다. 신규/변경 스토리에서는 같은 일본어 요약이 `translations/descriptions/ko_KR.json`와 `translations/outgame/ko_KR.json` 양쪽에 있어야 한다.

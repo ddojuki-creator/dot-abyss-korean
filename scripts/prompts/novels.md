@@ -9,4 +9,5 @@ For the 2026-07-10 characters, follow the speaker metadata and the detailed card
 
 - Main-story scenario IDs use the `mas_` prefix and commonly have a 10-digit numeric suffix, unlike the 11-digit suffix used by many `evs_`, `hmn_`, `hmr_`, and `men_` IDs. Treat `mas_` as a first-class novel source.
 - Main-story voice metadata can use `mcv_` as well as `vc_`; metadata is not dialogue and must never be included in a translation key.
+- Main-story world speech balloons use `dotmessage,<speaker>,<text>,...` and must be extracted in full from the cached TextAsset. Never treat the few `Runtime balloon audit` lines collected during manual play as the complete story dialogue. Strip the trailing `,,` voice/emotion/position metadata, compare the full `dotmessage` source-key count with the novel translation file, and apply character cards from the `speaker` field.
 - When a new chapter is opened, verify the complete logged `mas_` ID set and run the full-cache audit after the time-filtered extraction.
