@@ -129,7 +129,7 @@
 4. 게임 로컬 캐시를 갱신할 때 `cache/ko_KR/novels/<id>.json`도 같이 반영됐는지 확인한다.
 5. 스샷에서 대사가 일본어로 나오면 먼저 CDN 누락보다 로컬 `novels` 캐시 누락을 의심한다.
 6. `scripts\audit-cached-event-novels.mjs --all-cached --deep-small-textassets`로 전체 캐시를 검사하고, `scripts\audit-novel-dialogue-metadata.mjs --all-cached --deep-small-textassets --write-index --write-missing-source`로 `message`, `dotmessage`, `messageTextCenter`, `l2dmessage` 원문과 화자 메타데이터를 추출하면서 누락된 `mas_` 원문 파일과 키를 먼저 생성한다. 런타임 로그에 수집된 말풍선은 전체 대사의 표본일 뿐이므로, 원본 `dotmessage` 전체 키 수와 번역 JSON 키 수를 별도로 대조한다. 메인 스토리 ID와 `mcv_` 음성 메타데이터가 감사 결과에 포함되는지 확인한 뒤, 번역 후에는 `--write-missing-source` 없이 재검사한다.
-7. 화자 기준 호칭/용어 검수를 통과시킨다. 이벤트 본편 `evs_...`나 메인 본편 `mas_...`에 캐릭터가 등장해도 파일 ID가 캐릭터 ID로 시작하지 않을 수 있으므로, `message,<speaker>,...`, `dotmessage,<speaker>,...`, `l2dmessage,<speaker>,...`의 speaker를 기준으로 character card를 적용한다.
+7. 화자 기준 호칭/용어 검수를 통과시킨다. 이벤트 본편 `evs_...`나 메인 본편 `mas_...`에 캐릭터가 등장해도 파일 ID가 캐릭터 ID로 시작하지 않을 수 있으므로, `message,<speaker>,...`, `dotmessage,<speaker>,...`, `l2dmessage,<speaker>,...`의 speaker를 기준으로 character card를 적용한다. 동시에 `charaload`/`objectload`의 이름 필드를 추출해 신규 잡몹과 NPC의 `names/ko_KR.json` 누락을 검사하고, ASCII/전각 표기 변형을 별도 exact key로 확인한다.
 8. 새 장을 실제로 진행한 뒤 `BepInEx/config/AbyssMod/outgame-ja_JP.json`의 수집 결과에서 한국어+일본어 혼합 key를 검색한다. 진행도 팝업처럼 제목만 동적으로 바뀌는 문구는 개별 exact key를 반복 추가하지 말고 `{[quest]}` 동적 템플릿으로 등록한다. 예: `大穴の探索が進み<br>「{[quest]}」<br>が周回可能になりました。`.
 9. `Popup_QuestSelect/.../InfoNovel/TextBalloon`에 표시되는 장면 말풍선은 일반 노벨 감사에서 빠질 수 있으므로, 실제 진행 후 `NovelId`별 소설 JSON과 outgame exact 사전을 모두 확인한다.
 

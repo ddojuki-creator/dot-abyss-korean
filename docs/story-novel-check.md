@@ -26,6 +26,13 @@
 - `audit-cached-event-novels.mjs --all-cached --deep-small-textassets`와 `audit-novel-dialogue-metadata.mjs --all-cached --deep-small-textassets --write-index`가 `dotmessage`를 포함하는지 확인한 뒤 번역한다. 감사 결과가 `dotmessage`를 0개로 보고하면 스크립트 범위를 먼저 의심한다.
 - 원본 전체 대조를 통과한 뒤에만 실제 스토리를 진행해 런타임 말풍선과 `outgame-ja_JP.json`을 추가 확인한다. 런타임 수집 4개, 10개 등 일부 항목만으로 완료 처리하지 않는다.
 
+### 신규 잡몹/등장인물명 검수 규칙
+
+- 스토리 TextAsset의 `message`, `dotmessage`, `l2dmessage` 두 번째 필드인 `speaker`를 전부 모아 `translations/names/ko_KR.json`과 대조한다. 이름이 대사에 한 번만 등장해도 이름 사전 누락으로 처리한다.
+- 대사 화자와 별도로 `charaload,...,<name>` 및 `objectload,...,<name>`의 마지막 이름 필드도 확인한다. 씬에만 배치되는 인물이라도 이름판/전투 UI에 노출될 수 있으므로 신규 잡몹, 교단 간부, 병사, 제자, 주민 라벨을 누락시키지 않는다.
+- `信者A`와 `信者Ａ`, `信者 C`와 `信者Ｃ`처럼 ASCII/전각 문자, 공백 유무가 다른 표기는 서로 다른 exact key로 취급하고 각각 등록한다.
+- 신규 스토리의 이름 전수 대조 후 `translations/manifest/ko_KR.json`을 갱신하고 게임 로컬 `cache/ko_KR/names.json`에도 복사한다. 이름 사전만 수정하고 로컬 캐시를 갱신하지 않으면 화면에는 이전 일본어가 남을 수 있다.
+
 캐릭터 호칭 규칙은 파일 ID만으로 판단하지 않는다. 원본 스크립트의 `message,<speaker>,...`, `l2dmessage,<speaker>,...`에서 화자 메타데이터를 함께 추출하고, 그 화자 기준으로 `character-cards.md`와 glossary를 적용한다. 예: 이벤트 본편 `evs_...`에 쿠레하가 등장하면 파일명이 `hmr_105801...`가 아니어도 `旦那様/旦那さま/旦那=서방님` 규칙을 적용한다. 마리나의 `旦那様=나리` 규칙을 다른 캐릭터에게 전파하지 않는다.
 
 스토리 건너뛰기 확인 팝업의 긴 요약 본문은 일반 소설 본문(`translations/novels`)이 아니라 스토리 메타데이터 요약이다. 신규/변경 스토리에서는 같은 일본어 요약이 `translations/descriptions/ko_KR.json`와 `translations/outgame/ko_KR.json` 양쪽에 있어야 한다.
@@ -68,7 +75,7 @@
 7. `value == key`, 일본어 가나 잔존, `,,vc_...`, `,,,chara_...` 꼬리표 잔존을 확인한다.
 8. 중앙 연출 문구 `messageTextCenter`와 Live2D 대사 `l2dmessage`도 누락 0건인지 확인한다. 감사 결과에 `<size=48>...` 또는 `l2dmessage` 원문 missing-key가 나오면 해당 `translations/novels/<NOVEL_ID>/ko_KR.json`에 추가한다. `messageTextCenter`의 `,,,on`/`,,,off`, `l2dmessage`의 `,,vc_...`, 끝의 `,,` 같은 표시/음성 꼬리표는 번역 key에 포함하지 않는다.
 9. 대사 번역은 `translation/character-cards.md`, `translation/character-voice.md`, `translation/adult-content.md`, `translation/context-review.md`를 함께 확인한다.
-10. `scripts\audit-novel-dialogue-metadata.mjs --all-cached --deep-small-textassets --write-index`로 원본 대사 화자 인덱스를 만들고, `speaker + source` 기준의 호칭/성인 용어 검수를 통과시킨다. 이 감사는 `message`, `dotmessage`, `messageTextCenter`, `l2dmessage`를 모두 보며, 쿠레하/마리나 `旦那様` 규칙과 `素股/スマタ/すまた=스마타` 규칙을 검사한다.
+10. `scripts\audit-novel-dialogue-metadata.mjs --all-cached --deep-small-textassets --write-index`로 원본 대사 화자 인덱스를 만들고, `speaker + source` 기준의 호칭/성인 용어 검수를 통과시킨다. 이 감사는 `message`, `dotmessage`, `messageTextCenter`, `l2dmessage`를 모두 보며, 쿠레하/마리나 `旦那様` 규칙과 `素股/スマタ/すまた=스마타` 규칙을 검사한다. 인덱스의 speaker 목록은 `names/ko_KR.json`과 별도로 대조한다.
 11. `scripts\audit-runtime-balloons.mjs --fail-on-mixed`를 실행해 런타임 수집 파일의 말풍선 후보, 한국어+일본어 혼합 키, 미번역 exact key를 확인한다. 로그에 `NovelRoot/WorldUICanvas/.../Balloon`, `Exploration/.../TextBalloon`, `Popup_QuestSelect/.../InfoNovel/TextBalloon` 중 하나라도 나오면 해당 화면을 말풍선 QA 범위에 포함한다. 전체 신규 텍스트 완료 시에는 `--fail`까지 실행한다.
 12. 한 캐릭터의 고유 호칭/별명은 한 파일만 고치지 말고 `translations/novels` 전체에서 같은 원문 호칭을 검색한다. 특히 캐릭터 계열 `hmn_...`, `hmr_...`, `men_...`이 서로 다른 파일에 흩어져 있으므로 일반/일상/H/홈 대사 전체를 함께 맞춘다. 예: 에메르다의 `特ダネさん`은 `특종 씨`로 통일하고 `특다네 씨`, `특종 기자님`, `특종님`처럼 흔들지 않는다.
 13. 한 캐릭터 스토리에서 `missing-key`가 1개라도 나오면 같은 숫자 캐릭터 ID 전체를 재검수한다. 예를 들어 `hmn_10190100001`에서 키 누락이 나오면 `101901` 계열 `hmn_101901...`, `hmr_101901...`, `men_101901...` 전체를 캐시 원문 메시지와 번역 JSON key로 직접 대조해 `missing=0`, `untranslated=0`인지 확인한다. 원문 오탈자/수정본처럼 key가 한 글자만 다른 경우 기존 key를 지우지 말고 실제 런타임 key를 추가한다.
