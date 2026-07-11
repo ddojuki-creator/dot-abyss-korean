@@ -96,6 +96,8 @@ CDN outgame에 제목/요약 번역이 있어도 실제 화면은 조합된 exac
 
 7장에서는 현재 확인된 조사 해금 팝업뿐 아니라, 이후 해금되는 모든 조사명에 같은 템플릿이 적용되는지 재진입/재시작으로 확인한다. 신규 장마다 `outgame-ja_JP.json`에 남은 한국어+일본어 혼합 key가 0건인지 확인한다.
 
+퀘스트 선택 화면의 `Popup_QuestSelect/.../InfoNovel/TextBalloon`은 일반 `mas_` 본문 감사에 잡히지 않을 수 있다. 장면을 실제로 진행한 뒤 로그의 `NovelId`와 이 경로를 함께 확인하고, 말풍선 원문은 해당 `translations/novels/<NOVEL_ID>/ko_KR.json`과 `translations/outgame/ko_KR.json` 양쪽 exact key에 보강한다. 말풍선이 한국어로 바뀌지 않으면 노벨 파일 누락으로 단정하지 말고, 퀘스트 선택 UI의 outgame exact 경로도 같이 검사한다.
+
 건너뛰기 요약 팝업은 노벨 화면 안에서 뜨기 때문에 전역 outgame 스캔만으로는 잡히지 않을 수 있다. 화면이 일본어면 먼저 `descriptions` 누락, 그다음 노벨 계층 TMP exact 번역 패치 적용 여부를 확인한다.
 
 신규 스토리 요약 확인 필수 항목:
