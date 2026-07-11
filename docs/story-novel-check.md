@@ -60,9 +60,10 @@
 8. 중앙 연출 문구 `messageTextCenter`와 Live2D 대사 `l2dmessage`도 누락 0건인지 확인한다. 감사 결과에 `<size=48>...` 또는 `l2dmessage` 원문 missing-key가 나오면 해당 `translations/novels/<NOVEL_ID>/ko_KR.json`에 추가한다. `messageTextCenter`의 `,,,on`/`,,,off`, `l2dmessage`의 `,,vc_...`, 끝의 `,,` 같은 표시/음성 꼬리표는 번역 key에 포함하지 않는다.
 9. 대사 번역은 `translation/character-cards.md`, `translation/character-voice.md`, `translation/adult-content.md`, `translation/context-review.md`를 함께 확인한다.
 10. `scripts\audit-novel-dialogue-metadata.mjs --all-cached --deep-small-textassets --write-index`로 원본 대사 화자 인덱스를 만들고, `speaker + source` 기준의 호칭/성인 용어 검수를 통과시킨다. 이 감사는 `message`, `messageTextCenter`, `l2dmessage`를 모두 보며, 쿠레하/마리나 `旦那様` 규칙과 `素股/スマタ/すまた=스마타` 규칙을 검사한다.
-11. 한 캐릭터의 고유 호칭/별명은 한 파일만 고치지 말고 `translations/novels` 전체에서 같은 원문 호칭을 검색한다. 특히 캐릭터 계열 `hmn_...`, `hmr_...`, `men_...`이 서로 다른 파일에 흩어져 있으므로 일반/일상/H/홈 대사 전체를 함께 맞춘다. 예: 에메르다의 `特ダネさん`은 `특종 씨`로 통일하고 `특다네 씨`, `특종 기자님`, `특종님`처럼 흔들지 않는다.
-12. 한 캐릭터 스토리에서 `missing-key`가 1개라도 나오면 같은 숫자 캐릭터 ID 전체를 재검수한다. 예를 들어 `hmn_10190100001`에서 키 누락이 나오면 `101901` 계열 `hmn_101901...`, `hmr_101901...`, `men_101901...` 전체를 캐시 원문 메시지와 번역 JSON key로 직접 대조해 `missing=0`, `untranslated=0`인지 확인한다. 원문 오탈자/수정본처럼 key가 한 글자만 다른 경우 기존 key를 지우지 말고 실제 런타임 key를 추가한다.
-13. 줄바꿈은 `translation/style-core.md` 기준을 따른다. 현재 스토리 대사 기준은 표시 줄당 약 34자 목표, 36자 초과 시 수정이다. 36자는 대사 전체가 아니라 한 줄 기준이다. 줄이 길면 직역을 고집하지 말고 의미/말투를 유지한 채 자연스럽게 압축하거나 `<br>`을 자연스러운 한국어 구 단위에 넣는다. `조사<br>를`, `느<br>껴서`, `책임감<br>을`처럼 단어/조사/어미가 잘리는 줄바꿈은 실패로 본다. 원문 key에 `<br>`이 있으면 번역 value에도 같은 위치 또는 같은 문맥 분할로 `<br>`을 유지해 화면 줄바꿈이 사라지지 않게 한다.
+11. `scripts\audit-runtime-balloons.mjs --fail-on-mixed`를 실행해 런타임 수집 파일의 말풍선 후보, 한국어+일본어 혼합 키, 미번역 exact key를 확인한다. 로그에 `NovelRoot/WorldUICanvas/.../Balloon`, `Exploration/.../TextBalloon`, `Popup_QuestSelect/.../InfoNovel/TextBalloon` 중 하나라도 나오면 해당 화면을 말풍선 QA 범위에 포함한다. 전체 신규 텍스트 완료 시에는 `--fail`까지 실행한다.
+12. 한 캐릭터의 고유 호칭/별명은 한 파일만 고치지 말고 `translations/novels` 전체에서 같은 원문 호칭을 검색한다. 특히 캐릭터 계열 `hmn_...`, `hmr_...`, `men_...`이 서로 다른 파일에 흩어져 있으므로 일반/일상/H/홈 대사 전체를 함께 맞춘다. 예: 에메르다의 `特ダネさん`은 `특종 씨`로 통일하고 `특다네 씨`, `특종 기자님`, `특종님`처럼 흔들지 않는다.
+13. 한 캐릭터 스토리에서 `missing-key`가 1개라도 나오면 같은 숫자 캐릭터 ID 전체를 재검수한다. 예를 들어 `hmn_10190100001`에서 키 누락이 나오면 `101901` 계열 `hmn_101901...`, `hmr_101901...`, `men_101901...` 전체를 캐시 원문 메시지와 번역 JSON key로 직접 대조해 `missing=0`, `untranslated=0`인지 확인한다. 원문 오탈자/수정본처럼 key가 한 글자만 다른 경우 기존 key를 지우지 말고 실제 런타임 key를 추가한다.
+14. 줄바꿈은 `translation/style-core.md` 기준을 따른다. 현재 스토리 대사 기준은 표시 줄당 약 34자 목표, 36자 초과 시 수정이다. 36자는 대사 전체가 아니라 한 줄 기준이다. 줄이 길면 직역을 고집하지 말고 의미/말투를 유지한 채 자연스럽게 압축하거나 `<br>`을 자연스러운 한국어 구 단위에 넣는다. `조사<br>를`, `느<br>껴서`, `책임감<br>을`처럼 단어/조사/어미가 잘리는 줄바꿈은 실패로 본다. 원문 key에 `<br>`이 있으면 번역 value에도 같은 위치 또는 같은 문맥 분할로 `<br>`을 유지해 화면 줄바꿈이 사라지지 않게 한다.
 
 ## 런타임 exact key 주의
 
@@ -117,6 +118,7 @@ CDN outgame에 제목/요약 번역이 있어도 실제 화면은 조합된 exac
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-cached-event-novels.mjs --all-cached
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-cached-event-novels.mjs --all-cached --deep-small-textassets
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-novel-dialogue-metadata.mjs --all-cached --deep-small-textassets --write-index
+& "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-runtime-balloons.mjs --fail-on-mixed
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-character-story-ui.mjs
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-novel-location-titles.mjs
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\update-manifest.mjs
@@ -135,6 +137,7 @@ CDN outgame에 제목/요약 번역이 있어도 실제 화면은 조합된 exac
 - 제목, 요약, 재생 확인, 해방 조건, 첫 보상 팝업이 한국어로 표시된다.
 - 스토리 건너뛰기 확인 팝업의 긴 요약 본문이 한국어로 표시된다.
 - `audit-character-story-ui`의 `missing-description`이 0건이다.
+- `audit-runtime-balloons`가 런타임 말풍선 경로를 기록하고, 혼합 한국어+일본어 말풍선이 번역 사전에 남아 있지 않다.
 - 캐릭터 말투와 호칭이 `character-cards.md` 기준과 충돌하지 않는다.
 - 캐릭터 고유 호칭/별명이 `hmn/hmr/men` 전체에서 같은 기준으로 통일되어 있다.
 - 원본 대사의 화자 메타데이터 기준으로 쿠레하 `旦那様=서방님`, 마리나 `旦那様=나리`가 분리 적용되어 있다.
