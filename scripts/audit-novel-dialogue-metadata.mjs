@@ -60,7 +60,9 @@ function stripMessageMeta(text) {
 function parseMessageLine(line, lineNumber) {
   const command = line.startsWith('message,')
     ? 'message'
-    : line.startsWith('messageTextCenter,')
+    : line.startsWith('dotmessage,')
+      ? 'dotmessage'
+      : line.startsWith('messageTextCenter,')
       ? 'messageTextCenter'
       : line.startsWith('l2dmessage,')
         ? 'l2dmessage'
@@ -72,7 +74,12 @@ function parseMessageLine(line, lineNumber) {
   if (firstComma < 0) return null
   const speaker = rest.slice(0, firstComma)
   const payload = rest.slice(firstComma + 1)
-  const message = stripMessageMeta(payload)
+  const message = command === 'dotmessage'
+    ? (() => {
+        const metaSeparator = payload.indexOf(',,')
+        return metaSeparator >= 0 ? payload.slice(0, metaSeparator) : payload.split(',')[0]
+      })()
+    : stripMessageMeta(payload)
   if (!message) return null
 
   const voice = payload.match(/(?:vc|mcv)_[^,]*/)?.[0] || null
@@ -176,7 +183,7 @@ for file in files_to_scan:
                 text = script.decode("utf-8", "ignore")
             else:
                 text = str(script or "")
-            if "message," not in text and "messageTextCenter," not in text and "l2dmessage," not in text:
+            if "message," not in text and "dotmessage," not in text and "messageTextCenter," not in text and "l2dmessage," not in text:
                 continue
             novel_ids = sorted(set(re.findall(r"(?:mas_\d{10}|(?:evs|hmr|hmn|men)_\d{11})", str(name) + "\n" + text)))
             for novel_id in novel_ids:

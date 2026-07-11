@@ -80,7 +80,9 @@ function extractMessages(script) {
   for (const line of script.split(/\r?\n/)) {
     const command = line.startsWith('message,')
       ? 'message'
-      : line.startsWith('messageTextCenter,')
+      : line.startsWith('dotmessage,')
+        ? 'dotmessage'
+        : line.startsWith('messageTextCenter,')
         ? 'messageTextCenter'
         : line.startsWith('l2dmessage,')
           ? 'l2dmessage'
@@ -90,6 +92,12 @@ function extractMessages(script) {
     const firstComma = rest.indexOf(',')
     if (firstComma < 0) continue
     rest = rest.slice(firstComma + 1)
+    if (command === 'dotmessage') {
+      const metaSeparator = rest.indexOf(',,')
+      const message = metaSeparator >= 0 ? rest.slice(0, metaSeparator) : rest.split(',')[0]
+      if (message) messages.push(message)
+      continue
+    }
     const message = stripMessageMeta(rest)
     if (message) messages.push(message)
   }
@@ -183,7 +191,7 @@ for file in files_to_scan:
                 text = script.decode("utf-8", "ignore")
             else:
                 text = str(script or "")
-            if "message," not in text and "messageTextCenter," not in text and "l2dmessage," not in text:
+            if "message," not in text and "dotmessage," not in text and "messageTextCenter," not in text and "l2dmessage," not in text:
                 continue
             novel_ids = sorted(set(re.findall(r"(?:mas_\d{10}|(?:evs|hmr|hmn|men)_\d{11})", str(name) + "\n" + text)))
             if target_ids and not (target_ids & set(novel_ids)):
