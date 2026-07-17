@@ -206,4 +206,6 @@ for (const issue of issues.slice(0, 12)) {
   console.log(`+ ${issue.suggested}`)
 }
 
-if (args.fail && issues.length) process.exitCode = 1
+const blockingIssues = summary.autoReflow + summary.manual
+console.log(`blocking=${blockingIssues}`)
+if (args.fail && blockingIssues > 0) process.exitCode = 1
