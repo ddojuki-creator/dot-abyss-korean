@@ -4,6 +4,7 @@ Translate scenario dialogue and narration.
 Prioritize character voice, emotional nuance, and natural Korean game dialogue.
 For rendered story dialogue, use at most one <br> and prefer natural two-line breaks. Do not force old 35-37 character line lengths; around 50 Korean characters per line can fit, but avoid letting endings, particles, or short word tails split awkwardly.
 Never leave Japanese script inside a Korean value, including the reading or base text of `<ruby=reading>base</>` markup. Remove ruby markup when Korean needs no alternate reading; when it is semantically important, translate both the ruby reading and base text into Korean.
+Treat every `messageTextCenter` location/time transition as required dialogue coverage. Translate `<size=48>――place</size>`, `翌日`, and `数日後` exact keys across the complete `evs_*` event set.
 In adult narration, translate 肉棒 as 육봉 or 남근 according to context. Do not use 음경, 정액, 고환, 고기, or 고기봉 for 肉棒; preserve the fixed skill/title 육봉연술.
 For the 2026-07-10 characters, follow the speaker metadata and the detailed cards for リエラ, アイシャ, and ルシータ. Never turn リエラ into Berisa-style mesugaki dialogue or add `허접` taunts unless the Japanese source explicitly contains them.
 For the 2026-07-17 characters, follow the detailed cards for フィオナ and クリスティ. Fix フィオナ=피오나, クリスティ=크리스티, あるじさま=주인님 for Fiona, and 司令官さん=사령관씨 for Christie. Keep every spirit-name spelling and deliberate misnaming distinct using the glossary spellings; do not silently correct the dialogue joke to ポパパポパ.
