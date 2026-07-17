@@ -77,6 +77,14 @@ Use this table format:
 | しーちゃん | 시짱 | Riera's nickname for the commander. Always use `시짱`; never use `시이짱`, `시-짱`, or `시 짱`. |
 | アイシャ | 아이샤 | Character name. Always use `아이샤`; never use `아샤` or `아이샤아`. |
 | ルシータ | 루시타 | Character name. Always use `루시타`; never use `루시다`. |
+| フィオナ | 피오나 | Character name. Always use `피오나`; never use `피오너` or `피오나아`. |
+| クリスティ | 크리스티 | Character name. Always use `크리스티`; never use `크리스티이` or `크리스티ー`. |
+| ポパパポパ | 포파파포파 | Fiona's water spirit. Preserve this exact source spelling and Korean form. |
+| ポパポパパ | 포파포파파 | Source/mirror spelling variant. Do not collapse it into `포파파포파`. |
+| パポプピパ | 파포푸피파 | Deliberate misnaming in dialogue. Do not mistransliterate it as `파포프피파`. |
+| パパポパパ | 파파포파파 | Deliberate misnaming in dialogue. Preserve the joke instead of correcting it to the real name. |
+| プピパピプ | 푸피파피푸 | Deliberate misnaming in dialogue. Preserve the joke instead of correcting it to the real name. |
+| ポポポポポ | 포포포포포 | Deliberate misnaming in dialogue. Preserve the joke instead of correcting it to the real name. |
 | 快活！小悪魔ギャルちゃん | 쾌활한 소악마 갸루 | Riera title. Do not leave `ちゃん` as `짱`; use a natural title without it. |
 | 黒き翼の召喚士 | 검은 날개의 소환사 | Aisha title. |
 | 嵐を呼ぶ海賊娘 | 폭풍을 부르는 해적 소녀 | Lucita title. |

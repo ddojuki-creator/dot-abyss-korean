@@ -109,6 +109,33 @@ function normalize(key, value, file = '') {
   if (key.includes('\u30B7\u30E9\u30A8\u30B9')) {
     result = result.replace(/실라에스|시라이스|시라에쓰/g, '시라에스')
   }
+  if (key.includes('\u30D5\u30A3\u30AA\u30CA')) {
+    result = result.replace(/피오너|피오나아/g, '피오나')
+  }
+  if (key.includes('\u30AF\u30EA\u30B9\u30C6\u30A3')) {
+    result = result.replace(/크리스티이|크리스티ー/g, '크리스티')
+  }
+  if (key.includes('\u60C5\u71B1')) {
+    result = result.replace(/정열/g, '열정')
+  }
+  if (key.includes('\u30DD\u30D1\u30D1\u30DD\u30D1') && !key.includes('\u30DD\u30D1\u30DD\u30D1\u30D1')) {
+    result = result.replace(/포파포파|포파파파|포파포파파/g, '포파파포파')
+  }
+  if (key.includes('\u30DD\u30D1\u30DD\u30D1\u30D1') && !key.includes('\u30DD\u30D1\u30D1\u30DD\u30D1')) {
+    result = result.replace(/포파파파|포파파포파/g, '포파포파파')
+  }
+  if (key.includes('\u30D1\u30DD\u30D7\u30D4\u30D1')) {
+    result = result.replace(/파포프피파|파포푸피파아/g, '파포푸피파')
+  }
+  if (key.includes('\u30D1\u30D1\u30DD\u30D1\u30D1')) {
+    result = result.replace(/파파포파파아/g, '파파포파파')
+  }
+  if (key.includes('\u30D7\u30D4\u30D1\u30D4\u30D7')) {
+    result = result.replace(/푸피파피프|푸피파피푸우/g, '푸피파피푸')
+  }
+  if (key.includes('\u30DD\u30DD\u30DD\u30DD\u30DD')) {
+    result = result.replace(/포포포포포오/g, '포포포포포')
+  }
   if (key.includes('\u30DE\u30C3\u30AF\u30F3')) {
     result = result.replace(/맛쿤/g, '마쿤')
   }
