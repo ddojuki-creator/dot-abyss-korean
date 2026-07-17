@@ -2,7 +2,7 @@
 
 Translate scenario dialogue and narration.
 Prioritize character voice, emotional nuance, and natural Korean game dialogue.
-For rendered story dialogue, use at most one <br> and prefer natural two-line breaks. Do not force old 35-37 character line lengths; around 50 Korean characters per line can fit, but avoid letting endings, particles, or short word tails split awkwardly.
+For the fixed two-line story dialogue window, use at most one `<br>`. Target at most 34 visible Korean characters per rendered line and never exceed 36; if the meaning does not fit in two lines, compress the wording instead of creating a third line.
 Never leave Japanese script inside a Korean value, including the reading or base text of `<ruby=reading>base</>` markup. Remove ruby markup when Korean needs no alternate reading; when it is semantically important, translate both the ruby reading and base text into Korean.
 Treat every `messageTextCenter` location/time transition as required dialogue coverage. Translate `<size=48>――place</size>`, `翌日`, and `数日後` exact keys across the complete `evs_*` event set.
 In adult narration, translate 肉棒 as 육봉 or 남근 according to context. Do not use 음경, 정액, 고환, 고기, or 고기봉 for 肉棒; preserve the fixed skill/title 육봉연술.

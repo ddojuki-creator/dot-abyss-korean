@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs'
 import path from 'node:path'
+import { spawnSync } from 'node:child_process'
 import { collectEntries, parseArgs, rel, ROOT, setByPath, walk, writeJson } from './lib/ko-pipeline.mjs'
 
 const args = parseArgs(process.argv.slice(2))
@@ -108,8 +109,26 @@ function classify(value) {
   }
 }
 
+function changedNovelFiles() {
+  const commands = [
+    ['diff', '--name-only', '--diff-filter=ACMR', 'HEAD', '--', 'translations/novels'],
+    ['ls-files', '--others', '--exclude-standard', '--', 'translations/novels'],
+  ]
+  const files = new Set()
+  for (const command of commands) {
+    const result = spawnSync('git', command, { cwd: ROOT, encoding: 'utf8', shell: false })
+    if (result.status !== 0) continue
+    for (const line of result.stdout.split(/\r?\n/)) {
+      const file = line.trim()
+      if (file.endsWith('/ko_KR.json') || file.endsWith('\\ko_KR.json')) files.add(path.resolve(ROOT, file))
+    }
+  }
+  return [...files].sort()
+}
+
 let files = walk(path.join(ROOT, 'translations', 'novels')).filter((file) => file.endsWith('/ko_KR.json') || file.endsWith('\\ko_KR.json')).sort()
 if (args.file) files = [path.resolve(ROOT, args.file)]
+else if (args.changed) files = changedNovelFiles()
 if (args.limit != null) files = files.slice(0, args.limit)
 
 const issues = []
@@ -186,3 +205,5 @@ for (const issue of issues.slice(0, 12)) {
   console.log(`- ${issue.target.replace(/\n/g, '\\n')}`)
   console.log(`+ ${issue.suggested}`)
 }
+
+if (args.fail && issues.length) process.exitCode = 1

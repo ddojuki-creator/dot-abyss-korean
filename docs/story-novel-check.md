@@ -131,6 +131,7 @@ CDN outgame에 제목/요약 번역이 있어도 실제 화면은 조합된 exac
 
 ```powershell
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\validate-translations.mjs
+& "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\review-novel-layout.mjs --changed --fail
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-cached-event-novels.mjs --all-cached
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-cached-event-novels.mjs --all-cached --deep-small-textassets
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-novel-dialogue-metadata.mjs --all-cached --deep-small-textassets --write-index
@@ -146,6 +147,7 @@ CDN outgame에 제목/요약 번역이 있어도 실제 화면은 조합된 exac
 - 본문 value가 원문 그대로 남아 있지 않다.
 - 가나/일본어 잔존과 음성 꼬리표 잔존이 0건이다.
 - 루비 태그의 읽기/본문까지 검사해 `<ruby=きょうえい>鏡影</>` 같은 숨은 일본어 잔존이 0건이다. 한국어 독음이 불필요하면 루비 태그를 제거한다.
+- 변경된 노벨은 고정 2줄 대화창 기준 줄당 목표 34자, 최대 36자이며 `<br>`은 최대 1개다. `review-novel-layout.mjs --changed --fail`이 `watch=0 autoReflow=0 manual=0`으로 통과한다.
 - `messageTextCenter` 중앙 연출 문구의 `<size=48>...` key 누락과 일본어 잔존이 0건이다.
 - H스토리/Live2D 스토리의 `l2dmessage` key 누락과 일본어 잔존이 0건이다.
 - `audit-cached-event-novels --all-cached`가 `issues=0 warnings=0`이다. 특히 사용자 제보 NovelId가 `log-only-missing-file`로 남아 있으면 완료가 아니다.

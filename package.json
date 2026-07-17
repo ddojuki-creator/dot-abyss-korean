@@ -7,7 +7,7 @@
     "manifest": "node scripts/update-manifest.mjs",
     "static:build": "node scripts/build-static-bundle.mjs",
     "static:audit": "node scripts/audit-static-bundle.mjs && node scripts/audit-masterdata-coverage.mjs",
-    "validate:ko": "node scripts/validate-translations.mjs",
+    "validate:ko": "node scripts/validate-translations.mjs && node scripts/review-novel-layout.mjs --changed --fail",
     "translate:ko": "node scripts/translate-ko.mjs",
     "translate:changed": "node scripts/translate-ko.mjs --changed",
     "merge:partial": "node scripts/merge-partial.mjs",

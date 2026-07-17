@@ -28,6 +28,7 @@ export function parseArgs(argv, defaults = {}) {
     gitAdded: false,
     failedOnly: false,
     fix: false,
+    fail: false,
     ...defaults,
   }
   for (let i = 0; i < argv.length; i++) {
@@ -40,6 +41,7 @@ export function parseArgs(argv, defaults = {}) {
     else if (a === '--no-push') args.noPush = true
     else if (a === '--force') args.force = true
     else if (a === '--fix') args.fix = true
+    else if (a === '--fail') args.fail = true
     else if (a === '--changed') args.changed = true
     else if (a === '--remove-deleted') args.removeDeleted = true
     else if (a === '--git-added') args.gitAdded = true
