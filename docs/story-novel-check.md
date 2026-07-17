@@ -145,6 +145,7 @@ CDN outgame에 제목/요약 번역이 있어도 실제 화면은 조합된 exac
 - 신규/변경 스토리 파일이 모두 `translations/novels`에 존재한다.
 - 본문 value가 원문 그대로 남아 있지 않다.
 - 가나/일본어 잔존과 음성 꼬리표 잔존이 0건이다.
+- 루비 태그의 읽기/본문까지 검사해 `<ruby=きょうえい>鏡影</>` 같은 숨은 일본어 잔존이 0건이다. 한국어 독음이 불필요하면 루비 태그를 제거한다.
 - `messageTextCenter` 중앙 연출 문구의 `<size=48>...` key 누락과 일본어 잔존이 0건이다.
 - H스토리/Live2D 스토리의 `l2dmessage` key 누락과 일본어 잔존이 0건이다.
 - `audit-cached-event-novels --all-cached`가 `issues=0 warnings=0`이다. 특히 사용자 제보 NovelId가 `log-only-missing-file`로 남아 있으면 완료가 아니다.

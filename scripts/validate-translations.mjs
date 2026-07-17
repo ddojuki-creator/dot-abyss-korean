@@ -13,7 +13,10 @@ let emptyValues = 0
 let nonStringValues = 0
 let tokenErrors = 0
 let novelVoiceMarkerErrors = 0
+let novelJapaneseLeftoverErrors = 0
 const samples = []
+
+const JAPANESE_SCRIPT_RE = /[\u3041-\u3096\u30a1-\u30fa\uff66-\uff9d\u3400-\u9fff\u3005\u3006]/u
 
 for (const file of files) {
   if (isManifest(file)) continue
@@ -61,6 +64,10 @@ for (const file of files) {
       novelVoiceMarkerErrors += 1
       samples.push(`${fileRel} :: ${entry.path.join(' > ')}: voice marker leaked into novel key/value`)
     }
+    if (fileRel.startsWith('translations/novels/') && JAPANESE_SCRIPT_RE.test(entry.value)) {
+      novelJapaneseLeftoverErrors += 1
+      samples.push(`${fileRel} :: ${entry.path.join(' > ')}: Japanese script remains in novel value`)
+    }
     if (entry.value === '') {
       emptyValues += 1
       samples.push(`${fileRel} :: ${entry.path.join(' > ')}: empty value`)
@@ -85,6 +92,7 @@ printSummary('validate:ko', {
   emptyValues,
   tokenErrors,
   novelVoiceMarkerErrors,
+  novelJapaneseLeftoverErrors,
 })
 
 if (samples.length) {
@@ -92,4 +100,4 @@ if (samples.length) {
   for (const sample of samples.slice(0, 40)) console.log(`- ${sample}`)
 }
 
-if (parseErrors || invalidShape || keyErrors || nonStringValues || emptyValues || tokenErrors || novelVoiceMarkerErrors) process.exitCode = 1
+if (parseErrors || invalidShape || keyErrors || nonStringValues || emptyValues || tokenErrors || novelVoiceMarkerErrors || novelJapaneseLeftoverErrors) process.exitCode = 1

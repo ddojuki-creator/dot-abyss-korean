@@ -180,6 +180,7 @@ git push origin main
 - 한국어가 섞인 runtime key와 mojibake key를 정상 일본어/한국어 기준으로 다시 확인
 - `scripts\audit-character-abilities.mjs` 통과
 - `translations/novels/**/ko_KR.json` value 안에 일본어 잔존이 없는지 확인
+- `<ruby=읽기>본문</>` 태그의 속성 및 본문도 검사한다. 한국어에서 독음 표시가 불필요하면 태그를 제거하고, 연출상 필요하면 읽기와 본문을 모두 한국어로 번역한다. `<ruby=きょうえい>鏡影</>`처럼 태그 안에만 일본어가 남은 값도 실패로 처리한다.
 - 게임 로컬 캐시의 `cache\ko_KR\novels`가 manifest의 신규 소설을 모두 포함하는지 확인
 - `translations/manifest/ko_KR.json` 갱신 확인
 
