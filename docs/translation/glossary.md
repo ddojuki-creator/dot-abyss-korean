@@ -76,10 +76,15 @@ Use this table format:
 | シラエス | 시라에스 | Character name. Always use `시라에스`; never use `실라에스`, `시라이스`, or `시라에쓰`. |
 | リエラ | 리에라 | Character name. Always use `리에라`; never use `리엘라` or `리에르라`. |
 | しーちゃん | 시짱 | Riera's nickname for the commander. Always use `시짱`; never use `시이짱`, `시-짱`, or `시 짱`. |
-| リエラ의 アタシ / あたし | 나 | Riera's first-person pronoun. Translate semantically; never transliterate it as `아타시`. |
+| アタシ / あたし | 나 / 저 | General first-person pronoun. Choose by the speaker's speech level and relationship; never transliterate it as `아타시`. |
 | ハンバーグ | 햄버그 스테이크 | Food term. Distinguish it from `ハンバーガー`=`햄버거`. |
 | チル / チル曲 | 느긋하게 즐기다 / 느긋한 곡 | Translate the slang by function. Never use `칠`, `칠하다`, `칠한 곡`, or `칠해보자`. |
 | ギャップ萌え | 반전 매력 | Use natural Korean by context; avoid raw `갭모에` when it makes the dialogue unnatural. |
+| ぴえん | 눈물 나 / 울 것 같아 | Conversational slang. Translate its emotional function by context instead of mechanically importing the meme. |
+| ガチ恋 | 찐사랑 / 진심으로 빠짐 | Conversational slang. Choose a natural form by sentence and register; do not treat it as a character-specific term. |
+| 受けて立つ | 도전을 받아주다 / 승부를 받아주다 | Challenge idiom. Do not use `받아치다` unless the source actually describes countering an attack. |
+| 名前が言いにくい | 이름이 발음하기 어렵다 | Pronunciation context. Do not preserve the Japanese structure as `이름이 말하기 어렵다`. |
+| 星占いの結果 | 별점을 쳐 보니 / 점괘로는 | Choose natural Korean by sentence; avoid the noun-chain literalism `별점 결과`. |
 | アイシャ | 아이샤 | Character name. Always use `아이샤`; never use `아샤` or `아이샤아`. |
 | ルシータ | 루시타 | Character name. Always use `루시타`; never use `루시다`. |
 | フィオナ | 피오나 | Character name. Always use `피오나`; never use `피오너` or `피오나아`. |

@@ -14,7 +14,7 @@ Before editing translation files:
 4. For character, skill, ability, awakening, limit-break, or pure crystal updates, read `../new-character-update.md` first.
 5. Search the whole `translations` tree for the same character name, skill name, ability name, event name, and forbidden variant before editing only one file.
 6. Never change JSON keys. Edit Korean values only.
-7. If a new term, address rule, forbidden variant, or layout rule is found, add it to the canonical guide file, not only to a handoff.
+7. Put reusable language rules in the correct canonical layer: general meaning/grammar/layout in `style-core.md`, shared terms/slang/idioms in `glossary.md`, forbidden output variants in `forbidden.md`, and only speaker-specific tone/address/relationship rules in `character-cards.md`. Do not place a general rule in a character card just because one character exposed it first.
 8. After edits, run the relevant validation/audit scripts and regenerate `translations/manifest/ko_KR.json` with `scripts/update-manifest.mjs`.
 
 ## New-Version Translation Layers
