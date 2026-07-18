@@ -5,6 +5,8 @@ import { ROOT, readJson, shouldTranslateValue } from './lib/ko-pipeline.mjs'
 
 const DEFAULT_COLLECTION = 'F:/DMMGamePlayer/dotabyss_x_cl/BepInEx/config/AbyssMod/outgame-ja_JP.json'
 const translationFile = path.join(ROOT, 'translations', 'outgame', 'ko_KR.json')
+const dynamicToken = /\{\[[^\]]+\][^}]*\}/g
+const dynamicTokenPresent = /\{\[[^\]]+\][^}]*\}/
 
 function parseArgs(argv) {
   const args = {
@@ -39,6 +41,7 @@ const HOTSPOTS = [
   /フォロー|フォロワー|おすすめ|ID検索|プレイヤーLv|最終ログイン/,
   /時間前|日前|分前|秒前/,
   /配置終了|受取|購入|提供割合|ショップへ|ウィークリー|VIP特典/,
+  /^通知$/,
   /探索クエスト|探索隊|探索での追加|クエストでの追加|発見：|期限/,
   /厄災|討伐依頼|アップグレードが完了|以下のボーナス/,
   /出現ランク|出現レアリティ|ユニーク/,
@@ -66,18 +69,41 @@ function truncate(value, max = 180) {
   return value.length > max ? `${value.slice(0, max - 1)}…` : value
 }
 
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function matchesDynamicTemplate(source, template) {
+  const tokens = [...template.matchAll(dynamicToken)]
+  if (!tokens.length) return false
+  let pattern = '^'
+  let offset = 0
+  for (const token of tokens) {
+    pattern += escapeRegex(template.slice(offset, token.index))
+    pattern += '.+?'
+    offset = token.index + token[0].length
+  }
+  pattern += escapeRegex(template.slice(offset))
+  return new RegExp(`${pattern}$`, 's').test(source)
+}
+
 const args = parseArgs(process.argv.slice(2))
 if (!fs.existsSync(args.collection)) throw new Error(`Missing runtime collection: ${args.collection}`)
 if (!fs.existsSync(translationFile)) throw new Error(`Missing outgame translation: ${translationFile}`)
 
 const collection = readJson(args.collection)
 const translations = readJson(translationFile)
+const dynamicTemplates = Object.keys(translations).filter((source) => dynamicTokenPresent.test(source))
 const sources = Object.keys(collection).filter(isHotspot).sort()
 const issues = []
+let dynamicCovered = 0
 
 for (const source of sources) {
   const value = translations[source]
-  if (typeof value !== 'string') issues.push({ status: 'missing', source })
+  if (typeof value !== 'string') {
+    if (dynamicTemplates.some((template) => matchesDynamicTemplate(source, template))) dynamicCovered += 1
+    else issues.push({ status: 'missing', source })
+  }
   else if (value === source) issues.push({ status: 'untranslated', source, value })
   else if (shouldTranslateValue(source, value) || hasJapaneseLeftover(value)) {
     issues.push({ status: 'japanese-leftover', source, value })
@@ -90,7 +116,7 @@ const counts = issues.reduce((acc, issue) => {
 }, {})
 
 console.log(
-  `audit:outgame-ui-hotspots checked=${sources.length} issues=${issues.length} missing=${counts.missing || 0} untranslated=${counts.untranslated || 0} japanese-leftover=${counts['japanese-leftover'] || 0}`,
+  `audit:outgame-ui-hotspots checked=${sources.length} issues=${issues.length} missing=${counts.missing || 0} untranslated=${counts.untranslated || 0} japanese-leftover=${counts['japanese-leftover'] || 0} dynamicCovered=${dynamicCovered}`,
 )
 
 for (const issue of issues.slice(0, 50)) {

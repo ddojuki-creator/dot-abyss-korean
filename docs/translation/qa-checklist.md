@@ -70,6 +70,7 @@
 - Gacha shop / pickup character previews can render the same character skill and ability descriptions with yellow `<color=#F4FF00>` values, while normal character detail / upgrade screens often render green `<color=#4CF37B>` values. Treat both as separate exact keys.
 - Check status-name color variants too: `紋章：情熱` can become `<color=#FF5050>紋章：情熱</color>`, and `紋章：衝撃` can become `<color=#6B8CFF>紋章：衝撃</color>`.
 - Runtime exact keys can be mixed Korean/Japanese intermediate strings, not only pure Japanese source strings. If a key contains Korean text plus leftovers such as `上昇`, `【覚醒効果】`, `自身`, `会心`, `付与`, or `紋章`, register that exact key and translate the value fully.
+- Subscription failure notices can be composed after the product name is translated. Cover `「{[product]}」の継続購入が行えなかったため解約しました。` with a dynamic template, retain collected mixed exact keys for compatibility, and verify the `通知` popup title separately.
 - Check independent colorized count variants too, such as `【4】`, `【<color=#4CF37B>4</color>】`, and `【<color=#F4FF00>4</color>】`; a translated plain-count key does not cover colored-count keys.
 
 ## MasterData / Static QA
