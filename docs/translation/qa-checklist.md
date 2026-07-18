@@ -9,6 +9,9 @@
 - During final layout review, text normally uses one line, never exceeds two displayed lines, and aims for 35 characters or fewer per line.
 - Novel dialogue ignores the Japanese line-break position during final layout. Reflow Korean from the first word, aim for around 34 Korean characters per displayed line without splitting words, and keep every displayed line at or below the 36-character hard limit.
 - Every newly added `men_...` entry receives the same full contextual review as `hmn_...` and `hmr_...`; do not sample short character/home dialogue or leave first-person forms such as `アタシ` transliterated into Korean.
+- New novel publication order is mandatory: bulk translation -> full adjacent-context review of every new entry -> apply or reject every blocking finding -> per-file 34/36 layout audit -> `validate-translations.mjs` -> manifest generation -> local cache/CDN sync. Do not generate the manifest or report completion before the two review gates pass.
+- Run the changed-file layout audit before committing. Because `--changed` only sees uncommitted novel edits, a clean result obtained after the files were already committed is not evidence that the translated batch passed.
+- Translation-model prompts, style docs, and this checklist must agree on hard limits. If an older note claims roughly 50 Korean characters fit, it is obsolete; the novel prompt/style rule of 34 target and 36 hard maximum wins.
 - Novel location/title cards must preserve visible Korean word spacing. Do not collapse forms such as `어비스빛의계층`; use `어비스 빛의 계층`.
 - Non-novel line breaks are used only when context or readability requires them and are never added beyond the source count unless a local rule explicitly allows it.
 - Character voice and speech level are consistent.

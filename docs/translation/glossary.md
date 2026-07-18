@@ -19,6 +19,7 @@ Use this table format:
 | キョンシー | 강시 | Always use `강시`. Do not transliterate as `경시` or translate as `좀비`. |
 | 大穴 | 어비스 | Core world-location and title term. Always use `어비스`; do not use `대공`, `대공동`, `대구멍`, `거대 구멍`, `큰 구멍`, or `대동굴`. |
 | 大空洞 / アビス | 어비스 | Same world-location family as `大穴`. Use `어비스` unless a specific source context clearly needs another approved term. |
+| 前線基地 | 전선기지 | Main base/location term. Always use `전선기지`; never use `전진 기지`. |
 | ドットアビス | 도트어비스 | Project/game title. Always use `도트어비스`. |
 | 錬珍術 | 육봉연술 | Adult-pun localization. Always use `육봉연술`; do not use `연진술` or `연단술`. |
 | ご主人様 | 주인님 | Use only when the Japanese source actually says `ご主人様`. Do not substitute it for other address terms. |
@@ -75,6 +76,10 @@ Use this table format:
 | シラエス | 시라에스 | Character name. Always use `시라에스`; never use `실라에스`, `시라이스`, or `시라에쓰`. |
 | リエラ | 리에라 | Character name. Always use `리에라`; never use `리엘라` or `리에르라`. |
 | しーちゃん | 시짱 | Riera's nickname for the commander. Always use `시짱`; never use `시이짱`, `시-짱`, or `시 짱`. |
+| リエラ의 アタシ / あたし | 나 | Riera's first-person pronoun. Translate semantically; never transliterate it as `아타시`. |
+| ハンバーグ | 햄버그 스테이크 | Food term. Distinguish it from `ハンバーガー`=`햄버거`. |
+| チル / チル曲 | 느긋하게 즐기다 / 느긋한 곡 | Translate the slang by function. Never use `칠`, `칠하다`, `칠한 곡`, or `칠해보자`. |
+| ギャップ萌え | 반전 매력 | Use natural Korean by context; avoid raw `갭모에` when it makes the dialogue unnatural. |
 | アイシャ | 아이샤 | Character name. Always use `아이샤`; never use `아샤` or `아이샤아`. |
 | ルシータ | 루시타 | Character name. Always use `루시타`; never use `루시다`. |
 | フィオナ | 피오나 | Character name. Always use `피오나`; never use `피오너` or `피오나아`. |

@@ -131,6 +131,19 @@
 
 신규 캐릭터 스토리는 UI와 별도 경로다. 이름이 한국어로 보여도 대사 번역이 적용됐다고 판단하면 안 된다.
 
+### 번역 품질 게이트
+
+신규 소설 번역은 아래 순서를 바꾸지 않는다. 대량 번역 성공이나 일본어 잔존 0건만으로 완료 처리하지 않는다.
+
+1. `men_`, `hmn_`, `hmr_`, `evs_`, `mas_`의 신규 원문과 화자 메타데이터를 모두 추출한다.
+2. 지정된 번역 모델로 1차 번역한다. 일본어 1인칭과 회화 속어는 음차하지 않고 화자 카드에 맞는 자연스러운 한국어로 옮긴다.
+3. 신규 파일의 모든 엔트리를 지정 검수 모델로 다시 검토한다. 짧은 `men_`도 표본 검수가 아니라 전수 검수한다.
+4. 검수 제안 중 오역, 부자연스러운 직역, 호칭·용어 위반, 잘못된 사건 관계는 모두 반영하거나 원문 근거로 기각한다.
+5. 커밋 전에 신규 파일별로 `review-novel-layout.mjs --file <path> --fail`을 실행해 표시 줄당 34자 목표, 36자 상한, 최대 두 줄을 확인한다.
+6. 전체 번역 검증을 통과한 뒤에만 매니페스트 갱신, 게임 캐시 복사, CDN push를 진행한다.
+
+번역 프롬프트·스타일 문서·QA 문서의 줄 길이 규칙이 충돌하면 `scripts/prompts/novels.md`와 `translation/style-core.md`의 34/36 규칙을 최종 기준으로 삼는다. 약 50자가 들어간다는 과거 규칙은 폐기된 규칙이다.
+
 필수 확인:
 
 1. 신규 캐릭터명이 들어간 `translations/novels/**/ko_KR.json` 파일을 검색한다.
@@ -153,13 +166,17 @@ game: BepInEx/plugins/AbyssMod/cache/ko_KR/novels/<id>.json
 ## 검증과 반영
 
 ```powershell
-& "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\update-manifest.mjs
+# 신규 소설 파일만 .cache\review-new-novels에 모아 전수 문맥 검수
+& "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\review-dialogue-openai.mjs --dir .cache\review-new-novels --model gpt-5.4-mini --force --output .cache\dialogue-review\new-novels.jsonl
+# 아래 줄 길이 검사는 신규 소설 파일마다 반복하고 blocking=0을 확인
+& "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\review-novel-layout.mjs --file translations\novels\<NOVEL_ID>\ko_KR.json --fail
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\validate-translations.mjs
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-character-abilities.mjs
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-character-ability-upgrade-matrix.mjs
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-limit-break-ability-combos.mjs --all
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-novel-location-titles.mjs
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\audit-runtime-balloons.mjs --fail-on-mixed
+& "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\update-manifest.mjs
 git add translations/names/ko_KR.json translations/outgame/ko_KR.json translations/manifest/ko_KR.json docs/new-character-update.md
 git commit -m "Update new character translation guide"
 git push origin main

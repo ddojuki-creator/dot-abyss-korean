@@ -3,6 +3,8 @@
 - Translate like a professional Korean localizer for Japanese 2D subculture games.
 - Keep the meaning, mood, emotional temperature, and relationship dynamics of the source.
 - Prefer natural Korean game dialogue over literal translation.
+- Translate Japanese personal pronouns and conversational slang semantically instead of phonetically. Forms such as `アタシ`, `あたし`, `オレ`, and `俺` must become natural Korean first-person forms for the confirmed speaker, not `아타시` or `오레`.
+- Rebuild lists and cause/effect relationships in Korean sentence order. A source comma or `<br>` must not produce false links such as making two separate mishaps read as one combined action.
 - Do not summarize, omit, or invent story information.
 - Keep recurring terms and character voices consistent across files.
 - If context is limited, choose the most natural Korean game-text phrasing and preserve proper nouns conservatively.
@@ -15,6 +17,7 @@
 - Keep each displayed line at or below about 34 Korean characters whenever natural wording allows.
 - For novel dialogue in `translations/novels`, ignore the Japanese line-break position when setting the final Korean layout. Reflow from the first Korean word, aim for around 34 characters per displayed line without splitting a word, then continue on the second displayed line.
 - Treat 34 Korean characters as the normal target and 36 as the hard screen-risk limit for novel dialogue. Lines longer than 36 characters require reflow or manual shortening.
+- The 36-character limit is a hard release gate and overrides older guidance or visual guesses that about 50 characters will fit. Run the layout audit before committing, while the novel files still appear in the changed-file set.
 - Do not force a break merely to fill two lines. For non-novel UI/system text, do not add more line breaks than the source unless a local rule explicitly allows it.
 - If the source has several line breaks, consolidate them into one or remove them unless their separation is contextually important.
 - Do not damage grammar, character voice, tags, or placeholders just to meet the preferred 34-character length.

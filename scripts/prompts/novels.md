@@ -3,6 +3,10 @@
 Translate scenario dialogue and narration.
 Prioritize character voice, emotional nuance, and natural Korean game dialogue.
 For the fixed two-line story dialogue window, use at most one `<br>`. Target at most 34 visible Korean characters per rendered line and never exceed 36; if the meaning does not fit in two lines, compress the wording instead of creating a third line.
+This 34-character target and 36-character hard limit override any older note, source line length, or assumption that roughly 50 Korean characters fit. Recompose the complete Korean sentence before placing the single line break; never preserve a Japanese break mechanically when it makes the Korean clauses attach incorrectly.
+Translate Japanese first-person pronouns by meaning and speaker voice. `アタシ`/`あたし`/`私`/`オレ`/`俺` normally become `나` or `저`; never leave phonetic forms such as `아타시` or `오레` in Korean dialogue.
+Translate slang by function rather than katakana sound. For example, `チル` means relaxing/chilling and must not become `칠` or `칠하다`, while `ギャップ萌え` should become natural Korean such as `반전 매력`, not the raw loan form `갭모에` when it sounds unnatural.
+After bulk translation, every new `men_`, `hmn_`, and `hmr_` value requires a separate adjacent-context review. A short `men_` file is still character dialogue and must never be treated as a common UI-label batch.
 Never leave Japanese script inside a Korean value, including the reading or base text of `<ruby=reading>base</>` markup. Remove ruby markup when Korean needs no alternate reading; when it is semantically important, translate both the ruby reading and base text into Korean.
 Treat every `messageTextCenter` location/time transition as required dialogue coverage. Translate `<size=48>――place</size>`, `翌日`, and `数日後` exact keys across the complete `evs_*` event set.
 In adult narration, translate 肉棒 as 육봉 or 남근 according to context. Do not use 음경, 정액, 고환, 고기, or 고기봉 for 肉棒; preserve the fixed skill/title 육봉연술.
