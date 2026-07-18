@@ -7,6 +7,7 @@ const DEFAULT_COLLECTION = 'F:/DMMGamePlayer/dotabyss_x_cl/BepInEx/config/AbyssM
 const translationFile = path.join(ROOT, 'translations', 'outgame', 'ko_KR.json')
 const dynamicToken = /\{\[[^\]]+\][^}]*\}/g
 const dynamicTokenPresent = /\{\[[^\]]+\][^}]*\}/
+const runtimeExplorationDiscovery = /^(?:探索隊|탐색대\s*)[A-Z](?:が|가)\s*.+(?:を発見！|[을를] 발견(?:했다)?!)$/
 
 function parseArgs(argv) {
   const args = {
@@ -51,12 +52,11 @@ const HOTSPOTS = [
 ]
 
 function isHotspot(source) {
-  if (/^探索隊[A-Z]が/.test(source)) return false
-  if (/^(探索隊[A-Z]|探索隊[A-Z]가|탐색대 [A-Z]가|탐색대[A-Z]가).*(発見|발견)/.test(source)) return false
-  if (/\n/.test(source) && /(探索隊[A-Z]|探索隊[A-Z]가|탐색대 [A-Z]가|探索隊[A-Z]が|をクリア！|が発生！|클리어했다|발생했다)/.test(source)) {
-    return false
-  }
   return HOTSPOTS.some((pattern) => pattern.test(source))
+}
+
+function isRuntimeNormalizedExploration(source) {
+  return source.split(/\r?\n/).some((line) => runtimeExplorationDiscovery.test(line.trim()))
 }
 
 function hasJapaneseLeftover(value) {
@@ -97,11 +97,13 @@ const dynamicTemplates = Object.keys(translations).filter((source) => dynamicTok
 const sources = Object.keys(collection).filter(isHotspot).sort()
 const issues = []
 let dynamicCovered = 0
+let runtimeCovered = 0
 
 for (const source of sources) {
   const value = translations[source]
   if (typeof value !== 'string') {
     if (dynamicTemplates.some((template) => matchesDynamicTemplate(source, template))) dynamicCovered += 1
+    else if (isRuntimeNormalizedExploration(source)) runtimeCovered += 1
     else issues.push({ status: 'missing', source })
   }
   else if (value === source) issues.push({ status: 'untranslated', source, value })
@@ -116,7 +118,7 @@ const counts = issues.reduce((acc, issue) => {
 }, {})
 
 console.log(
-  `audit:outgame-ui-hotspots checked=${sources.length} issues=${issues.length} missing=${counts.missing || 0} untranslated=${counts.untranslated || 0} japanese-leftover=${counts['japanese-leftover'] || 0} dynamicCovered=${dynamicCovered}`,
+  `audit:outgame-ui-hotspots checked=${sources.length} issues=${issues.length} missing=${counts.missing || 0} untranslated=${counts.untranslated || 0} japanese-leftover=${counts['japanese-leftover'] || 0} dynamicCovered=${dynamicCovered} runtimeCovered=${runtimeCovered}`,
 )
 
 for (const issue of issues.slice(0, 50)) {
