@@ -8,6 +8,7 @@
 - Placeholders and non-layout tags are preserved; line-break controls follow the Korean line-layout policy.
 - During final layout review, text normally uses one line, never exceeds two displayed lines, and aims for 35 characters or fewer per line.
 - Novel dialogue ignores the Japanese line-break position during final layout. Reflow Korean from the first word, aim for around 34 Korean characters per displayed line without splitting words, and keep every displayed line at or below the 36-character hard limit.
+- Every newly added `men_...` entry receives the same full contextual review as `hmn_...` and `hmr_...`; do not sample short character/home dialogue or leave first-person forms such as `アタシ` transliterated into Korean.
 - Novel location/title cards must preserve visible Korean word spacing. Do not collapse forms such as `어비스빛의계층`; use `어비스 빛의 계층`.
 - Non-novel line breaks are used only when context or readability requires them and are never added beyond the source count unless a local rule explicitly allows it.
 - Character voice and speech level are consistent.
