@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { CACHE_DIR, ROOT, readJson, walk, writeJson } from './lib/ko-pipeline.mjs'
+import { CACHE_DIR, ROOT, readJson, shouldTranslateValue, walk, writeJson } from './lib/ko-pipeline.mjs'
 
 const japanese = /[\u3041-\u3096\u30a1-\u30fa\u30fd-\u30ff]/
 const novelIdPattern = String.raw`(?:mas_\d{10}|(?:evs|hmr|hmn|men)_\d{11})`
@@ -355,6 +355,32 @@ for (const record of records) {
 const issues = []
 const warnings = []
 const fixes = []
+const namesFile = path.join(ROOT, 'translations', 'names', 'ko_KR.json')
+const names = readJson(namesFile)
+const speakerReferences = new Map()
+
+for (const record of records) {
+  const speaker = record.speaker?.trim()
+  if (!speaker) continue
+  if (!speakerReferences.has(speaker)) speakerReferences.set(speaker, { count: 0, novelIds: new Set() })
+  const reference = speakerReferences.get(speaker)
+  reference.count += 1
+  reference.novelIds.add(record.novelId)
+}
+
+for (const [speaker, reference] of speakerReferences) {
+  const value = names[speaker]
+  const details = {
+    speaker,
+    count: reference.count,
+    novelIds: [...reference.novelIds].sort(),
+  }
+  if (typeof value !== 'string') {
+    issues.push({ type: 'missing-speaker-name', ...details })
+  } else if (shouldTranslateValue(speaker, value)) {
+    issues.push({ type: 'untranslated-speaker-name', value, ...details })
+  }
+}
 
 for (const [novelId, novelRecords] of grouped) {
   const file = path.join(ROOT, 'translations', 'novels', novelId, 'ko_KR.json')
@@ -437,7 +463,7 @@ if (fallback.scanner !== 'skipped') {
   console.log(`audit:novel-dialogue-metadata fallbackScanner=${fallback.scanner} fallbackFiles=${fallback.files} fallbackRecords=${fallback.records.length}`)
 }
 if (writeIndex) console.log(`audit:novel-dialogue-metadata index=${indexFile}`)
-console.log(`audit:novel-dialogue-metadata novelIds=${grouped.size} fixes=${fixes.length} issues=${issues.length} warnings=${warnings.length}`)
+console.log(`audit:novel-dialogue-metadata novelIds=${grouped.size} speakerNames=${speakerReferences.size} fixes=${fixes.length} issues=${issues.length} warnings=${warnings.length}`)
 
 for (const fixed of fixes.slice(0, 20)) {
   console.log(`\n[fixed] translations/novels/${fixed.novelId}/ko_KR.json`)
@@ -449,8 +475,13 @@ for (const warning of warnings.slice(0, 20)) {
   if (warning.speakers) console.log(`speakers: ${warning.speakers.join(', ')}`)
 }
 for (const issue of issues.slice(0, 60)) {
-  console.log(`\n[${issue.type}] translations/novels/${issue.novelId}/ko_KR.json`)
+  const issueFile = issue.type.endsWith('speaker-name')
+    ? 'translations/names/ko_KR.json'
+    : `translations/novels/${issue.novelId}/ko_KR.json`
+  console.log(`\n[${issue.type}] ${issueFile}`)
   if (issue.speaker) console.log(`speaker: ${issue.speaker}`)
+  if (issue.count) console.log(`count  : ${issue.count}`)
+  if (issue.novelIds) console.log(`novels : ${issue.novelIds.join(', ')}`)
   if (issue.command) console.log(`command: ${issue.command}`)
   if (issue.source) console.log(`source : ${JSON.stringify(issue.source)}`)
   if (issue.value) console.log(`value  : ${JSON.stringify(issue.value)}`)
