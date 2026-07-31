@@ -51,6 +51,22 @@ function storyRewardSource(title) {
   return `ストーリー解放：「${title}」が解放！`
 }
 
+function storyReplaySource(title) {
+  return `${title}\\nを再生しますか？`
+}
+
+function storyReplayTitle(source) {
+  return source.match(/^(【\d+(?:話|화)】.+)\\nを再生しますか？$/)?.[1] || null
+}
+
+function storyClearSource(title) {
+  return title + 'をクリア'
+}
+
+function storyClearTitle(source) {
+  return source.match(/^(【\d+(?:話|화)】.+)をクリア$/)?.[1] || null
+}
+
 function isRuntimeStoryUiSource(source) {
   if (/^【\d+話】.+をクリア$/.test(source)) return true
   return /ストーリー|閲覧しますか|再生しますか|재생하시겠습니까|初回報酬|クリアで解放|鬼退治|鬼と協力|追加データ.*ボイス/s.test(source)
@@ -99,6 +115,8 @@ const sources = new Set([
   'キャラクターストーリーが解放されました。',
   'キャラクターストーリーが開放されました。',
   '閲覧しますか？',
+  '{[storyTitle]}\\nを再生しますか？',
+  '{[storyTitle]}をクリア',
   'キャラクターストーリーが解放されました。<br>閲覧しますか？',
   'キャラクターストーリーが開放されました。<br>閲覧しますか？',
 ])
@@ -113,6 +131,10 @@ for (const [location, source] of Object.entries(snapshot.entries || {})) {
   if (isStoryMetadataLocation(location)) {
     sources.add(source)
   }
+  if (/^m_event_story_stages\/id:\d+\/2$/.test(location) && /^【\d+話】/.test(source)) {
+    sources.add(storyReplaySource(source))
+    sources.add(storyClearSource(source))
+  }
   if (isStoryDescriptionLocation(location)) {
     descriptionSources.add(source)
   }
@@ -125,7 +147,19 @@ if (args.writeMissingSource) {
   const seeded = []
   for (const source of [...sources].sort()) {
     if (typeof outgame[source] === 'string') continue
-    outgame[source] = source
+    const replayTitle = storyReplayTitle(source)
+    if (replayTitle) {
+      const translatedTitle = outgame[replayTitle] || replayTitle
+      outgame[source] = `${translatedTitle}\\n재생하시겠습니까?`
+    } else {
+      const clearTitle = storyClearTitle(source)
+      if (clearTitle) {
+        const translatedTitle = outgame[clearTitle] || clearTitle
+        outgame[source] = translatedTitle + ' 클리어'
+      } else {
+        outgame[source] = source
+      }
+    }
     seeded.push(source)
   }
   if (seeded.length) {

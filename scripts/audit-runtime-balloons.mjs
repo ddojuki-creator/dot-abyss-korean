@@ -6,10 +6,11 @@ import { ROOT, readJson, writeJson } from './lib/ko-pipeline.mjs'
 const DEFAULT_COLLECTION = 'F:/DMMGamePlayer/dotabyss_x_cl/BepInEx/config/AbyssMod/outgame-ja_JP.json'
 const DEFAULT_LOG = 'F:/DMMGamePlayer/dotabyss_x_cl/BepInEx/LogOutput.log'
 const DEFAULT_REPORT = path.join(ROOT, '.cache', 'runtime-balloon-audit.json')
-const japanese = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/
+const japanese = /[\u3041-\u3096\u30a1-\u30fa\u30fd-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/
 const korean = /[\uac00-\ud7af]/
 const richText = /<[^>]*>/g
 const dynamicToken = /\{\[[^\]]+\][^}]*\}/g
+const dynamicTokenPresent = /\{\[[^\]]+\][^}]*\}/
 
 function parseArgs(argv) {
   const args = {
@@ -114,7 +115,7 @@ if (!fs.existsSync(args.translation)) throw new Error(`Missing outgame translati
 
 const collection = readJson(args.collection)
 const translations = readJson(args.translation)
-const dynamicTemplates = Object.keys(translations).filter((source) => dynamicToken.test(source))
+const dynamicTemplates = Object.keys(translations).filter((source) => dynamicTokenPresent.test(source))
 const candidates = Object.keys(collection)
   .filter(isBalloonCandidate)
   .sort()
