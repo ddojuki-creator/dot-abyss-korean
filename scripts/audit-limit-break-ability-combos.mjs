@@ -38,8 +38,8 @@ function parseArgs(argv) {
 function usage() {
   console.log(`Usage: node scripts/audit-limit-break-ability-combos.mjs [--all] [--no-fail]
 
-Checks limit-break/awakening ability-detail combinations built from
-m_ability_details field 4 + field 5.
+Checks standalone runtime variants and combined limit-break/awakening strings
+built from m_ability_details field 4 + field 5.
 
 Default scope is only m_ability_details rows in .cache/game-cache-extract-report.json
 changes.added/changed. Use --all for a full historical scan.`)
@@ -174,6 +174,10 @@ function comboVariants(base, awakening) {
   return variants.flatMap(statusColorSourceVariants)
 }
 
+function standaloneVariants(source) {
+  return placeholderStyleVariants(source).flatMap(statusColorSourceVariants)
+}
+
 function hasJapaneseLeftover(value) {
   const text = stripTags(value)
   if (/[\u3041-\u3096\u30a1-\u30fa\u30fd-\u30ff]/.test(text)) return true
@@ -202,16 +206,23 @@ for (const id of ids) {
   const awakening = entries[`m_ability_details/id:${id}/5`]
   if (!isMeaningfulSource(base) || !isMeaningfulSource(awakening)) continue
   if (!isAbilityDetailSource(base) && !isAbilityDetailSource(awakening)) continue
+  for (const source of standaloneVariants(base)) {
+    sources.push({ id, kind: 'base', source })
+  }
+  for (const source of standaloneVariants(awakening)) {
+    sources.push({ id, kind: 'awakening', source })
+  }
   for (const source of comboVariants(base, awakening)) {
-    sources.push({ id, source })
+    sources.push({ id, kind: 'combined', source })
   }
 }
 
 const uniqueSources = []
 const seen = new Set()
 for (const item of sources) {
-  if (seen.has(item.source)) continue
-  seen.add(item.source)
+  const identity = `${item.kind}\0${item.source}`
+  if (seen.has(identity)) continue
+  seen.add(identity)
   uniqueSources.push(item)
 }
 
@@ -219,11 +230,11 @@ const issues = []
 for (const item of uniqueSources) {
   const value = translations[item.source]
   if (typeof value !== 'string') {
-    issues.push({ status: 'missing-limit-break-combo', ...item })
+    issues.push({ status: 'missing-ability-runtime-variant', ...item })
   } else if (value === item.source) {
-    issues.push({ status: 'untranslated-limit-break-combo', ...item, value })
+    issues.push({ status: 'untranslated-ability-runtime-variant', ...item, value })
   } else if (shouldTranslateValue(item.source, value) || hasJapaneseLeftover(value)) {
-    issues.push({ status: 'japanese-leftover-limit-break-combo', ...item, value })
+    issues.push({ status: 'japanese-leftover-ability-runtime-variant', ...item, value })
   }
 }
 
@@ -233,11 +244,11 @@ const counts = issues.reduce((acc, issue) => {
 }, {})
 
 console.log(
-  `audit:limit-break-ability-combos scope=${args.all ? 'all' : 'changed'} ids=${ids.size} checked=${uniqueSources.length} issues=${issues.length} missing=${counts['missing-limit-break-combo'] || 0} untranslated=${counts['untranslated-limit-break-combo'] || 0} japanese-leftover=${counts['japanese-leftover-limit-break-combo'] || 0}`,
+  `audit:limit-break-ability-combos scope=${args.all ? 'all' : 'changed'} ids=${ids.size} checked=${uniqueSources.length} issues=${issues.length} missing=${counts['missing-ability-runtime-variant'] || 0} untranslated=${counts['untranslated-ability-runtime-variant'] || 0} japanese-leftover=${counts['japanese-leftover-ability-runtime-variant'] || 0}`,
 )
 
 for (const issue of issues.slice(0, 50)) {
-  console.log(`\n[${issue.status}] id=${issue.id} ${truncate(JSON.stringify(issue.source))}`)
+  console.log(`\n[${issue.status}] id=${issue.id} kind=${issue.kind} ${truncate(JSON.stringify(issue.source))}`)
   if (issue.value != null) console.log(`value: ${truncate(JSON.stringify(issue.value))}`)
 }
 

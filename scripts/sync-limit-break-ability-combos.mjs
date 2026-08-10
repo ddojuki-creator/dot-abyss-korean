@@ -34,10 +34,10 @@ function parseArgs(argv) {
 function usage() {
   console.log(`Usage: node scripts/sync-limit-break-ability-combos.mjs [--dry-run] [--force]
 
-Builds exact outgame keys for limit-break/awakening ability rows from
-m_ability_details field 4 + field 5. The game UI displays these combined keys,
-so keeping them in translations/outgame/ko_KR.json prevents Japanese fallback
-before a player manually opens the ability awakening screen.`)
+Builds standalone and combined exact outgame keys for limit-break/awakening
+ability rows from m_ability_details field 4 + field 5. The game UI can render
+the fields separately or as one combined string, so both forms must exist to
+prevent partial Japanese fallback.`)
 }
 
 function stripPlaceholderBraces(source) {
@@ -169,6 +169,12 @@ function comboItems(id, baseSource, awakeningSource, baseTranslation, awakeningT
   return items.flatMap(statusColorComboVariants)
 }
 
+function standaloneItems(id, kind, source, translation) {
+  return placeholderStylePairs(source, translation)
+    .map((item) => ({ id, kind, ...item }))
+    .flatMap(statusColorComboVariants)
+}
+
 function bondRewardItems(id, source, translation) {
   return [
     {
@@ -216,8 +222,13 @@ for (const [location, baseSource] of Object.entries(entries)) {
     continue
   }
 
+  const runtimeItems = [
+    ...standaloneItems(id, 'base', baseSource, baseTranslation),
+    ...standaloneItems(id, 'awakening', awakeningSource, awakeningTranslation),
+    ...comboItems(id, baseSource, awakeningSource, baseTranslation, awakeningTranslation),
+  ]
   const seen = new Set()
-  for (const item of comboItems(id, baseSource, awakeningSource, baseTranslation, awakeningTranslation)) {
+  for (const item of runtimeItems) {
     if (seen.has(item.source)) continue
     seen.add(item.source)
 
