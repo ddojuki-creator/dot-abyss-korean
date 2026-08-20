@@ -72,6 +72,12 @@ function isKurehaNovelFile(file) {
 
 function normalize(key, value, file = '') {
   let result = value
+  if (key.includes('イライザ')) {
+    result = result.replace(/이라이자|이라이저|일라이저/g, '일라이자')
+  }
+  if (key.includes('エアリエル')) {
+    result = result.replace(/에어리얼|에아리엘/g, '에어리엘')
+  }
   if (key.includes('\u5927\u7A74')) {
     result = result.replace(/\ub300\uacf5\ub3d9|\ub300\uad6c\uba4d|\ud070 \uad6c\uba4d|\ub300\ub3d9\uad74/g, '\uc5b4\ube44스')
   }

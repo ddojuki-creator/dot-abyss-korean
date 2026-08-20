@@ -19,6 +19,7 @@ let MODEL = process.env.OPENAI_DIALOGUE_REVIEW_MODEL || process.env.OPENAI_REVIE
 let BATCH_SIZE = Number(process.env.DIALOGUE_REVIEW_BATCH_SIZE || 8)
 const MAX_RETRIES = Number(process.env.TRANSLATE_MAX_RETRIES || 4)
 const CONTEXT_RADIUS = Number(process.env.DIALOGUE_REVIEW_CONTEXT_RADIUS || 2)
+const BATCH_DELAY_MS = Number(process.env.DIALOGUE_REVIEW_BATCH_DELAY_MS || 0)
 const REVIEW_VERSION = '2026-06-30.2'
 const CACHE_DIR = path.join(ROOT, '.cache', 'dialogue-review')
 const STATE_FILE = path.join(CACHE_DIR, 'state.json')
@@ -436,6 +437,7 @@ async function main() {
       if (error.noRetry) throw error
     }
     batches += 1
+    if (BATCH_DELAY_MS > 0 && offset + BATCH_SIZE < pending.length) await sleep(BATCH_DELAY_MS)
   }
 
   const latestFile = path.join(CACHE_DIR, 'latest.json')

@@ -88,6 +88,51 @@ function normalizeKurehaDannaAddress(value) {
     .replace(/나리/g, '서방님')
 }
 
+function normalizeKotonoDannaAddress(value) {
+  return value
+    .replace(/나리를/g, '주군을')
+    .replace(/나리는/g, '주군은')
+    .replace(/나리가/g, '주군이')
+    .replace(/(?:서방님|주인님|주군님|남편님|나리님|나리)께서/g, '주군께서')
+    .replace(/(?:서방님|주인님|주군님|남편님|나리님|나리)께/g, '주군께')
+    .replace(/(?:서방님|주인님|주군님|남편님|나리님|나리)의/g, '주군의')
+    .replace(/(?:서방님|주인님|주군님|남편님|나리님|나리)과/g, '주군과')
+    .replace(/(?:서방님|주인님|주군님|남편님|나리님|나리)와/g, '주군과')
+    .replace(/(?:서방님|주인님|주군님|남편님|나리님|나리)을/g, '주군을')
+    .replace(/(?:서방님|주인님|주군님|남편님|나리님|나리)은/g, '주군은')
+    .replace(/(?:서방님|주인님|주군님|남편님|나리님|나리)이/g, '주군이')
+    .replace(/(?:서방님|주인님|주군님|남편님|나리님|나리)도/g, '주군도')
+    .replace(/서방님|주인님|주군님|남편님|나리님|서방|남편|여보|나리/g, '주군')
+    .replace(/주군를/g, '주군을')
+    .replace(/주군는/g, '주군은')
+    .replace(/주군가/g, '주군이')
+    .replace(/주군와/g, '주군과')
+}
+
+function normalizeSpeakerTerminology(key, value, speakers = []) {
+  if (speakers.length === 1 && speakers[0] === 'コトノ') {
+    let normalized = value
+    if (/<user>殿/.test(key)) normalized = normalized.replace(/<user>(?:님|공)/g, '<user>공')
+    if (/旦那(?:様|さま)?/.test(key)) normalized = normalizeKotonoDannaAddress(normalized)
+    return normalized
+  }
+  return value
+}
+
+function trimNovelLineBreaks(source, value) {
+  const breakPattern = /<br(?:\s+[^>]*)?>|\\r\\n|\\[nr]|\r\n|\r|\n/gi
+  const maxBreaks = source.match(breakPattern)?.length || 0
+  let kept = 0
+  return value
+    .replace(breakPattern, (match) => {
+      if (kept >= maxBreaks) return ' '
+      kept++
+      return match
+    })
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim()
+}
+
 function normalizeOnigashimaProduce(value) {
   return value
     .replace(/프로듀스 계획/g, '홍보 계획')
@@ -109,6 +154,12 @@ function stateKey(file, entry) {
 
 function normalizeTerminology(key, value) {
   let normalized = value
+  if (key.includes('イライザ')) {
+    normalized = normalized.replace(/이라이자|이라이저|일라이저/g, '일라이자')
+  }
+  if (key.includes('エアリエル')) {
+    normalized = normalized.replace(/에어리얼|에아리엘/g, '에어리엘')
+  }
   if (key.includes('\u5927\u7A74')) {
     normalized = normalized.replace(/\ub300\uacf5\ub3d9|\ub300\uad6c\uba4d|\ud070 \uad6c\uba4d|\ub300\ub3d9\uad74/g, '\uc5b4\ube44스')
   }
@@ -416,6 +467,8 @@ async function callOpenAI(prompt, items, options = {}) {
       throw err
     }
     let value = normalizeTerminology(item.key, responseValue)
+    value = normalizeSpeakerTerminology(item.key, value, item.speakers)
+    if (item.novelId) value = trimNovelLineBreaks(item.value, value)
     if (options.removeAddedLineBreaks) {
       value = value
         .replace(/<br(?:\s+[^>]*)?>/gi, ' ')

@@ -10,6 +10,9 @@
 - Novel dialogue ignores the Japanese line-break position during final layout. Reflow Korean from the first word, aim for around 34 Korean characters per displayed line without splitting words, and keep every displayed line at or below the 36-character hard limit.
 - Every newly added `men_...` entry receives the same full contextual review as `hmn_...` and `hmr_...`; do not sample short character/home dialogue or leave first-person forms such as `アタシ` transliterated into Korean.
 - New novel publication order is mandatory: bulk translation -> full adjacent-context review of every new entry -> apply or reject every blocking finding -> per-file 34/36 layout audit -> `validate-translations.mjs` -> manifest generation -> local cache/CDN sync. Do not generate the manifest or report completion before the two review gates pass.
+- Before translating an update, freeze the full-cache list of every added or changed `mas_`, `evs_`, `hmn_`, `hmr_`, and `men_` ID. For each ID, require exact four-way presence in the source index, `translations/novels`, manifest novels, and the game-local novels cache.
+- For every added or changed scenario ID, the source and Korean JSON must have identical `message`, `dotmessage`, `messageTextCenter`, and `l2dmessage` key sets. A file created by `--write-missing-source` is not translated; non-punctuation `value == source` must be 0.
+- If the required contextual review cannot run because the review API or model quota is unavailable, report the review as blocked. Do not silently skip it, generate the manifest, sync CDN/cache, or report completion.
 - Run the changed-file layout audit before committing. Because `--changed` only sees uncommitted novel edits, a clean result obtained after the files were already committed is not evidence that the translated batch passed.
 - Translation-model prompts, style docs, and this checklist must agree on hard limits. If an older note claims roughly 50 Korean characters fit, it is obsolete; the novel prompt/style rule of 34 target and 36 hard maximum wins.
 - Novel location/title cards must preserve visible Korean word spacing. Do not collapse forms such as `어비스빛의계층`; use `어비스 빛의 계층`.
@@ -42,6 +45,10 @@
 - `魔導炉` / `特殊魔導炉` is always `마도로` / `특수 마도로`; `마도 노심` and `마도노심` do not remain.
 - `マリナ` dialogue uses `旦那様/旦那さま=나리` unless the source clearly uses another address; `단나사마`, `주인님`, `남편님`, `남편`, `여보`, `사장님`, and `당신` do not remain as active translations.
 - `クレハ` dialogue/profiles/titles use `旦那様/旦那さま/旦那=서방님` even when the file is an event `evs_...` story; Marina's `나리` rule must not be applied to Kureha.
+- `コトノ` dialogue uses `<user>殿=<user>공` before the loyalty pledge and `旦那様/旦那=주군` after it. Do not leave `단나사마` or use `나리`, `서방님`, `주인님`, or `남편님`.
+- `コトノ=코토노` and `ホウライ=호라이`; `호우라이` must not remain in the 2026-07-24 scenario batch.
+- `氷河 / 氷河の厄災=빙하 / 빙하의 재앙` and `飢餓 / 飢餓の厄災=기아 / 기아의 재앙`. Never merge or swap the two disaster names.
+- In Kotono's clothing/body context, `サラシ` is translated as `가슴을 감는 천`, not `복대` or a transliteration.
 - `ベリサ` dialogue uses `兄さん/おにーさん=오빠`; never `형` or `형님`.
 - `ちゃん` is not left as `쨩` unless intentionally approved for a specific character voice.
 - `大穴` is always `어비스`; `대공`, `거대 구멍`, and `큰 구멍` do not remain as active translations.

@@ -26,12 +26,20 @@ Use this table format:
 | お兄様 / オニサマ | 오라버니 | Distinguish from casual `おにーさん`/`お兄さん` = `오빠`. |
 | マリナ의 旦那様 / 旦那さま | 나리 | Marina's merchant-style address. Do not translate as `단나사마`, `주인님`, `서방님`, `남편님`, `남편`, `여보`, `사장님`, or `당신`. |
 | クレハ의 旦那様 / 旦那さま / 旦那 | 서방님 | Kureha's romantic address for the protagonist. Do not use Marina's `나리` here. |
+| コトノ | 코토노 | Character name. Always use `코토노`. |
+| コトノ의 <user>殿 | <user>공 | Kotono's address before the loyalty pledge. Apply only when the speaker is Kotono. |
+| コトノ의 旦那様 / 旦那 | 주군 | Kotono's address after the loyalty pledge. Never use `나리`, `서방님`, `주인님`, or `남편님`. |
+| コトノ의 主君 | 주군 | Kotono's explicit lord/master term. Keep consistent with her post-pledge address. |
+| ホウライ | 호라이 | Kotono's home region. Never use `호우라이`. |
+| サラシ | 가슴을 감는 천 | In Kotono's clothing/body context, translate by function. Do not use `복대` or transliteration. |
 | 베리사(1200002 / 102001)의 兄さん·おにーさん | 오빠 | Berisa is a woman addressing the male protagonist. Never translate her address as `형` or `형님`. |
 | 마뇨리아(1300019 / 102401)의 おにいさん | 오빠 | Manioria is a woman addressing the male protagonist. Mackun's `兄ちゃん` remains `형` because Mackun is male. |
 | 멜리사(1300041 / 107701)의 お兄さん | 오빠 | Melissa is a woman addressing the male protagonist. Do not use `형님`. |
 | 라베리아(1300015)의 兄さん | 오빠 | Laveria is a woman addressing the male protagonist. Do not use `형` or `형님`. |
 | アリシア | 알리시아 | Character name. Always use `알리시아`; never use `아리시아`. |
 | クルル | 쿠루루 | Character name. Always use `쿠루루`; never use `크루루`, `크룰루`, or `쿠룰루`. |
+| 【水着】クルル | 【수영복】쿠루루 | Costume variant label. Preserve the full-width corner brackets and do not insert a space after the prefix. |
+| 【水着】ニナ | 【수영복】니나 | Costume variant label. Preserve the full-width corner brackets and do not insert a space after the prefix. |
 | ヴィーラ | 비라 | Character name. Always use `비라`; never use `비이라`. |
 | ノワール | 느와르 | Character name. Always use `느와르`; never use `노와르`, `누와르`, or `누아르`. |
 | ペルディオン | 페르디온 | Region and faction name. Always use `페르디온`; never use `펄디온` or `펠디온`. |
@@ -52,6 +60,7 @@ Use this table format:
 | バック (formation role) | 백 | Formation role. Always use `백`; never use `가방` or `후위`. Note that バッグ means a physical bag and is unrelated. |
 | フロント (formation role) | 프론트 | Formation role. Always use `프론트`; never use `전위`. |
 | ノックバック | 넉백 | Combat/status term. Always use `넉백`; never use `노크백`. |
+| いずれかのエネミー | 어떤 적이든 | Mission-condition wording. Never use `어느 에너미든` or `어느 적을`. |
 | HIT | HIT | Combat hit-count unit in skill/ability descriptions. Preserve as `HIT`; do not translate as `회 타격`, `히트`, or `타`. |
 | クイック選択 | 빠른 선택 | Formation UI action. Never use `퀵 선택`. |
 | スタンス | 스탠스 | Gameplay stance term. Keep as `스탠스`; attach particles naturally. |
@@ -61,6 +70,7 @@ Use this table format:
 | 巡回 | 순찰 | Icon/button label. Do not use mixed or malformed variants such as `巡회`. |
 | ピッケル | 곡갱이 | Weapon/equipment type. Always use `곡갱이`; never use `픽켈` or `피켈`. |
 | 飢餓 / 飢餓の厄災 | 기아 / 기아의 재앙 | Disaster and status terminology. Always use `기아`; never use `굶주림`. |
+| 氷河 / 氷河の厄災 | 빙하 / 빙하의 재앙 | Disaster terminology. Keep distinct from `飢餓 / 기아`; never translate it as `기아의 재앙`. |
 | 土 / 土属性 | 토 / 토 속성 | Attribute name. Use `토` in compact UI and `토 속성` in prose. Never use `흙` or `흙 속성` for the attribute. |
 | カノンコール / キャノン コール / キャノンコール | 캐논 콜 | Skill name. Always use `캐논 콜`; never use `카논 콜`, `카논콜`, `캐넌 콜`, or `캐논콜`. |
 | 魔導炉 / 特殊魔導炉 | 마도로 / 특수 마도로 | Wendy automata core term. Always use `마도로`; never use `마도 노심` or `마도노심`. |
@@ -86,6 +96,9 @@ Use this table format:
 | 名前が言いにくい | 이름이 발음하기 어렵다 | Pronunciation context. Do not preserve the Japanese structure as `이름이 말하기 어렵다`. |
 | 星占いの結果 | 별점을 쳐 보니 / 점괘로는 | Choose natural Korean by sentence; avoid the noun-chain literalism `별점 결과`. |
 | アイシャ | 아이샤 | Character name. Always use `아이샤`; never use `아샤` or `아이샤아`. |
+| イライザ | 일라이자 | Character name. Always use `일라이자`; never use `이라이자`, `이라이저`, or `일라이저`. |
+| エアリエル | 에어리엘 | Character name. Always use `에어리엘`; never use `에어리얼` or `에아리엘`. |
+| ヴェスペラ | 베스페라 | Character name. Always use `베스페라`; never use `베스페라아` or `베스페라르`. |
 | ルシータ | 루시타 | Character name. Always use `루시타`; never use `루시다`. |
 | フィオナ | 피오나 | Character name. Always use `피오나`; never use `피오너` or `피오나아`. |
 | クリスティ | 크리스티 | Character name. Always use `크리스티`; never use `크리스티이` or `크리스티ー`. |
