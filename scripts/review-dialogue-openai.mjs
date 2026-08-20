@@ -49,6 +49,7 @@ function parseArgs(argv) {
     maxBatches: null,
     batchSize: null,
     model: null,
+    speaker: null,
     output: null,
     dryRun: false,
     force: false,
@@ -74,6 +75,8 @@ function parseArgs(argv) {
     else if (arg.startsWith('--batch-size=')) args.batchSize = Number(arg.slice('--batch-size='.length))
     else if (arg === '--model') args.model = next()
     else if (arg.startsWith('--model=')) args.model = arg.slice('--model='.length)
+    else if (arg === '--speaker') args.speaker = next()
+    else if (arg.startsWith('--speaker=')) args.speaker = arg.slice('--speaker='.length)
     else if (arg === '--output') args.output = next()
     else if (arg.startsWith('--output=')) args.output = arg.slice('--output='.length)
     else if (arg === '--dry-run') args.dryRun = true
@@ -102,6 +105,7 @@ Options:
   --max-batches <n>    Stop after n API batches. Useful for daily slices.
   --batch-size <n>     Items per API batch. Larger values reduce repeated instruction tokens.
   --model <model>      Override OPENAI_* model env vars for this run.
+  --speaker <name>     Review only entries spoken by this exact metadata speaker.
   --output <path>      JSONL suggestions output path.
   --force              Ignore saved done-state and review again.
   --dry-run            Print targets without calling OpenAI.
@@ -158,6 +162,17 @@ function targetFiles(args) {
   }
   if (args.limit != null) files = files.slice(0, args.limit)
   return files
+}
+
+function buildSpeakerSourceIndex(speaker) {
+  if (!speaker) return null
+  const indexFile = path.join(ROOT, '.cache', 'novel-message-index.json')
+  const sources = new Set()
+  for (const row of readJson(indexFile)) {
+    if (row?.speaker !== speaker || !row.novelId || typeof row.source !== 'string') continue
+    sources.add(`${row.novelId}\u0000${row.source}`)
+  }
+  return sources
 }
 
 function entryStateKey(file, entry) {
@@ -300,16 +315,18 @@ function appendJsonLine(file, item) {
   fs.appendFileSync(file, `${JSON.stringify(item)}\n`, 'utf8')
 }
 
-function collectPending(files, state, instructionsHash, args) {
+function collectPending(files, state, instructionsHash, args, speakerSources) {
   const pending = []
   const fileStats = []
   for (const file of files) {
     const data = readJson(file)
     const entries = collectEntries(data)
+    const novelId = path.basename(path.dirname(file))
     let selected = 0
     for (let index = 0; index < entries.length; index += 1) {
       const entry = entries[index]
       if (typeof entry.value !== 'string') continue
+      if (speakerSources && !speakerSources.has(`${novelId}\u0000${entry.key}`)) continue
       if (isDone(state, file, entry, instructionsHash, args.force)) continue
       pending.push({ file, entry, index, entries })
       selected += 1
@@ -363,14 +380,16 @@ async function main() {
   const instructions = loadInstructions()
   const state = loadState()
   const files = targetFiles(args)
+  const speakerSources = buildSpeakerSourceIndex(args.speaker)
   const outputFile = args.output ? resolveFromRoot(args.output) : defaultOutputFile()
-  const { pending, fileStats } = collectPending(files, state, instructions.hash, args)
+  const { pending, fileStats } = collectPending(files, state, instructions.hash, args, speakerSources)
   const runId = path.basename(outputFile, '.jsonl')
 
   console.log(`model=${MODEL}`)
   console.log(`reviewVersion=${REVIEW_VERSION}`)
   console.log(`instructionsHash=${instructions.hash}`)
   console.log(`targetFiles=${files.length}`)
+  if (args.speaker) console.log(`speaker=${args.speaker} indexedSources=${speakerSources.size}`)
   console.log(`pendingEntries=${pending.length}`)
   console.log(`batchSize=${BATCH_SIZE}`)
   console.log(`output=${rel(outputFile)}`)
