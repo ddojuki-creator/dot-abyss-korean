@@ -78,6 +78,13 @@ function normalize(key, value, file = '') {
   if (key.includes('エアリエル')) {
     result = result.replace(/에어리얼|에아리엘/g, '에어리엘')
   }
+  if (key.includes('生き字引')) {
+    result = result
+      .replace(/살아남은 글을 모르는 코토/g, '걸어 다니는 백과사전도 모르는 것')
+      .replace(/마법\s*도서관의\s*(?:생자자|생자 끌기|활자 뽑기|활자인|활자)/g, '마법 도서관의 걸어 다니는 백과사전')
+      .replace(/페르디온의 산증인/g, '페르디온의 걸어 다니는 백과사전')
+      .replace(/산증인|생자자/g, '걸어 다니는 백과사전')
+  }
   if (key.includes('\u5927\u7A74')) {
     result = result.replace(/\ub300\uacf5\ub3d9|\ub300\uad6c\uba4d|\ud070 \uad6c\uba4d|\ub300\ub3d9\uad74/g, '\uc5b4\ube44스')
   }

@@ -98,6 +98,7 @@ Use this table format:
 | アイシャ | 아이샤 | Character name. Always use `아이샤`; never use `아샤` or `아이샤아`. |
 | イライザ | 일라이자 | Character name. Always use `일라이자`; never use `이라이자`, `이라이저`, or `일라이저`. |
 | エアリエル | 에어리엘 | Character name. Always use `에어리엘`; never use `에어리얼` or `에아리엘`. |
+| 生き字引 | 걸어 다니는 백과사전 | A knowledgeable-person idiom used for Ariel. Never translate it as `살아남은 글`, `산증인`, `생자자`, `활자`, or a literal `living index`. |
 | ヴェスペラ | 베스페라 | Character name. Always use `베스페라`; never use `베스페라아` or `베스페라르`. |
 | ルシータ | 루시타 | Character name. Always use `루시타`; never use `루시다`. |
 | フィオナ | 피오나 | Character name. Always use `피오나`; never use `피오너` or `피오나아`. |
