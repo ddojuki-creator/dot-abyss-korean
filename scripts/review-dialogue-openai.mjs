@@ -105,7 +105,7 @@ Options:
   --max-batches <n>    Stop after n API batches. Useful for daily slices.
   --batch-size <n>     Items per API batch. Larger values reduce repeated instruction tokens.
   --model <model>      Override OPENAI_* model env vars for this run.
-  --speaker <name>     Review only entries spoken by this exact metadata speaker.
+  --speaker <name>     Review entries spoken by this metadata speaker, including <costume> variants.
   --output <path>      JSONL suggestions output path.
   --force              Ignore saved done-state and review again.
   --dry-run            Print targets without calling OpenAI.
@@ -169,7 +169,8 @@ function buildSpeakerSourceIndex(speaker) {
   const indexFile = path.join(ROOT, '.cache', 'novel-message-index.json')
   const sources = new Set()
   for (const row of readJson(indexFile)) {
-    if (row?.speaker !== speaker || !row.novelId || typeof row.source !== 'string') continue
+    const rowSpeaker = String(row?.speaker || '')
+    if ((rowSpeaker !== speaker && !rowSpeaker.startsWith(`${speaker}<`)) || !row.novelId || typeof row.source !== 'string') continue
     sources.add(`${row.novelId}\u0000${row.source}`)
   }
   return sources
