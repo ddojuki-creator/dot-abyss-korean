@@ -8,6 +8,8 @@ const DEFAULT_SNAPSHOT = path.join(ROOT, 'snapshots', 'game-cache-ja_JP.json')
 const outgameFile = path.join(ROOT, 'translations', 'outgame', 'ko_KR.json')
 const titlesFile = path.join(ROOT, 'translations', 'titles', 'ko_KR.json')
 const descriptionsFile = path.join(ROOT, 'translations', 'descriptions', 'ko_KR.json')
+const dynamicToken = /\{\[[^\]]+\][^}]*\}/g
+const dynamicTokenPresent = /\{\[[^\]]+\][^}]*\}/
 
 function parseArgs(argv) {
   const args = {
@@ -47,6 +49,24 @@ function truncate(value, max = 180) {
   return value.length > max ? `${value.slice(0, max - 1)}…` : value
 }
 
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function matchesDynamicTemplate(source, template) {
+  const tokens = [...template.matchAll(dynamicToken)]
+  if (!tokens.length) return false
+  let pattern = '^'
+  let offset = 0
+  for (const token of tokens) {
+    pattern += escapeRegex(template.slice(offset, token.index))
+    pattern += '.+?'
+    offset = token.index + token[0].length
+  }
+  pattern += escapeRegex(template.slice(offset))
+  return new RegExp(`${pattern}$`, 's').test(source)
+}
+
 function storyRewardSource(title) {
   return `ストーリー解放：「${title}」が解放！`
 }
@@ -69,7 +89,7 @@ function storyClearTitle(source) {
 
 function isRuntimeStoryUiSource(source) {
   if (/^【\d+話】.+をクリア$/.test(source)) return true
-  return /ストーリー|閲覧しますか|再生しますか|재생하시겠습니까|初回報酬|クリアで解放|鬼退治|鬼と協力|追加データ.*ボイス/s.test(source)
+  return /ストーリー|閲覧しますか|再生しますか|再生します[、。]よろしいですか|재생하시겠습니까|初回報酬|クリアで解放|鬼退治|鬼と協力|追加データ.*ボイス/s.test(source)
 }
 
 function isStoryMetadataLocation(location) {
@@ -103,6 +123,7 @@ const collection = readJson(args.collection)
 const outgame = readJson(outgameFile)
 const titles = readJson(titlesFile)
 const descriptions = readJson(descriptionsFile)
+const dynamicTemplates = Object.keys(outgame).filter((source) => dynamicTokenPresent.test(source))
 const snapshot = fs.existsSync(args.snapshot) ? readJson(args.snapshot) : { entries: {} }
 
 const sources = new Set([
@@ -116,6 +137,10 @@ const sources = new Set([
   'キャラクターストーリーが開放されました。',
   '閲覧しますか？',
   '{[storyTitle]}\\nを再生しますか？',
+  '「{[storyTitle]}」<br>を再生します。よろしいですか？',
+  '「{[storyTitle]}」\nを再生します。よろしいですか？',
+  '「{[storyTitle]}」\nを再生します、よろしいですか？',
+  '「{[storyTitle]}」を再生します。よろしいですか？',
   '{[storyTitle]}をクリア',
   'キャラクターストーリーが解放されました。<br>閲覧しますか？',
   'キャラクターストーリーが開放されました。<br>閲覧しますか？',
@@ -182,6 +207,7 @@ if (args.writeMissingSource) {
 }
 
 const issues = []
+let dynamicCovered = 0
 for (const source of [...sources].sort()) {
   const rewardTitle = source.match(/^ストーリー解放：「(.+)」が解放！$/)?.[1]
   if (rewardTitle && hasJapaneseUiLeftover(rewardTitle)) {
@@ -194,7 +220,10 @@ for (const source of [...sources].sort()) {
   }
 
   const value = outgame[source]
-  if (typeof value !== 'string') issues.push({ status: 'missing', source })
+  if (typeof value !== 'string') {
+    if (dynamicTemplates.some((template) => matchesDynamicTemplate(source, template))) dynamicCovered += 1
+    else issues.push({ status: 'missing', source })
+  }
   else if (value === source) issues.push({ status: 'untranslated', source, value })
   else if (shouldTranslateValue(source, value) || hasJapaneseUiLeftover(value)) {
     issues.push({ status: 'japanese-leftover', source, value })
@@ -216,7 +245,7 @@ const counts = issues.reduce((acc, issue) => {
 }, {})
 
 console.log(
-  `audit:character-story-ui checked=${sources.size} descriptions=${descriptionSources.size} issues=${issues.length} missing=${counts.missing || 0} untranslated=${counts.untranslated || 0} japanese-leftover=${counts['japanese-leftover'] || 0} missing-title=${counts['missing-title-translation'] || 0} missing-description=${counts['missing-description'] || 0}`,
+  `audit:character-story-ui checked=${sources.size} descriptions=${descriptionSources.size} issues=${issues.length} missing=${counts.missing || 0} untranslated=${counts.untranslated || 0} japanese-leftover=${counts['japanese-leftover'] || 0} missing-title=${counts['missing-title-translation'] || 0} missing-description=${counts['missing-description'] || 0} dynamicCovered=${dynamicCovered}`,
 )
 
 for (const issue of issues.slice(0, 50)) {
