@@ -75,6 +75,9 @@ function normalize(key, value, file = '') {
   if (key.includes('イライザ')) {
     result = result.replace(/이라이자|이라이저|일라이저/g, '일라이자')
   }
+  if (key.includes('ヒマリ')) {
+    result = result.replace(/히말리/g, '히마리')
+  }
   if (key.includes('エアリエル')) {
     result = result.replace(/에어리얼|에아리엘/g, '에어리엘')
   }
