@@ -74,7 +74,8 @@ Use this table format:
 | 土 / 土属性 | 토 / 토 속성 | Attribute name. Use `토` in compact UI and `토 속성` in prose. Never use `흙` or `흙 속성` for the attribute. |
 | カノンコール / キャノン コール / キャノンコール | 캐논 콜 | Skill name. Always use `캐논 콜`; never use `카논 콜`, `카논콜`, `캐넌 콜`, or `캐논콜`. |
 | 魔導炉 / 特殊魔導炉 | 마도로 / 특수 마도로 | Wendy automata core term. Always use `마도로`; never use `마도 노심` or `마도노심`. |
-| 選べる○○BOX / 選べる○○BOX交換券 | ○○ 선택 BOX | Selectable item names must put the target first, e.g. `SSR 캐릭터 선택 BOX`, `Rank4 무기 선택 BOX`, `초급 기술 원소 선택 BOX`. Do not use `선택 가능한 ○○ BOX`. |
+| 選べる○○BOX | ○○ 선택 BOX | Selectable item names must put the target first, e.g. `SSR 캐릭터 선택 BOX`, `Rank4 무기 선택 BOX`, `초급 기술 원소 선택 BOX`. Do not use `선택 가능한 ○○ BOX`. |
+| 選べる○○BOX交換券 | ○○ 선택 BOX 교환권 | Keep `交換券`: a ticket exchanged for a BOX is not the BOX itself. Preserve this distinction in item names, pack contents and runtime combinations. |
 | フロア1 / フロア2 / フロア3 | 플로어1 / 플로어2 / 플로어3 | Brothel management area labels. Do not translate these labels as `1층`, `2층`, or `3층`. Actual building floors such as `1階` remain `1층`. |
 | 司令官 / 指揮官 | 사령관 | Commander title/address. Use `사령관` or `사령관님` as context requires; never use `지휘관`. |
 | 司令官殿 | 사령관공 | Formal knight/soldier address. Preserve this when the source explicitly uses `殿`; do not normalize it to `사령관님`. |
@@ -98,6 +99,13 @@ Use this table format:
 | アイシャ | 아이샤 | Character name. Always use `아이샤`; never use `아샤` or `아이샤아`. |
 | イライザ | 일라이자 | Character name. Always use `일라이자`; never use `이라이자`, `이라이저`, or `일라이저`. |
 | ヒマリ | 히마리 | Character name. Always use `히마리`; never use `히말리`. |
+| ナイア | 나이아 | 2026-08-31 신규 캐릭터. |
+| ユーリ | 유리 | 2026-08-31 신규 캐릭터. |
+| フェルトゥーナ / フェル | 펠투나 / 펠 | 용인족 이름과 별명. 페르투나/펠트나 등으로 흔들지 않는다. |
+| フェレスティア | 펠레스티아 | 나이아의 해상 레스토랑. |
+| ノルトメキア | 노르트메키아 | 유리의 고향 성봉. 山이 붙으면 노르트메키아산. |
+| 氷精蝶 | 빙정접 | 유리의 버프/어빌리티 공통 용어. |
+| エルドラーナフードフェス | 엘드라나 푸드 페스티벌 | 요리 축제 고유명. |
 | エアリエル | 에어리엘 | Character name. Always use `에어리엘`; never use `에어리얼` or `에아리엘`. |
 | 生き字引 | 걸어 다니는 백과사전 | A knowledgeable-person idiom used for Ariel. Never translate it as `살아남은 글`, `산증인`, `생자자`, `활자`, or a literal `living index`. |
 | ヴェスペラ | 베스페라 | Character name. Always use `베스페라`; never use `베스페라아` or `베스페라르`. |

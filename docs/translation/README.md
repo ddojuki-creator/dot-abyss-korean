@@ -50,6 +50,7 @@ Do not assume `static` makes `outgame` unnecessary. Many UI screens assemble Jap
 5. `tags-placeholders.md`: placeholders, tags, line-break controls, and rich-text preservation.
 6. `qa-checklist.md`: final QA and audit expectations.
 7. `ui-system.md`: UI/system text principles.
+8. `direct-review.md`: API 없는 직접 번역·전수 문맥 검수와 검수 기록. API 전용이라는 과거 절차보다 우선한다.
 
 Dialogue work also needs `character-voice.md`, `context-review.md`, and `adult-content.md`.
 

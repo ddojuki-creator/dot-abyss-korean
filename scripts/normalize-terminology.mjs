@@ -270,7 +270,6 @@ function normalize(key, value, file = '') {
     result = result
       .replace(/선택 가능한 ([^\n]*?) BOX/g, '$1 선택 BOX')
       .replace(/선택 가능한 ([^\n]*?) 상자/g, '$1 선택 BOX')
-      .replace(/SSR 캐릭터 선택 BOX 교환권/g, 'SSR 캐릭터 선택 BOX')
   }
   const floorLabel = key.match(/^\u30D5\u30ED\u30A2([123])$/)
   if (floorLabel) {

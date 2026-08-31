@@ -12,13 +12,14 @@
 - New novel publication order is mandatory: bulk translation -> full adjacent-context review of every new entry -> apply or reject every blocking finding -> per-file 34/36 layout audit -> `validate-translations.mjs` -> manifest generation -> local cache/CDN sync. Do not generate the manifest or report completion before the two review gates pass.
 - Before translating an update, freeze the full-cache list of every added or changed `mas_`, `evs_`, `hmn_`, `hmr_`, and `men_` ID. For each ID, require exact four-way presence in the source index, `translations/novels`, manifest novels, and the game-local novels cache.
 - For every added or changed scenario ID, the source and Korean JSON must have identical `message`, `dotmessage`, `messageTextCenter`, and `l2dmessage` key sets. A file created by `--write-missing-source` is not translated; non-punctuation `value == source` must be 0.
-- If the required contextual review cannot run because the review API or model quota is unavailable, report the review as blocked. Do not silently skip it, generate the manifest, sync CDN/cache, or report completion.
+- Contextual review may use either the direct Codex procedure in `direct-review.md` or the designated API model. API/model quota failure does not block direct translation or review. Record the actual method and full reviewed coverage; if neither path has completed the required review, do not generate the manifest, sync CDN/cache, or report completion.
 - Run the changed-file layout audit before committing. Because `--changed` only sees uncommitted novel edits, a clean result obtained after the files were already committed is not evidence that the translated batch passed.
 - Translation-model prompts, style docs, and this checklist must agree on hard limits. If an older note claims roughly 50 Korean characters fit, it is obsolete; the novel prompt/style rule of 34 target and 36 hard maximum wins.
 - Novel location/title cards must preserve visible Korean word spacing. Do not collapse forms such as `어비스빛의계층`; use `어비스 빛의 계층`.
 - Non-novel line breaks are used only when context or readability requires them and are never added beyond the source count unless a local rule explicitly allows it.
 - Character voice and speech level are consistent.
 - UI text is concise.
+- Item qualifiers (`交換券`, `かけら`, `引換券`) are not dropped to shorten labels. Distinguish a BOX from its exchange ticket in both standalone names and pack contents. Run `node scripts/audit-item-qualifiers.mjs` after item-name normalization and static generation.
 - No invented setting, relationship, or emotion was added.
 
 ## CDN Update QA

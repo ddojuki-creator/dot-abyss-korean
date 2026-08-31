@@ -191,8 +191,8 @@ evs_10600010101
 신규 소설 번역은 아래 순서를 바꾸지 않는다. 대량 번역 성공이나 일본어 잔존 0건만으로 완료 처리하지 않는다.
 
 1. `men_`, `hmn_`, `hmr_`, `evs_`, `mas_`의 신규 원문과 화자 메타데이터를 모두 추출한다.
-2. 지정된 번역 모델로 1차 번역한다. 일본어 1인칭과 회화 속어는 음차하지 않고 화자 카드에 맞는 자연스러운 한국어로 옮긴다.
-3. 신규 파일의 모든 엔트리를 지정 검수 모델로 다시 검토한다. 짧은 `men_`도 표본 검수가 아니라 전수 검수한다.
+2. Codex가 직접 또는 지정된 API 번역 모델로 1차 번역한다. 일본어 1인칭과 회화 속어는 음차하지 않고 화자 카드에 맞는 자연스러운 한국어로 옮긴다.
+3. 신규 파일의 모든 엔트리를 별도 패스로 다시 검토한다. 직접 작업은 `translation/direct-review.md`에 따라 전체 원문·화자·앞뒤 문맥을 대조하고 기록한다. API 경로는 지정 검수 모델을 쓴다. 짧은 `men_`도 표본 검수가 아니라 전수 검수하며, API 크레딧은 직접 검수의 필수 조건이 아니다.
 4. 검수 제안 중 오역, 부자연스러운 직역, 호칭·용어 위반, 잘못된 사건 관계는 모두 반영하거나 원문 근거로 기각한다.
 5. 커밋 전에 신규 파일별로 `review-novel-layout.mjs --file <path> --fail`을 실행해 표시 줄당 34자 목표, 36자 상한, 최대 두 줄을 확인한다.
 6. 전체 번역 검증을 통과한 뒤에만 매니페스트 갱신, 게임 캐시 복사, CDN push를 진행한다.
@@ -221,7 +221,7 @@ game: BepInEx/plugins/AbyssMod/cache/ko_KR/novels/<id>.json
 ## 검증과 반영
 
 ```powershell
-# 신규 소설 파일만 .cache\review-new-novels에 모아 전수 문맥 검수
+# API 경로를 선택한 경우의 전수 문맥 검수 예시 (직접 경로는 translation/direct-review.md)
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\review-dialogue-openai.mjs --dir .cache\review-new-novels --model gpt-5.4-mini --force --output .cache\dialogue-review\new-novels.jsonl
 # 아래 줄 길이 검사는 신규 소설 파일마다 반복하고 blocking=0을 확인
 & "C:\Users\tl300\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" scripts\review-novel-layout.mjs --file translations\novels\<NOVEL_ID>\ko_KR.json --fail
