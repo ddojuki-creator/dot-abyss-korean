@@ -10,7 +10,7 @@ const API_URL = process.env.OPENAI_API_URL || 'https://api.openai.com/v1/chat/co
 const BATCH_SIZE = Number(process.env.REVIEW_BATCH_SIZE || 20)
 const MAX_RETRIES = Number(process.env.TRANSLATE_MAX_RETRIES || 4)
 const STATE_FILE = path.join(ROOT, '.review-ko-state.json')
-const REVIEW_VERSION = '2026-06-23.9'
+const REVIEW_VERSION = '2026-09-05.2'
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -31,7 +31,7 @@ function saveState(state) {
 }
 
 function loadInstructions() {
-  const names = ['context-review.md', 'style-core.md', 'character-voice.md', 'character-cards.md', 'glossary.md', 'adult-content.md', 'tags-placeholders.md', 'forbidden.md']
+  const names = ['context-review.md', 'final-review.md', 'style-core.md', 'character-voice.md', 'character-cards.md', 'glossary.md', 'adult-content.md', 'tags-placeholders.md', 'forbidden.md', 'supplementary-reference.md']
   return names.map((name) => readText(path.join(ROOT, 'docs', 'translation', name))).join('\n\n---\n\n')
 }
 

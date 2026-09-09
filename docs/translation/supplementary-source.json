@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "kind": "hdor-derived-local-reference",
+  "repository": "https://github.com/Chroche-Latel/Ehnd-individual-user-dictionary",
+  "commit": "0eeef96e4adbd2e7fd670b562d58fa61f14c58eb",
+  "redistribute": false,
+  "files": [
+    {"name": "README.md", "sha256": "4af1b5b3bb7eaac77e272dae683b01fecbf9c0620793cc8733da081ea1df0964"},
+    {"name": "UserDict_@Hdor#1.txt", "sha256": "985ff81c8a4691c569f5c8fb966d65fde43c4fc35323dc5388bc24a73e047a8f"},
+    {"name": "UserDict_@Hdor#0#req.txt", "sha256": "f14dc0813519290a4b46f0e55aa8b70c93457b415272d876338fc0b7823cdeca"},
+    {"name": "UserDict_@Hdor#name.txt", "sha256": "11bd6ea67ff7181ce0ea26875aecb7a045c376d07fdf78e20bb9cd13c089cbd1"},
+    {"name": "UserDict_@Custom.txt", "sha256": "5e30147555979baf70d50a03a93738f1d60031c91173102b86a0faaf8a926210"},
+    {"name": "PreFilter_@Hdor.txt", "sha256": "a0e043bc3b474de0043907e32bba15310fe17ffe95dab3d4f5e37a11cb0bed1b"},
+    {"name": "PostFilter_@Hdor.txt", "sha256": "f92b23b236fea7535805d43529cfe7cdd8bfef8d6eab6b270ae4a9532e486859"}
+  ]
+}

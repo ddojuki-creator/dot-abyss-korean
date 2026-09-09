@@ -22,6 +22,7 @@
 - Do not translate `旦那様` / `旦那さま` as `단나사마`, `주인님`, `서방님`, `남편님`, `남편`, `여보`, `사장님`, or `당신` in Marina dialogue unless the source context explicitly requires a different relationship.
 - Do not translate Kureha's `旦那様` / `旦那さま` / `旦那` as Marina's `나리` or as `주인님`; use `서방님`.
 - Do not translate `兄さん` / `おにーさん` as `형` or `형님` for Berisa-style address; use `오빠`.
+- Do not translate `お兄様` or equivalent address variants in `glossary.md` as `오니사마`, `오빠`, or `오빠님`; use `오라버니`, including quoted repetitions by another speaker. Do not apply this rule by globally replacing Korean `오빠` without checking the Japanese source.
 - Do not translate `魔導炉` / `特殊魔導炉` as `마도 노심` or `마도노심`; use `마도로` / `특수 마도로`.
 - Do not mistranslate `肉棒` / `男根` / `陰茎` / `男性器` as `정액`, `고환`, `고기`, or `고기봉`; use `남근` or context-appropriate `음경`.
 - Do not translate `膣壁` or typo-like `膣癖` body-part context as `질 습관`; use `질벽`.
@@ -34,4 +35,5 @@
 - Do not translate brothel/service-card `ドリンク` as `음료`; use `드링크`.
 - Do not translate brothel auto-assignment button `任せる` literally as `맡기기`; use `자동 배치`.
 - Do not leave mixed malformed `巡회` for `巡回`; use `순찰`.
-- Do not translate Onigashima event UI `プロデュース` as `프로듀스` when glyph safety matters; use `홍보`.
+- Do not replace accurate Korean expressions solely to avoid historically missing font glyphs. Report any reproduced missing glyph as a rendering issue.
+- Do not use `곡갱이` for `ピッケル`; the standard spelling is `곡괭이`.

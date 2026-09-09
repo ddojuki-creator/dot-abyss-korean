@@ -1,17 +1,19 @@
 # QA Checklist
 
+- If supplementary lexical material was used, record the query, file/line/version and accept/reject reason under `supplementary-reference.md`. Check for context conflicts and leaked engine markers. Do not require a full dictionary pass or change a correct translation just to match a dictionary entry.
+
 - JSON parses successfully.
 - Every translation file is a JSON object.
 - `translations/manifest/ko_KR.json` is generated, not translated.
-- Keys match upstream `zh_Hans.json`.
+- Required keys match the frozen current source index. Use upstream `zh_Hans.json` only where it is the verified source for that layer; record retained compatibility keys separately rather than deleting them to force equality.
 - Values are non-empty strings.
-- Placeholders and non-layout tags are preserved; line-break controls follow the Korean line-layout policy.
-- During final layout review, text normally uses one line, never exceeds two displayed lines, and aims for 35 characters or fewer per line.
+- Placeholders and non-layout tags are preserved; line-break controls follow the Korean line-layout policy. Novel ruby follows the specific exception in `tags-placeholders.md`: remove unnecessary readings or translate both meaningful layers, never restore Japanese readings under the generic preservation rule.
+- Final novel layout targets 34 visible characters per line, allows 35~36 as watch items, and never exceeds two displayed lines. UI follows its own screen-specific layout rule.
 - Novel dialogue ignores the Japanese line-break position during final layout. Reflow Korean from the first word, aim for around 34 Korean characters per displayed line without splitting words, and keep every displayed line at or below the 36-character hard limit.
 - Every newly added `men_...` entry receives the same full contextual review as `hmn_...` and `hmr_...`; do not sample short character/home dialogue or leave first-person forms such as `アタシ` transliterated into Korean.
 - New novel publication order is mandatory: bulk translation -> full adjacent-context review of every new entry -> apply or reject every blocking finding -> per-file 34/36 layout audit -> `validate-translations.mjs` -> manifest generation -> local cache/CDN sync. Do not generate the manifest or report completion before the two review gates pass.
-- Before translating an update, freeze the full-cache list of every added or changed `mas_`, `evs_`, `hmn_`, `hmr_`, and `men_` ID. For each ID, require exact four-way presence in the source index, `translations/novels`, manifest novels, and the game-local novels cache.
-- For every added or changed scenario ID, the source and Korean JSON must have identical `message`, `dotmessage`, `messageTextCenter`, and `l2dmessage` key sets. A file created by `--write-missing-source` is not translated; non-punctuation `value == source` must be 0.
+- Before translating an update, freeze the full-cache list of every added or changed `mas_`, `evs_`, `hmn_`, `hmr_`, and `men_` ID. Check source/repository coverage before translation and four-way source/repository/manifest/game-cache presence after deployment. Preserve explicitly approved exclusions under `direct-review.md`; do not claim that the unfiltered full-cache audit passed.
+- For every added or changed scenario ID, compare the union of exact unique source keys from `message`, `dotmessage`, `messageTextCenter`, `messageTextUnder`, and `l2dmessage` against Korean JSON keys. Count repeated message occurrences separately and review every occurrence with its source order and speaker. A smaller unique-key count than message count is not itself a missing translation. A file created by `--write-missing-source` is not translated; non-punctuation `value == source` must be 0.
 - Contextual review may use either the direct Codex procedure in `direct-review.md` or the designated API model. API/model quota failure does not block direct translation or review. Record the actual method and full reviewed coverage; if neither path has completed the required review, do not generate the manifest, sync CDN/cache, or report completion.
 - Run the changed-file layout audit before committing. Because `--changed` only sees uncommitted novel edits, a clean result obtained after the files were already committed is not evidence that the translated batch passed.
 - Translation-model prompts, style docs, and this checklist must agree on hard limits. If an older note claims roughly 50 Korean characters fit, it is obsolete; the novel prompt/style rule of 34 target and 36 hard maximum wins.
@@ -21,6 +23,12 @@
 - UI text is concise.
 - Item qualifiers (`交換券`, `かけら`, `引換券`) are not dropped to shorten labels. Distinguish a BOX from its exchange ticket in both standalone names and pack contents. Run `node scripts/audit-item-qualifiers.mjs` after item-name normalization and static generation.
 - No invented setting, relationship, or emotion was added.
+- Final review of an already translated and first-reviewed batch follows `final-review.md`. Record current source/translation/instruction versions, preserve prior review history, and distinguish mechanical spelling fixes from a new full semantic review.
+- Korean counters, spacing, particles, negation, and actor/recipient relationships have been checked without changing exact UI/combat values. Uncertain source defects are recorded rather than silently rewritten.
+- Historical font-based synonym rules are not applied. Missing glyphs, clipping, variable-name expansion, and overlap are separate rendering checks; character-count success alone does not prove screen fit.
+- Compare the five supported source commands with raw TextAsset order/counts, not just an already extracted index. Newly discovered commands/keys need their own review; source extraction alone is not translation approval.
+- When instructions are supplemented, retain the previous completion evidence and hashes under the 2026-09-06 user policy. Do not re-review completed translations or sign replacement approvals solely to clear `rule-impact-check`. Keep partial approvals, unresolved holds, exclusions, and technical/rendering work distinct.
+- Record missing-candidate counts, warning counts, tested files, and actual QA run count separately. A passing run with existing warnings is not warning-free. Run the integrated full QA once per batch unless a failure and its repair require a recorded rerun.
 
 ## CDN Update QA
 
@@ -55,6 +63,7 @@
 - `大穴` is always `어비스`; `대공`, `거대 구멍`, and `큰 구멍` do not remain as active translations.
 - `司令官` / `指揮官` commander-address uses are translated as `사령관`/`사령관님`; `지휘관` does not remain as an active translation.
 - Explicit source honorifics are preserved: `司令官殿=사령관공`, `司令官さん=사령관씨`. Do not flatten these to `사령관님`.
+- `お兄様` 및 공통 용어집의 동형 호칭은 `오라버니`로 옮겼는지 원문과 대조한다. 화자의 직접 호칭뿐 아니라 상대의 인용·되묻기, 호칭 도입 회차와 이후 일상 대사도 확인한다. `오니사마`/`오빠님`이나 해당 원문의 `오빠`가 남아 있으면 수정하되, `お兄さん`/`おにーさん` 등 다른 원문에 대응하는 정상 번역은 일괄 변경하지 않는다.
 - `司令室` / `しれーしつ` location uses are translated as `사령실`; `지휘실` does not remain for these source terms.
 - Skill/ability hit-count units keep source `HIT` as `HIT`. Do not translate them as `회 타격`, `히트`, or `타`.
 - `ノックバック` is always `넉백`; `노크백` does not remain.
@@ -63,13 +72,13 @@
 ## Character Ability / Limit-Break QA
 
 - New character updates must check `translations/names`, `titles`, `descriptions`, `outgame`, `novels`, `another_name`, `ability_descriptions`, and generated `static`, not only the file where the first Japanese string was found.
-- Cached novel IDs can include `evs`, `hmn`, `hmr`, `mas`, and `men`; all new files must be translated and included in manifest/cache.
+- Cached novel IDs can include `evs`, `hmn`, `hmr`, `mas`, and `men`; all included new files must be translated and included in manifest/cache. Record explicitly approved exclusions separately.
 - Main-story `mas_` IDs use a 10-digit numeric suffix, while most other novel IDs use 11 digits. The audit regex must support both; do not validate only by the `--cache-since` window because reused Unity `__data` files can have older modification times.
 - Main-story dialogue may carry `mcv_` voice metadata while other dialogue uses `vc_`. Strip both before creating translation keys and fail QA if either metadata form remains in a source key.
 - After opening a new chapter once, run an all-cache audit so every logged `mas_` scenario ID is present in the CDN and local `novels` cache.
 - After playing newly added story content, inspect the runtime-collected `outgame-ja_JP.json` for mixed Korean/Japanese keys. Dynamic common popups can translate the changing quest title while leaving fixed Japanese suffixes; cover these with a `{[quest]}` template and verify all unlocked quest names, not only the first screenshot.
 - Run `scripts/audit-runtime-balloons.mjs --fail-on-mixed` after opening new story/quest screens. It records `NovelRoot/WorldUICanvas`, `Exploration/.../TextBalloon`, and `Popup_QuestSelect/.../InfoNovel/TextBalloon` runtime paths and catches missing or mixed-language balloon entries.
-- Full-cache story audits must include `dotmessage` world-balloon commands as well as `message`, `messageTextCenter`, and `l2dmessage`; checking only the latter three misses main-story speech balloons.
+- Full-cache story audits must include `dotmessage` world-balloon commands as well as `message`, `messageTextCenter`, `messageTextUnder`, and `l2dmessage`; checking only ordinary dialogue misses speech balloons and Under narration.
 - Story QA must compare all dialogue `speaker` values and `charaload`/`objectload` name fields against `translations/names/ko_KR.json`, including ASCII/full-width and spacing variants such as `信者A` vs `信者Ａ`.
 - Cache update reviews must inspect `.cache/game-cache-extract-report.json` `characterSpecSummary`. `m_ability_details` IDs do not include character IDs, so map them through `m_character_abilities` before deciding which character changed.
 - Limit-break abilities usually have 3 abilities, each upgraded twice. Verify all 3 abilities across base, first-upgrade, and second-upgrade states, and check both exact keys and translated values.

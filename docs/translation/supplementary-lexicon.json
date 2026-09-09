@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "mode": "reference-only",
+  "priority": 4,
+  "provenance": "2026-09-05 Naia comparison: hmn_11030100002 and men_11030100002. Project-authored contextual notes; not mandatory replacements or measured quality gains.",
+  "sourceDescriptor": "supplementary-source.json",
+  "entries": [
+    {
+      "id": "sanzan-extent",
+      "terms": ["散々", "さんざん"],
+      "context": "행위의 정도·반복·부정적 경험을 문맥별로 구분한다.",
+      "options": ["설거리를 실컷 하다", "몹시", "호되게"],
+      "caution": "설거리를 많이 한 문맥에서는 실컷이 후보다. 모든 문맥을 심하게로 치환하지 않고 엔진 표기를 가져오지 않는다.",
+      "references": [{"file": "UserDict_@Hdor#1.txt", "line": 11114}]
+    },
+    {
+      "id": "ude-ni-yori",
+      "terms": ["腕によりを", "腕に縒りを"],
+      "context": "솜씨를 최대한 발휘하려는 관용구. 음식 준비 장면에서는 정성을 쏟는 뜻도 살린다.",
+      "options": ["솜씨를 한껏 발휘하다", "정성을 다해 만들다"],
+      "caution": "기존 정성을 다해가 장면에 맞으면 유지한다. 필터의 형태소 코드나 치환 정규식을 사용하지 않는다.",
+      "references": [{"file": "PreFilter_@Hdor.txt", "line": 5006}]
+    },
+    {
+      "id": "hakidame-metaphor",
+      "terms": ["掃き溜め", "掃きだめ"],
+      "context": "쓰레기가 쌓인 곳 또는 지저분한 장소의 비유.",
+      "options": ["쓰레기장"],
+      "caution": "어질러진 주방의 비유와 실제 장소명을 구분한다. 장면에 없는 더러움이나 모욕의 강도를 더하지 않는다.",
+      "references": [{"file": "UserDict_@Hdor#1.txt", "line": 3439}]
+    },
+    {
+      "id": "level-prose-ui",
+      "terms": ["レベル"],
+      "context": "일반 서술의 정도·수준과 게임 성장 수치를 구분한다.",
+      "options": ["정도", "수준", "레벨"],
+      "caution": "일반 비유에서 정도가 자연스러울 수 있다. UI의 Lv나 게임 용어를 일괄 치환하지 않는다.",
+      "references": [{"file": "UserDict_@Hdor#1.txt", "line": 7946}]
+    },
+    {
+      "id": "nanchatte-senses",
+      "terms": ["なんちゃって"],
+      "context": "문장 끝에서 농담으로 말을 거두는 용법과 명사 앞에서 가짜·흉내를 뜻하는 용법을 구분한다.",
+      "options": ["농담이야", "막 이래", "가짜", "흉내 낸"],
+      "caution": "문장 끝 농담에 가짜를 넣지 않는다. 자조·장난의 강도와 해당 화자의 말투에 맞춘다.",
+      "references": [{"file": "UserDict_@Hdor#1.txt", "line": 11224}, {"file": "PreFilter_@Hdor.txt", "line": 2430}]
+    },
+    {
+      "id": "shaki-texture",
+      "terms": ["シャキッ", "シャキシャキ", "しゃきっ", "しゃきしゃき"],
+      "context": "채소의 식감과 사람이 정신을 차리거나 자세를 바로 하는 장면을 구분한다.",
+      "options": ["아삭하다", "정신을 차리다", "똑바로 하다"],
+      "caution": "샐러드 식감에는 아삭하다가 후보다. 사전의 산뜻을 모든 문맥에 적용하지 않는다.",
+      "references": [{"file": "UserDict_@Hdor#1.txt", "line": 9118}, {"file": "UserDict_@Hdor#1.txt", "line": 11214}]
+    },
+    {
+      "id": "awa-fluster",
+      "terms": ["あわあわ"],
+      "context": "당황해서 말을 더듬는 소리인지, 거품을 묘사하는 말인지 주변 대사로 판별한다.",
+      "options": ["어, 어어", "아, 아앗"],
+      "caution": "당황한 감탄사의 후보일 뿐 고정 표기가 아니다. 아와아와 음역이나 사전 엔진 표기를 그대로 출력하지 않는다.",
+      "references": [{"file": "UserDict_@Hdor#1.txt", "line": 10608}]
+    },
+    {
+      "id": "salad-konshin-title",
+      "terms": ["サラダ", "渾身"],
+      "context": "정성을 담아 지은 장난스러운 요리 이름에서도 재료·수식·과장된 명명 의도를 보존한다.",
+      "options": ["샐러드", "혼신의", "온 정성을 담은"],
+      "caution": "긴 이름이라고 세부 정보를 지우지 않는다. 渾身の出来는 관련 사례이지 渾身サラダ와 같은 문구가 아니다.",
+      "references": [{"file": "UserDict_@Hdor#1.txt", "line": 2653}, {"file": "UserDict_@Hdor#1.txt", "line": 7674}]
+    }
+  ]
+}

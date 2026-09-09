@@ -84,6 +84,8 @@ function extractMessages(script) {
         ? 'dotmessage'
         : line.startsWith('messageTextCenter,')
         ? 'messageTextCenter'
+        : line.startsWith('messageTextUnder,')
+          ? 'messageTextUnder'
         : line.startsWith('l2dmessage,')
           ? 'l2dmessage'
           : null
@@ -191,7 +193,7 @@ for file in files_to_scan:
                 text = script.decode("utf-8", "ignore")
             else:
                 text = str(script or "")
-            if "message," not in text and "dotmessage," not in text and "messageTextCenter," not in text and "l2dmessage," not in text:
+            if "message," not in text and "dotmessage," not in text and "messageTextCenter," not in text and "messageTextUnder," not in text and "l2dmessage," not in text:
                 continue
             novel_ids = sorted(set(re.findall(r"(?:mas_\d{10}|(?:evs|hmr|hmn|men)_\d{11})", str(name) + "\n" + text)))
             if target_ids and not (target_ids & set(novel_ids)):

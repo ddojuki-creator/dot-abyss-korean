@@ -20,16 +20,18 @@ let BATCH_SIZE = Number(process.env.DIALOGUE_REVIEW_BATCH_SIZE || 8)
 const MAX_RETRIES = Number(process.env.TRANSLATE_MAX_RETRIES || 4)
 const CONTEXT_RADIUS = Number(process.env.DIALOGUE_REVIEW_CONTEXT_RADIUS || 2)
 const BATCH_DELAY_MS = Number(process.env.DIALOGUE_REVIEW_BATCH_DELAY_MS || 0)
-const REVIEW_VERSION = '2026-06-30.2'
+const REVIEW_VERSION = '2026-09-05.1'
 const CACHE_DIR = path.join(ROOT, '.cache', 'dialogue-review')
 const STATE_FILE = path.join(CACHE_DIR, 'state.json')
 
 const instructionFiles = [
   'docs/translation/context-review.md',
+  'docs/translation/final-review.md',
   'docs/translation/style-core.md',
   'docs/translation/character-voice.md',
   'docs/translation/character-cards.md',
   'docs/translation/glossary.md',
+  'docs/translation/supplementary-reference.md',
   'docs/translation/adult-content.md',
   'docs/translation/tags-placeholders.md',
   'docs/translation/forbidden.md',
@@ -205,7 +207,7 @@ function buildPayload(targets) {
       'Preserve approved commander honorifics: 司令官殿=사령관공 and 司令官さん=사령관씨. Do not flatten them to 사령관님.',
       'If changed, suggested must be the full replacement Korean value.',
       'Preserve tags, placeholders, and control tokens. For novel dialogue, use at most one rendered line break.',
-      'Do not remove or replace existing <br>, \\n, or other line-break tokens; keep their count and form.',
+      'Novel line breaks are layout controls: reposition or consolidate them to zero or one rendered break independently of the source count. Preserve meaning and all non-layout tags and placeholders.',
       'Do not propose style-only polish or line-break-only rewrites unless the current text is clearly wrong.',
       'Keep reasons short and concrete.',
     ],
@@ -296,7 +298,7 @@ function sanitizeChange(change, targets) {
   if (typeof change.suggested !== 'string' || change.suggested.length === 0) return null
   const target = targets[id]
   if (change.suggested === target.entry.value) return null
-  const tokenErrors = compareProtectedTokens(target.entry.key, change.suggested, { lineBreaks: 'korean-dialogue', preserveLineBreakTokens: true })
+  const tokenErrors = compareProtectedTokens(target.entry.key, change.suggested, { lineBreaks: 'korean-dialogue' })
   if (tokenErrors.length) return null
   return {
     id,

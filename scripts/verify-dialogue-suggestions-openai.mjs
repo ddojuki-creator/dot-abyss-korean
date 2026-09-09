@@ -88,6 +88,7 @@ function loadInstructions() {
     'docs/translation/style-core.md',
     'docs/translation/character-cards.md',
     'docs/translation/glossary.md',
+    'docs/translation/supplementary-reference.md',
     'docs/translation/adult-content.md',
     'docs/translation/tags-placeholders.md',
     'docs/translation/forbidden.md',
@@ -217,7 +218,6 @@ async function main() {
       }
       const tokenErrors = compareProtectedTokens(target.source, finalValue, {
         lineBreaks: 'korean-dialogue',
-        preserveLineBreakTokens: true,
       })
       if (tokenErrors.length) {
         action = 'reject'

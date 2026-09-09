@@ -353,7 +353,7 @@ export function readPromptVersion() {
 }
 
 export function loadPrompt(scope) {
-  const docs = ['style-core.md', 'tags-placeholders.md', 'glossary.md', 'forbidden.md']
+  const docs = ['style-core.md', 'tags-placeholders.md', 'glossary.md', 'forbidden.md', 'supplementary-reference.md']
   if (scope === 'common') docs.splice(1, 0, 'ui-system.md')
   else docs.splice(1, 0, 'character-voice.md', 'character-cards.md', 'adult-content.md')
 

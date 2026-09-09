@@ -2,6 +2,8 @@
 
 Add recurring official terms, names, titles, factions, skills, and forms of address here.
 
+Optional contextual candidates live in `supplementary-lexicon.json`; consult them under `supplementary-reference.md` only when needed. They and the local Hdor-derived reference never override this glossary or character rules. Promote a candidate here only after contextual review and conflict checks.
+
 Use this table format:
 
 | Source | Korean | Note |
@@ -20,10 +22,19 @@ Use this table format:
 | 大穴 | 어비스 | Core world-location and title term. Always use `어비스`; do not use `대공`, `대공동`, `대구멍`, `거대 구멍`, `큰 구멍`, or `대동굴`. |
 | 大空洞 / アビス | 어비스 | Same world-location family as `大穴`. Use `어비스` unless a specific source context clearly needs another approved term. |
 | 前線基地 | 전선기지 | Main base/location term. Always use `전선기지`; never use `전진 기지`. |
+| 師範代 | 사범 대리 | 훈련소 직책. `사범대`로 줄이지 않는다. |
+| 騎士活 | 기사 덕질 | 기사 팬 활동을 뜻하는 해당 스토리/제목 문맥. 기사로서의 직무 활동과 구별한다. |
+| 魔力結晶 | 마력 결정 | 마력의 결정체. `魔法`와 혼동해 `마법 결정`으로 바꾸지 않는다. |
+| 魔脈の道標 | 마맥의 이정표 | 탐색 관련 명칭. `마맥의 도표`와 구별한다. |
+| 巻き寿司 | 김초밥 | 해당 음식 문맥. 한국 음식 `김밥`으로 현지화하지 않는다. |
+| 形代 | 사람 모양 부적 | 해당 시나리오의 부적 문맥에서 확인한 풀이. hmn_10620100001 line379의 護符, hmn_10620100002 line936의 남녀 모양 두 장이 근거. 다른 물건/문맥에 무조건 적용하지 않는다. |
+| 炎上 | 발화 | 전투 상태 이상 명칭. 단순한 화염 피해와 구별한다. 일반 비유/서술은 문맥으로 판단한다. |
+| 凍結 | 빙결 | 전투 상태 이상 명칭. 발동 조건의 속성을 이유로 다른 상태 이상으로 바꾸지 않는다. |
+| ブリザード | 블리자드 | 필드 효과명 문맥. 효과 제목과 설명 안의 참조명을 일치시키며, 그 효과가 다루는 상태 이상 `凍結`=`빙결`과 구별한다. 일반적인 날씨 서술까지 이 이름으로 고정하지 않는다. |
 | ドットアビス | 도트어비스 | Project/game title. Always use `도트어비스`. |
 | 錬珍術 | 육봉연술 | Adult-pun localization. Always use `육봉연술`; do not use `연진술` or `연단술`. |
 | ご主人様 | 주인님 | Use only when the Japanese source actually says `ご主人様`. Do not substitute it for other address terms. |
-| お兄様 / オニサマ | 오라버니 | Distinguish from casual `おにーさん`/`お兄さん` = `오빠`. |
+| お兄様 / お兄さま / おにいさま / オニサマ / オニーサマ | 오라버니 | 사용자 지정 호칭. 같은 호칭의 표기 변형과 이를 인용하거나 되묻는 대사에도 적용한다. `오니사마`, `오빠`, `오빠님`으로 옮기지 않는다. 일반형 `お兄さん`/`おにーさん`은 기존 화자·관계별 기준(`오빠` 등)을 유지하며, 한국어 `오빠` 전체를 일괄 치환하지 않는다. |
 | マリナ의 旦那様 / 旦那さま | 나리 | Marina's merchant-style address. Do not translate as `단나사마`, `주인님`, `서방님`, `남편님`, `남편`, `여보`, `사장님`, or `당신`. |
 | クレハ의 旦那様 / 旦那さま / 旦那 | 서방님 | Kureha's romantic address for the protagonist. Do not use Marina's `나리` here. |
 | コトノ | 코토노 | Character name. Always use `코토노`. |
@@ -68,7 +79,7 @@ Use this table format:
 | 仕事 / おしごと | 작업 / 업무 | In brothel work screens, use `작업` or `업무` by context. Existing auto-assignment wording uses `모든 작업`. |
 | 任せる | 자동 배치 | Brothel auto-assignment button. Do not translate literally as `맡기기` in this UI. |
 | 巡回 | 순찰 | Icon/button label. Do not use mixed or malformed variants such as `巡회`. |
-| ピッケル | 곡갱이 | Weapon/equipment type. Always use `곡갱이`; never use `픽켈` or `피켈`. |
+| ピッケル | 곡괭이 | Weapon/equipment type. Use the standard spelling `곡괭이`; never use `곡갱이`, `픽켈`, or `피켈`. |
 | 飢餓 / 飢餓の厄災 | 기아 / 기아의 재앙 | Disaster and status terminology. Always use `기아`; never use `굶주림`. |
 | 氷河 / 氷河の厄災 | 빙하 / 빙하의 재앙 | Disaster terminology. Keep distinct from `飢餓 / 기아`; never translate it as `기아의 재앙`. |
 | 土 / 土属性 | 토 / 토 속성 | Attribute name. Use `토` in compact UI and `토 속성` in prose. Never use `흙` or `흙 속성` for the attribute. |
@@ -138,8 +149,28 @@ Use this table format:
 | おしごと用コスチューム | 업무용 코스튬 | UI costume category. Never abbreviate it as `일용 코스튬`. Preserve an existing `<br>` between the words. |
 | 嘘 / ウソ / うそ | 거짓말 / 말도 안 돼 / 농담 | Translate naturally by context. Never transliterate it as `우소`. |
 | バブみ | 바부미 | Always use `바부미`; never use `바붐`. |
-| プロデュース | 홍보 | In Onigashima event UI, prefer `홍보` because `프로듀스` can expose unsupported glyphs. |
-| 頭を悩ませる | 골치를 썩이다 | Prefer this wording in story/UI when glyph safety matters; avoid `앓` if it renders as a square. |
+| プロデュース | 홍보 / 기획 / 프로듀스 | Choose by the actual role and context. Do not force a synonym for font compatibility or undo an already accurate `홍보` translation. |
+| 頭を悩ませる | 골머리를 앓다 / 골치를 썩이다 | Choose natural Korean by context. Neither expression is forbidden for font compatibility. |
+
+## Contextual Vocabulary Notes
+
+These are context-bound review cues, not a global replacement dictionary. Apply them to unfinished work; do not reopen completed translations for wording preferences.
+
+| Source | Korean / Meaning | Context Check |
+| --- | --- | --- |
+| 瘴気 | 독기 | Harmful miasma in the Abyss; do not confuse it with 장기, an ordinary smell, or a curse. |
+| 純真結晶 | 순진 결정 | Preserve the established item name rather than freely changing it to 순수 결정. |
+| まかない | 직원 식사 | A restaurant's staff meal, not a head-chef position. |
+| 便箋 / 手紙 | 편지지 / 편지 | Distinguish writing materials from a finished letter being posted. |
+| 話が早い | 이해가 빠르다 / 이야기가 잘 통하다 | In reaching an understanding, not literal speaking speed. |
+| 公僕 | 공무원 | In public-service dialogue, not the Korean homograph 공복 meaning an empty stomach. |
+| 始末書 / 残業 | 시말서 / 초과근무 | Distinguish a written account from a disciplinary order; overtime is not limited to nighttime. |
+| ひのふのみぃ | 하나, 둘, 셋 | A counting expression. Do not confuse it with 하필 or infer that the whole group contains exactly three people. |
+| 箱の中身 | 상자 안의 내용물 | The contents, not just the interior location. |
+| 盗掘 | 도굴 | Preserve the illegal-excavation meaning when applicable. |
+| 異物 | 특이한 물건 / 문맥에 따른 이물질 | 어비스에서 수집·연구·활용하는 물건은 `특이한 물건`을 후보로 검토한다. 신체나 다른 물질에 섞인 이물질과 구별하며, 공식 아이템 표시명을 인용하면 해당 명칭을 따른다. 모든 문맥에 적용하는 고정 치환어가 아니다. |
+
+For proper names, compare internal syllables as well as the first/last syllable (`カタストフラム` contains `フラ`). Existing approved names such as `캐논 콜` are not freely re-transliterated.
 
 ## Forbidden Variants
 
@@ -185,9 +216,9 @@ Use this table format:
 | 회 타격 | HIT | 원문이 `HIT`인 스킬/어빌리티 타수 단위는 `HIT`로 유지한다. |
 | 히트 | HIT | 원문이 `HIT`인 스킬/어빌리티 타수 단위는 음역하지 않고 `HIT`로 유지한다. |
 | 타 | HIT | 원문이 `HIT`인 전투 타수 단위는 `1타`처럼 축약하지 말고 `1HIT` 계열로 유지한다. |
-| 픽켈 | 곡갱이 | `ピッケル`의 표기는 `곡갱이`로 통일한다. |
-| 피켈 | 곡갱이 | `ピッケル`의 표기는 `곡갱이`로 통일한다. |
-| 곡괭이 | 곡갱이 | `ピッケル`의 표기는 `곡갱이`로 통일한다. |
+| 픽켈 | 곡괭이 | `ピッケル`의 표기는 표준어 `곡괭이`로 통일한다. |
+| 피켈 | 곡괭이 | `ピッケル`의 표기는 표준어 `곡괭이`로 통일한다. |
+| 곡갱이 | 곡괭이 | 비표준 표기를 표준어 `곡괭이`로 교정한다. |
 | 굶주림 | 기아 | `飢餓` 상태/재앙명은 `기아`로 통일한다. |
 | 굶주림의 재앙 | 기아의 재앙 | `飢餓の厄災`은 `기아의 재앙`으로 통일한다. |
 | 흙 속성 | 토 속성 | `土属性`의 속성명 문맥에서는 `토 속성`으로 통일한다. |
@@ -215,9 +246,22 @@ Use this table format:
 | 귀족족 | 오니족 | `鬼族`은 `오니족`으로 통일한다. |
 | 라살 | 나찰 | `羅刹`은 `나찰`로 통일한다. |
 | 바붐 | 바부미 | `バブみ`는 `바부미`로 통일한다. |
-| 오니가시마 이벤트의 프로듀스 | 홍보 | `プロデュース`는 해당 UI에서 `홍보`로 처리한다. |
 | 쿠레하 대사의 나리 | 서방님 | `クレハ`가 주인공을 부르는 `旦那様`/`旦那さま`/`旦那`는 `서방님`으로 통일한다. |
 | 쿠레하 대사의 주인님 | 서방님 | `クレハ`의 `旦那様`를 `ご主人様`처럼 번역하지 않는다. |
 | 고기 / 고기봉 / 육봉 | 남근 | `肉棒`은 일반 성인 서술에서 반드시 `남근`으로 번역한다. 단, 별도 고유 스킬명으로 확정된 `육봉연술`은 예외. |
 | 정액 전체 / 정액에 힘 / 정액을 조여 | 남근 전체 / 남근에 힘 / 남근을 조여 | `肉棒`을 `精液`처럼 오역하지 않는다. |
 | 질 습관 | 질벽 | `膣壁` 또는 원문 오탈자 `膣癖` 문맥은 신체 부위 `질벽`으로 처리한다. |
+
+## 2026-09-08 문맥 용어 보강
+
+- `犬人族`은 종족명 문맥에서 `견인족`으로 표기한다. `개인족`으로 옮기지 않는다.
+- `雪庇`는 이번 설산 지형 문맥에서 `눈 처마`로 옮긴다. 돌출된 눈 지형의 의미를 일반적인 `눈더미`로 약화하지 않으며, 줄바꿈도 `눈 처마`를 분리하지 않는다.
+- `人型厄災（人魂）`의 로드 이름은 `인간형 재앙(혼불)`로 표기한다. 본체 이름과 형태 수식어를 함께 보존하며 별개의 신규 종족 설정으로 확대하지 않는다. 일반 어휘 `人魂`의 모든 문맥에 이 전체 이름을 치환하지 않는다.
+
+## 2026-09-09 신규 번들 명칭
+
+- 리코리트: `リコリット`=`리코리트`, 별명 `リコ`=`리코`, 동료 피닉스 `クー`=`쿠`. 신규 일반 스토리와 프로필 300040을 근거로 한다.
+- `フェニックス`=`피닉스`, `不死鳥`=`불사조`. 서로 다른 이름임을 설명하는 장면에서 둘을 같은 단어로 합치지 않는다.
+- `満腹度`=`포만도`. 기존 상태 `飽食`=`포식`과 구별한다.
+- `じゃくにくきょーしょく砲`=`약육강식포`, `フェニックスリヴァイヴ`=`피닉스 리바이브`. 추가 스킬·무기 명칭은 docs/reviews/updates/2026-09-09-bundle-update/masterdata-review.md에 기록했다.
+- 기존 `フェルトゥーナ`/`フェル`=`펠투나`/`펠` 표기를 유지한다. 이 보강은 신규 범위에 적용하며 과거 완료분을 일괄 재작성하지 않는다.

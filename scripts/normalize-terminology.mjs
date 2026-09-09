@@ -39,21 +39,6 @@ function normalizeKurehaDannaAddress(value) {
     .replace(/나리/g, '서방님')
 }
 
-function normalizeOnigashimaProduce(value) {
-  return value
-    .replace(/프로듀스 계획/g, '홍보 계획')
-    .replace(/프로듀스 대작전/g, '홍보 대작전')
-    .replace(/프로듀스한다는/g, '홍보한다는')
-    .replace(/프로듀스하는/g, '홍보하는')
-    .replace(/프로듀스하기/g, '홍보하기')
-    .replace(/프로듀스하려/g, '홍보하려')
-    .replace(/프로듀스할/g, '홍보할')
-    .replace(/프로듀스는/g, '홍보는')
-    .replace(/프로듀스를/g, '홍보를')
-    .replace(/프로듀스에/g, '홍보에')
-    .replace(/프로듀스/g, '홍보')
-}
-
 function normalizeSumata(value, key) {
   let result = value
     .replace(/스오마타|스오마|소마타|스타마/g, '스마타')
@@ -187,7 +172,7 @@ function normalize(key, value, file = '') {
     result = result.replace(/퀵 선택/g, '빠른 선택')
   }
   if (key.includes('\u30D4\u30C3\u30B1\u30EB')) {
-    result = result.replace(/픽켈|피켈|곡괭이/g, '곡갱이')
+    result = result.replace(/픽켈|피켈|곡갱이/g, '곡괭이')
   }
   if (key.includes('\u98E2\u9913')) {
     result = result.replace(/굶주림/g, '기아')
@@ -215,16 +200,8 @@ function normalize(key, value, file = '') {
   if (key.includes('\u9B3C\u30F6\u5CF6')) {
     result = result.replace(/귀신\s*섬|귀신섬|귀가섬|오니가\s*섬/g, '오니가시마')
   }
-  if (key.includes('\u30D7\u30ED\u30C7\u30E5\u30FC\u30B9')) {
-    result = normalizeOnigashimaProduce(result)
-  }
   if (/素股|スマタ|すまた/.test(key)) {
     result = normalizeSumata(result, key)
-  }
-  if (key.includes('\u982D\u3092\u60A9\u307E\u305B')) {
-    result = result
-      .replace(/골머리를 앓고/g, '골치를 썩이고')
-      .replace(/머리를 앓고/g, '골치를 썩이고')
   }
   if (key.includes('\u9B3C\u9000\u6CBB') || key.includes('\u9B3C\u3068\u5354\u529B')) {
     result = result

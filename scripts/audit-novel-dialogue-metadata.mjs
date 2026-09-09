@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import { extractMessageRecords } from './lib/novel-message-parser.mjs'
 import { CACHE_DIR, ROOT, readJson, shouldTranslateValue, walk, writeJson } from './lib/ko-pipeline.mjs'
 
 const japanese = /[\u3041-\u3096\u30a1-\u30fa\u30fd-\u30ff]/
@@ -39,64 +40,6 @@ function defaultCacheRoot() {
   return path.join(localLow, 'EXNOA LLC_', 'ドットアビスX')
 }
 
-function stripMessageMeta(text) {
-  let message = text
-  for (;;) {
-    const before = message
-    message = message
-      .replace(/,{2,}$/, '')
-      .replace(/,{2,3}(?:on|off|ALLON)$/, '')
-      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),(?:vc|mcv)_[^,]*(?:,(?:\d+\/)?chara_\d+)?[,]?$/, '')
-      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),(?:vc|mcv)_[^,]*(?:,(?:on|off|ALLON|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
-      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?)(?:,,[^,]+)?$/, '')
-      .replace(/,,(?:vc|mcv)_[^,]*(?:,(?:on|off|ALLON|(?:\d+\/)?chara_\d+(?:\/chara_\d+)*))?[,]?$/, '')
-      .replace(/,(?:\d{6,}[A-Z]?|[A-Z]?\d{6,}[A-Z]?),(?:vc|mcv)_[^,\r\n]*(?:,[^\r\n]*)?$/, '')
-      .replace(/,,(?:vc|mcv)_[^,\r\n]*(?:,[^\r\n]*)?$/, '')
-      .replace(/,{2,3}(?:\d+\/)?chara_\d+(?:\/chara_\d+)*$/, '')
-    if (message === before) return message
-  }
-}
-
-function parseMessageLine(line, lineNumber) {
-  const command = line.startsWith('message,')
-    ? 'message'
-    : line.startsWith('dotmessage,')
-      ? 'dotmessage'
-      : line.startsWith('messageTextCenter,')
-      ? 'messageTextCenter'
-      : line.startsWith('l2dmessage,')
-        ? 'l2dmessage'
-        : null
-  if (!command) return null
-
-  const rest = line.slice(`${command},`.length)
-  const firstComma = rest.indexOf(',')
-  if (firstComma < 0) return null
-  const speaker = rest.slice(0, firstComma)
-  const payload = rest.slice(firstComma + 1)
-  const message = command === 'dotmessage'
-    ? (() => {
-        const metaSeparator = payload.indexOf(',,')
-        return metaSeparator >= 0 ? payload.slice(0, metaSeparator) : payload.split(',')[0]
-      })()
-    : stripMessageMeta(payload)
-  if (!message) return null
-
-  const voice = payload.match(/(?:vc|mcv)_[^,]*/)?.[0] || null
-  const chara = payload.match(/(?:\d+\/)?chara_\d+(?:\/chara_\d+)*/)?.[0] || null
-  return { line: lineNumber, command, speaker, source: message, voice, chara }
-}
-
-function extractMessageRecords(script, novelId, cacheFile) {
-  const records = []
-  const lines = String(script || '').split(/\r?\n/)
-  for (let i = 0; i < lines.length; i++) {
-    const parsed = parseMessageLine(lines[i], i + 1)
-    if (!parsed) continue
-    records.push({ novelId, cacheFile, ...parsed })
-  }
-  return records
-}
 
 function scanCachedBundleNames(cacheRoot, options = {}) {
   const bundles = new Map()
@@ -183,7 +126,7 @@ for file in files_to_scan:
                 text = script.decode("utf-8", "ignore")
             else:
                 text = str(script or "")
-            if "message," not in text and "dotmessage," not in text and "messageTextCenter," not in text and "l2dmessage," not in text:
+            if "message," not in text and "dotmessage," not in text and "messageTextCenter," not in text and "messageTextUnder," not in text and "l2dmessage," not in text:
                 continue
             novel_ids = sorted(set(re.findall(r"(?:mas_\d{10}|(?:evs|hmr|hmn|men)_\d{11})", str(name) + "\n" + text)))
             for novel_id in novel_ids:

@@ -18,3 +18,6 @@
 - Do not intensify teasing, affection, anger, embarrassment, vulgarity, or adult nuance beyond the source.
 - UI, item names, skill descriptions, status names, system messages, and narration without a confirmed speaker must not receive character-specific voice.
 - Glossary terms override character cards.
+- Follow the actual speaker and addressee, not the owner of the scenario file. A quote retains the quoted speaker's approved address; the narrator or person quoting it does not lend it their own habitual address.
+- Record where a relationship or speech level changes. Public reports, letters, private thoughts, teasing, and a request to speak casually may use different levels within one episode. A terse card summary must not erase explicit polite forms, military speech, or intentional casual replies.
+- Keep explicit honorifics and established addresses separate from sentence endings. For example, source `司令官さん` and `司令官殿` retain their glossary forms; a polite verb alone does not justify adding `님` to every plain `司令官`.

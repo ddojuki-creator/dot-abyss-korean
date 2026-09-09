@@ -119,35 +119,6 @@ function normalizeSpeakerTerminology(key, value, speakers = []) {
   return value
 }
 
-function trimNovelLineBreaks(source, value) {
-  const breakPattern = /<br(?:\s+[^>]*)?>|\\r\\n|\\[nr]|\r\n|\r|\n/gi
-  const maxBreaks = source.match(breakPattern)?.length || 0
-  let kept = 0
-  return value
-    .replace(breakPattern, (match) => {
-      if (kept >= maxBreaks) return ' '
-      kept++
-      return match
-    })
-    .replace(/[ \t]{2,}/g, ' ')
-    .trim()
-}
-
-function normalizeOnigashimaProduce(value) {
-  return value
-    .replace(/프로듀스 계획/g, '홍보 계획')
-    .replace(/프로듀스 대작전/g, '홍보 대작전')
-    .replace(/프로듀스한다는/g, '홍보한다는')
-    .replace(/프로듀스하는/g, '홍보하는')
-    .replace(/프로듀스하기/g, '홍보하기')
-    .replace(/프로듀스하려/g, '홍보하려')
-    .replace(/프로듀스할/g, '홍보할')
-    .replace(/프로듀스는/g, '홍보는')
-    .replace(/프로듀스를/g, '홍보를')
-    .replace(/프로듀스에/g, '홍보에')
-    .replace(/프로듀스/g, '홍보')
-}
-
 function stateKey(file, entry) {
   return `${rel(file)}::${entry.path.join('\u0001')}`
 }
@@ -239,6 +210,9 @@ function normalizeTerminology(key, value) {
   if (key.includes('\u30AF\u30A4\u30C3\u30AF\u9078\u629E')) {
     normalized = normalized.replace(/퀵 선택/g, '빠른 선택')
   }
+  if (key.includes('\u30D4\u30C3\u30B1\u30EB')) {
+    normalized = normalized.replace(/픽켈|피켈|곡갱이/g, '곡괭이')
+  }
   if (key.includes('\u98E2\u9913')) {
     normalized = normalized.replace(/굶주림/g, '기아')
   }
@@ -264,14 +238,6 @@ function normalizeTerminology(key, value) {
   }
   if (key.includes('\u9B3C\u30F6\u5CF6')) {
     normalized = normalized.replace(/귀신\s*섬|귀신섬|귀가섬|오니가\s*섬/g, '오니가시마')
-  }
-  if (key.includes('\u30D7\u30ED\u30C7\u30E5\u30FC\u30B9')) {
-    normalized = normalizeOnigashimaProduce(normalized)
-  }
-  if (key.includes('\u982D\u3092\u60A9\u307E\u305B')) {
-    normalized = normalized
-      .replace(/골머리를 앓고/g, '골치를 썩이고')
-      .replace(/머리를 앓고/g, '골치를 썩이고')
   }
   if (key.includes('\u9B3C\u9000\u6CBB') || key.includes('\u9B3C\u3068\u5354\u529B')) {
     normalized = normalized
@@ -388,11 +354,11 @@ function buildMessages(prompt, items) {
       content: [
         'You are a professional Korean localizer for a Japanese 2D subculture game.',
         'Translate only JSON values into natural Korean.',
-        'Never modify JSON keys, IDs, tags, or placeholders. Source line breaks may only be reduced according to the Korean layout rules.',
-        'Preserve the exact number and type of line-break tokens for common/UI resources. Never add literal newlines or <br> tags that are not present in the source value.',
+        'Never modify JSON keys, IDs, non-layout tags, or placeholders except for the specific novel ruby policy below. Novel line breaks may be repositioned or consolidated to at most one, independently of source breaks. Non-novel UI must not add breaks beyond the source.',
+        'For common/UI resources, line breaks may be consolidated for Korean layout but their rendered count must not exceed the source unless an explicit local rule allows it.',
         'Do not leave any Japanese kana outside protected tags; fully rewrite mixed Japanese-Korean values in Korean.',
         'For novel dialogue, speaker metadata is authoritative. Apply a character card only when exactly one speaker is listed; if speakers are empty or ambiguous, use neutral natural Korean.',
-        'Japanese text inside tag syntax such as <ruby=...> is protected and must remain unchanged.',
+        'For novel dialogue, the specific ruby policy overrides generic tag preservation: remove ruby markup when Korean needs no alternate reading; when base and reading carry distinct meaning, translate both into Korean. Never leave Japanese in either part of a Korean novel value. Preserve unrelated tags and placeholders exactly.',
         'Return JSON only with this schema: {"items":[{"id":0,"value":"..."}]}.',
         prompt,
       ].join('\n\n'),
@@ -468,7 +434,6 @@ async function callOpenAI(prompt, items, options = {}) {
     }
     let value = normalizeTerminology(item.key, responseValue)
     value = normalizeSpeakerTerminology(item.key, value, item.speakers)
-    if (item.novelId) value = trimNovelLineBreaks(item.value, value)
     if (options.removeAddedLineBreaks) {
       value = value
         .replace(/<br(?:\s+[^>]*)?>/gi, ' ')
@@ -476,7 +441,7 @@ async function callOpenAI(prompt, items, options = {}) {
         .replace(/[ \t]{2,}/g, ' ')
         .trim()
     }
-    const tokenErrors = compareProtectedTokens(item.value, value)
+    const tokenErrors = compareProtectedTokens(item.value, value, item.novelId ? { lineBreaks: 'korean-dialogue' } : {})
     if (tokenErrors.length) {
       const err = new Error(`Protected token mismatch at id=${id}: ${tokenErrors.join(', ')}`)
       err.splitBatch = true
@@ -516,7 +481,7 @@ async function translateByLineBreaks(prompt, item) {
   }
 
   const value = valueParts.join('')
-  const tokenErrors = compareProtectedTokens(item.value, value)
+  const tokenErrors = compareProtectedTokens(item.value, value, item.novelId ? { lineBreaks: 'korean-dialogue' } : {})
   if (tokenErrors.length) {
     throw new Error(`Protected token mismatch after line split: ${tokenErrors.join(', ')}`)
   }
