@@ -366,6 +366,114 @@
       "reviewStatus": "full JP/KO contextual reread completed; duplicate occurrences included"
     },
     {
+      "id": "hmr_11000100011",
+      "messages": 27,
+      "uniqueKeys": 27,
+      "file": "translations/novels/hmr_11000100011/ko_KR.json",
+      "translationSha256": "c1cb1ec6bcdaa389f1639642300a76d1bb853b07010737f91d2e4bb49c32d305",
+      "reviewedMessageRangeZeroBased": [
+        0,
+        26
+      ],
+      "reviewStatus": "full JP/KO contextual reread completed; duplicate occurrences included"
+    },
+    {
+      "id": "hmr_11000100012",
+      "messages": 63,
+      "uniqueKeys": 63,
+      "file": "translations/novels/hmr_11000100012/ko_KR.json",
+      "translationSha256": "ddf8b77c5fe31762c0405b3e214c9f96eaed1467bfecdbc2bc099d1ad4386be4",
+      "reviewedMessageRangeZeroBased": [
+        0,
+        62
+      ],
+      "reviewStatus": "full JP/KO contextual reread completed; duplicate occurrences included"
+    },
+    {
+      "id": "hmr_11000100013",
+      "messages": 6,
+      "uniqueKeys": 6,
+      "file": "translations/novels/hmr_11000100013/ko_KR.json",
+      "translationSha256": "0234b181eac64ce7264d0c2b7eba00b3ee5f759e93245e37c8054e278fdc66f2",
+      "reviewedMessageRangeZeroBased": [
+        0,
+        5
+      ],
+      "reviewStatus": "full JP/KO contextual reread completed; duplicate occurrences included"
+    },
+    {
+      "id": "hmr_11000100021",
+      "messages": 22,
+      "uniqueKeys": 22,
+      "file": "translations/novels/hmr_11000100021/ko_KR.json",
+      "translationSha256": "ad2d242ef4730894e0d1197e02dfda0057b0ee13ad6c9c36c8b86793884944b8",
+      "reviewedMessageRangeZeroBased": [
+        0,
+        21
+      ],
+      "reviewStatus": "full JP/KO contextual reread completed; duplicate occurrences included"
+    },
+    {
+      "id": "hmr_11000100022",
+      "messages": 52,
+      "uniqueKeys": 52,
+      "file": "translations/novels/hmr_11000100022/ko_KR.json",
+      "translationSha256": "4ae12690a7f78644624011a2fea3b0e376b7b162ad016ca594413349d400b73f",
+      "reviewedMessageRangeZeroBased": [
+        0,
+        51
+      ],
+      "reviewStatus": "full JP/KO contextual reread completed; duplicate occurrences included"
+    },
+    {
+      "id": "hmr_11000100023",
+      "messages": 18,
+      "uniqueKeys": 18,
+      "file": "translations/novels/hmr_11000100023/ko_KR.json",
+      "translationSha256": "c1ef701546ab575711271c8719071d8dd0e77a7fff24134e8354e6bffab84d79",
+      "reviewedMessageRangeZeroBased": [
+        0,
+        17
+      ],
+      "reviewStatus": "full JP/KO contextual reread completed; duplicate occurrences included"
+    },
+    {
+      "id": "hmr_11000100031",
+      "messages": 31,
+      "uniqueKeys": 31,
+      "file": "translations/novels/hmr_11000100031/ko_KR.json",
+      "translationSha256": "661f16389ff0d62b1fbde410e77267db36202d6eadaf67a5ce5a0fde2b57ff36",
+      "reviewedMessageRangeZeroBased": [
+        0,
+        30
+      ],
+      "reviewStatus": "full JP/KO contextual reread completed; duplicate occurrences included"
+    },
+    {
+      "id": "hmr_11000100032",
+      "messages": 57,
+      "uniqueKeys": 57,
+      "file": "translations/novels/hmr_11000100032/ko_KR.json",
+      "translationSha256": "0ea60efdaff900c773f6c8e35faa21fd620bd479196229309c21544aa00e67f9",
+      "reviewedMessageRangeZeroBased": [
+        0,
+        56
+      ],
+      "reviewStatus": "full JP/KO contextual reread completed; duplicate occurrences included"
+    },
+    {
+      "id": "hmr_11000100033",
+      "messages": 10,
+      "uniqueKeys": 10,
+      "file": "translations/novels/hmr_11000100033/ko_KR.json",
+      "translationSha256": "8659b672bea478eaaff76e20889cef6e7842f30398269fb11d9ee142a8b51e26",
+      "reviewedMessageRangeZeroBased": [
+        0,
+        9
+      ],
+      "reviewStatus": "full JP/KO contextual reread completed; duplicate occurrences included"
+    },
+    {
       "id": "men_10220100001",
       "messages": 5,
       "uniqueKeys": 5,
