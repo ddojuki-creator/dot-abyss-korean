@@ -18,7 +18,7 @@ Before editing translation files:
 8. After edits, run the relevant validation/audit scripts and regenerate `translations/manifest/ko_KR.json` with `scripts/update-manifest.mjs`.
 9. For final review of a batch whose translation and first review are complete, read `final-review.md` and preserve the completed stages. Freeze the current source, translation, and instruction versions before reviewing.
 10. Read `supplementary-reference.md` for optional fourth-priority lexical help. Query only unresolved expressions; neither the project supplemental lexicon nor external dictionary overrides source context or approved project rules.
-11. For ongoing full final review, resume from `../reviews/final-review/README.md` and `NEXT.md`. Run `node scripts/final-review-progress.mjs status`; skip unchanged completed files and persist each actually reviewed range before moving on.
+11. For ongoing full final review, resume from `../reviews/final-review/README.md` and `../reviews/final-review/NEXT.md`. Run `node scripts/final-review-progress.mjs status`; skip unchanged completed files and persist each actually reviewed range before moving on.
 12. The 2026-09-06 user decision makes instruction supplements prospective: do not re-review completed translations merely because guides changed. Preserve original receipts and follow the completion-preservation policy in `final-review.md`; this is not a new semantic approval or a release approval.
 13. For novels, the ruby-specific policy in `tags-placeholders.md` and `../../scripts/prompts/novels.md` overrides generic tag-preservation wording. Do not restore unnecessary Japanese readings into Korean values.
 

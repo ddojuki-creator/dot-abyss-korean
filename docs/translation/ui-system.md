@@ -37,3 +37,7 @@
 - A dummy, malformed placeholder, or unknown abbreviation is not approved merely because it parses or has no Japanese. Record it as unresolved until its runtime role or source meaning is established.
 - A stored static dictionary path does not prove that its table/field is loaded by the current `Config/master.json` or matched by the current source. Verify the field mapping and exact source evidence separately. An inactive field with insufficient authority stays on hold; do not enable a field merely to justify approving its translation.
 - For numeric-only or diagnostic-looking strings, record the exact value and the checked source/runtime scope. Zero matches in a snapshot or collected log means no match was observed there, not that the string can never appear. Preserve unexplained strings without inventing display text, and do not claim a screen check from a source-only lookup.
+
+## 2026-09-12 검수 보강
+
+- 상품·코스튬의 고유명에 들어간 계절 표현과 실제 이용 기간·상시 효과 조건을 구분한다. 원문 단어의 사전적 뜻만으로 일관된 현지화 제목을 반드시 재명명하지 않는다. 제목·획득UI·상품명이 같은 뜻으로 연결되고 강제 용어 규정이나 조건 누락이 없다면 유효한 현행 이름은 유지한다.
