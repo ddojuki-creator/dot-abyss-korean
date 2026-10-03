@@ -6,6 +6,7 @@ import { ROOT, readJson, shouldTranslateValue } from './lib/ko-pipeline.mjs'
 const CRITICAL_TABLES = new Set([
   'm_battle_result_reactions',
   'm_disaster_boss_messages',
+  'm_event_top_characters',
   'm_idle_exploration_log_messages',
   'm_interaction_voices',
   'm_part_voices',
@@ -28,6 +29,19 @@ const translationFile = path.join(ROOT, 'translations', 'outgame', 'ko_KR.json')
 
 function tableOf(location) {
   return location.split('/', 1)[0]
+}
+
+function isSkinSerif(location) {
+  return /^m_character_skins\/id:[^/]+\/6$/.test(location)
+}
+
+function translationIssue(source, value, skinSerif = false) {
+  if (typeof value !== 'string') return 'missing'
+  if (value.trim() === '') return 'empty'
+  if (value === source) return 'untranslated'
+  const mixedSkinJapanese = skinSerif && /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(value.replace(/<[^>]*>/g, ''))
+  if (shouldTranslateValue(source, value) || mixedSkinJapanese) return 'japanese-leftover'
+  return null
 }
 
 function truncate(value, max = 120) {
@@ -58,21 +72,20 @@ const byTable = new Map()
 const issues = []
 for (const item of entries) {
   const table = tableOf(item.location)
-  if (!CRITICAL_TABLES.has(table)) continue
+  const skinSerif = isSkinSerif(item.location)
+  if (!CRITICAL_TABLES.has(table) && !skinSerif) continue
   byTable.set(table, (byTable.get(table) || 0) + 1)
   const value = translations[item.source]
-  if (typeof value !== 'string' || value === item.source || shouldTranslateValue(item.source, value)) {
-    issues.push({ ...item, table, value })
-  }
+  const status = translationIssue(item.source, value, skinSerif)
+  if (status) issues.push({ ...item, table, value, status })
 }
 
 for (const source of HARDCODED_UI_TEXTS) {
   const table = 'hardcoded-ui'
   byTable.set(table, (byTable.get(table) || 0) + 1)
   const value = translations[source]
-  if (typeof value !== 'string' || value === source || shouldTranslateValue(source, value)) {
-    issues.push({ location: `hardcoded-ui/${source}`, source, table, value })
-  }
+  const status = translationIssue(source, value)
+  if (status) issues.push({ location: `hardcoded-ui/${source}`, source, table, value, status })
 }
 
 console.log(`audit:outgame-critical scope=${addedOnly ? 'added-or-changed' : 'all-critical'} checked=${[...byTable.values()].reduce((a, b) => a + b, 0)} issues=${issues.length}`)
@@ -82,8 +95,7 @@ for (const [table, count] of [...byTable].sort(([a], [b]) => a.localeCompare(b))
 }
 
 for (const item of issues.slice(0, 30)) {
-  const status = item.value == null ? 'missing' : item.value === item.source ? 'untranslated' : 'japanese-leftover'
-  console.log(`\n[${status}] ${item.location}`)
+  console.log(`\n[${item.status}] ${item.location}`)
   console.log(`source: ${truncate(JSON.stringify(item.source))}`)
   if (item.value != null) console.log(`value : ${truncate(JSON.stringify(item.value))}`)
 }

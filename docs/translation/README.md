@@ -11,8 +11,11 @@ Before editing translation files:
 1. Read this file, `style-core.md`, `glossary.md`, `forbidden.md`, `tags-placeholders.md`, and `qa-checklist.md`.
 2. For dialogue, story, or character voice work, also read `character-cards.md`, `character-voice.md`, `context-review.md`, and `adult-content.md`.
 3. For UI, skill, ability, system text, popup text, or runtime-composed text, also read `ui-system.md`, `tags-placeholders.md`, and `../outgame-update-qa.md`.
-4. For character, skill, ability, awakening, limit-break, or pure crystal updates, read `../new-character-update.md` first.
+   New or changed events also require the [event character balloon check](../outgame-update-qa.md#이벤트-캐릭터-말풍선-필수-확인) for all linked `m_event_top_characters` rows, separately from novel/body and title/summary coverage.
+4. For character, skill, ability, awakening, limit-break, or pure crystal updates, read `../new-character-update.md` first. Also follow the [mandatory alias/profile source comparison](../new-character-update.md#이명프로필-원문-전수-대조): use actual character/profile/skin references and every profile field, including strings without the character's name, and verify stored translations and installed lookup results separately.
 5. Search the whole `translations` tree for the same character name, skill name, ability name, event name, and forbidden variant before editing only one file.
+   Character additions and costume/interaction-episode updates must also complete the [interaction-story title/summary check](../new-character-update.md#교류-스토리-제목요약-필수-확인) for every linked episode. Names or body translations alone do not cover metadata, locked episodes, or the replay/skip popup text.
+   Every character/costume addition or change also requires the [gacha acquisition dialogue check](../new-character-update.md#가챠-획득-대사-필수-확인) for all actual skin references, including lines without the character name and unowned skins. Review `serif` separately from skin names/descriptions, and verify stored values, installed lookup and actual acquisition screens separately.
 6. Never change JSON keys. Edit Korean values only.
 7. Put reusable language rules in the correct canonical layer: general meaning/grammar/layout in `style-core.md`, shared terms/slang/idioms in `glossary.md`, forbidden output variants in `forbidden.md`, and only speaker-specific tone/address/relationship rules in `character-cards.md`. Do not place a general rule in a character card just because one character exposed it first.
 8. After edits, run the relevant validation/audit scripts and regenerate `translations/manifest/ko_KR.json` with `scripts/update-manifest.mjs`.
@@ -89,6 +92,9 @@ Use the repository's normal Node runtime. If `node` is not on PATH in Codex, use
 ```powershell
 node scripts\validate-translations.mjs
 node --test scripts\tests\translation-guidance.test.mjs
+node scripts\audit-character-profile-coverage.mjs --profile-ids <검증한ID목록>
+node --test scripts\tests\character-profile-coverage.test.mjs
+node --test scripts\tests\outgame-critical.test.mjs
 node scripts\audit-outgame-critical.mjs
 node scripts\audit-outgame-ui-hotspots.mjs
 node scripts\audit-static-bundle.mjs

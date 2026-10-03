@@ -4,6 +4,9 @@
 - Prefer concise Korean game UI terms.
 - Button labels should be short when possible.
 - Do not give system messages a character voice.
+- Event character speech balloons have a confirmed speaker when the actual asset/reference identifies one. Follow the source speech level and that speaker's approved voice; keep system labels neutral. Every event addition/change must follow the [event character balloon check](../outgame-update-qa.md#이벤트-캐릭터-말풍선-필수-확인), including source rows and installed exact lookup results outside the novel body.
+- Gacha acquisition/skin dialogue is character speech when actual character/skin references confirm the speaker. Follow the approved voice and source address terms; keep acquisition buttons and system labels neutral. Every character/costume addition or change must perform the [gacha acquisition dialogue check](../new-character-update.md#가챠-획득-대사-필수-확인) across all linked skins, separately from names, profiles and story text.
+- Character aliases and profile headings are separate text from the display name. Translate every supplied alias/profile field even when it contains no character name; preserve the source honorifics, meaning and approved names without inventing a title or setting. Update preparation and installed coverage follow the [mandatory alias/profile comparison](../new-character-update.md#이명프로필-원문-전수-대조).
 - Do not over-explain short labels.
 
 ## Mission Quantities And Source Evidence

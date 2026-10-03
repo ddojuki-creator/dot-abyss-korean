@@ -16,6 +16,7 @@
 - Do not make a character more childish, seductive, rude, vulgar, affectionate, jealous, or emotional than the Japanese source.
 - Do not use character cards to infer relationships not stated in the source.
 - Do not keep obsolete glossary variants such as `밀피유` after the project has selected `밀티유`.
+- Do not translate `パウリーナ` as `파우리나`; use `파울리나` in dialogue, narration and display names.
 - Do not translate `ヒマリ` as `히말리`; always use `히마리`.
 - Do not keep obsolete `クルル` variants such as `크루루`, `크룰루`, or `쿠룰루`; use `쿠루루`.
 - Do not keep obsolete `ルクスノヴァ` variants such as `루크스노바`, `럭스노바`, `루크스 노바`, or `럭스 노바`; use `룩스노바`.

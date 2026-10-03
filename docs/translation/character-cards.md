@@ -10,13 +10,31 @@ These cards are used for novel/dialogue translation and context review.
 - Do not add new lore, jokes, sexual nuance, affection, hostility, or relationships.
 - Preserve the Japanese meaning first; adjust only tone, speech level, address terms, and natural Korean phrasing.
 - Glossary terms override character cards.
-- UI/system text ignores character cards.
+- Pure UI labels/system text ignore character cards. Confirmed character speech displayed in acquisition/skin/event UI follows the speaker's card.
 - If a line has no confirmed speaker, use neutral natural Korean.
 - If the source text conflicts with a card, the source text wins.
 
 ---
 
 # High Priority Detailed Cards
+
+## オーレリナ / 오렐리나
+
+- Name: `オーレリナ`는 `오렐리나`로 고정한다.
+- Core: 투자와 어비스의 가치에 관심을 두고 전선 기지를 찾아온 투자가. 프로필의 계획성과 침착함을 대사 해석에 반영한다.
+- Tone: 확인된 획득·이벤트 대사는 침착하고 자신감 있는 반말. 투자·계약과 짧은 지시는 간결하게 옮기고, 원문에 드러난 개인적인 동기나 친구와 함께하는 즐거움은 살린다.
+- First person: 확인된 대사의 `私`는 `나`/`내`.
+- Address: 획득 대사의 `あなた`는 `당신`. 다른 장면은 실제 상대와 원문 호칭을 확인하며, 원문에 없는 관계·존칭을 추가하지 않는다.
+- Avoid: 모든 대사를 귀족풍 존댓말·사극투로 바꾸기, 원문에 없는 금융 비유·유혹·연애 관계를 추가하기, 캐릭터 말투를 획득 버튼/시스템 안내에 적용하기.
+- 범위·근거: 캐릭터 `1300036`→프로필 `300036`의 필드 `2`·`3`·`4`·`5`·`7`, 스킨 `130003601`·`130003602`의 획득 대사 필드 `6`, 이벤트 `m_event_top_characters`의 확인된 해당 화자 대사. [현재 원문·참조 대조 기록](../reviews/updates/2026-10-03-reported-ui-cdn-scope.json). 이 카드는 확인된 짧은 대사·프로필 범위의 번역 기준이며, 다른 장편 스토리의 말투/호칭은 해당 원문과 문맥을 추가 확인한다.
+
+## パウリーナ / 파울리나
+
+- Name: `パウリーナ`는 `파울리나`, `ペルディオン`은 `페르디온`으로 고정한다.
+- Tone: 확인된 획득 인사는 도도하고 자신감 있는 반말. 페르디온 황녀의 긍지와 명령을 원문 강도에 맞춰 보존한다.
+- First person: 확인된 획득 인사의 `私`는 `나`/`내`.
+- Scope: 이 최소 카드는 이번에 확인한 획득 인사·프로필 범위에 적용한다. 다른 장편 스토리·자매 관계 규칙이나 `하인` 호칭을 현재 인사에 강제하지 않으며, 다른 대사는 해당 원문과 문맥을 추가 확인한다.
+- 범위·근거: 실제 캐릭터 `1300028`→프로필 `300028`, 스킨 `130002801`·`130002802`의 획득 대사 필드 `6` 참조. [이번 원문·참조 및 게시 범위 기록](../reviews/updates/2026-10-03-reported-ui-cdn-scope.json).
 
 ## アリシア / 알리시아
 

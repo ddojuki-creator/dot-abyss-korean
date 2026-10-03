@@ -6,6 +6,10 @@
 
 캐릭터 관련 스토리는 `new-character-update.md`도 함께 보고, 스테이지에 연결된 이벤트 스토리는 `stage-content-check.md`도 함께 본다.
 
+캐릭터 추가·코스튬/교류 회차 변경 시에는 [교류 스토리 제목·요약 필수 확인](new-character-update.md#교류-스토리-제목요약-필수-확인)을 반드시 수행한다. 실제 스토리 참조로 미열람·잠긴 회차까지 제목·요약 원문을 전부 목록화하고, 제목은 `titles`+`outgame`, 요약은 `descriptions`+`outgame` 및 해당 `static` 필드에서 확인한다. 본문 번역 완료를 제목·요약 완료로 대신하지 않는다.
+
+이벤트 추가·변경 시에는 [이벤트 캐릭터 말풍선 필수 확인](outgame-update-qa.md#이벤트-캐릭터-말풍선-필수-확인)도 수행한다. `m_event_top_characters`의 조건별 캐릭터 대사는 별도 MasterData/UI 경로이므로 `evs_*` 본문 검사와 함께 원시 row·저장 사전·설치 최종값·실제 말풍선 화면을 확인한다.
+
 ## 먼저 확인할 범위
 
 - `translations/novels`: 본문 대사와 홈 대사
