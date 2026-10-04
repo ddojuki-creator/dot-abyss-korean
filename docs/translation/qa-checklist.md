@@ -7,6 +7,7 @@
 - `translations/manifest/ko_KR.json` is generated, not translated.
 - Required keys match the frozen current source index. Use upstream `zh_Hans.json` only where it is the verified source for that layer; record retained compatibility keys separately rather than deleting them to force equality.
 - Values are non-empty strings.
+- 대화의 일반 마침표 줄임표 누락은 `node scripts/audit-dialogue-ellipsis.mjs --fail`로 검사한다. 기본 범위는 `translations/novels`이며, `--file <경로> --keys <원문 key 배열 JSON>`으로 공통 사전의 확인된 대사만 선택한다. `--fix --report work/<작업>/ellipsis.json`은 보호 요소 밖의 줄임표만 정본 `……`로 정리하며 JSON key·문장·줄바꿈을 보존한다. 긴 반복과 남은 일반 마침표를 유지한다. 별도 의미·기술·레이아웃 검사와 실제 게임 화면 확인을 대신하지 않는다.
 - Placeholders and non-layout tags are preserved; line-break controls follow the Korean line-layout policy. Novel ruby follows the specific exception in `tags-placeholders.md`: remove unnecessary readings or translate both meaningful layers, never restore Japanese readings under the generic preservation rule.
 - Final novel layout targets 34 visible characters per line, allows 35~36 as watch items, and never exceeds two displayed lines. UI follows its own screen-specific layout rule.
 - Novel dialogue ignores the Japanese line-break position during final layout. Reflow Korean from the first word, aim for around 34 Korean characters per displayed line without splitting words, and keep every displayed line at or below the 36-character hard limit.

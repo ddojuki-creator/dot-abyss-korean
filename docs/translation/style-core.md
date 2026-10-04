@@ -10,6 +10,8 @@
 - If context is limited, choose the most natural Korean game-text phrasing and preserve proper nouns conservatively.
 
 ## Korean Expression Review
+- Use the ellipsis character `…` (U+2026), repeated without spaces as `……`, for pauses in Korean values; never `. . .`, `...` or `· · ·`. Preserve hesitation, repetition and timing. This does not alter source keys, protected tokens, decimals, URLs or ordinary periods. Program reflow changes breaks only.
+- 2026-10-04 사용자 화면 확인: 일반 마침표 `...`는 한국어 글꼴에서 점 간격이 넓게 보일 수 있다. 일본어처럼 촘촘한 줄임표를 원하므로 기존 대사와 신규 대사는 위 `……` 표기를 적용한다. 이는 점 사이 공백 삭제나 모든 줄임표를 한 글자로 축약하라는 지시가 아니다. 이미 적용된 Unicode 줄임표와 일반 문장 마침표·보호 요소는 유지한다.
 
 - In dialogue and narration, use natural Korean counters and spacing: `한 방울`, `두 사람`, `세 번`. Do not mechanically retain forms such as `1방울` when the number is ordinary prose.
 - Preserve exact quantities and distinguish prose counters from UI levels, ranks, IDs, dates, percentages, durations, and combat values. Do not apply a global digit-to-word replacement to either source keys or Korean values.
