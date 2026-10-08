@@ -25,6 +25,7 @@
 
 - `m_plan_step_serifs`: 시설/플랜/업데이트 단계 말풍선 대사
 - `m_battle_result_reactions`: 전투 결과 반응 대사
+- 이 표의 원문 존재 검사만으로 게임 적용을 완료 처리하지 않는다. [전투 결과 대사 필수 확인](new-character-update.md#전투-결과-대사-필수-확인)의 캐릭터 참조·결과 구분별 행·실제 조회 순서 대조와 설치 캐시 재검사를 수행한다.
 - `m_disaster_boss_messages`: 재앙/보스 메시지
 - `m_event_top_characters`: 이벤트 메인 화면 캐릭터 말풍선/조건별 대사
 - `m_character_skins.serif`: 캐릭터/의상 획득 대사. 감사는 실제 snapshot 필드 `6`만 선택하며 이름/설명 `4`/`5`와 구별한다. 전체 스킨 참조·원시 row·화자·설치 적용은 [가챠 획득 대사 필수 확인](new-character-update.md#가챠-획득-대사-필수-확인)을 따른다.
