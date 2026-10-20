@@ -1,6 +1,29 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {cdnByteHash,cdnManifestHash,verifyCdnBytes,verifySourceCoverage,isSupportingCdnFile} from '../verify-selected-cdn.mjs'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import {execFileSync} from 'node:child_process'
+import {cdnByteHash,cdnManifestHash,verifyCdnBytes,verifySourceCoverage,isSupportingCdnFile,readGitBytes} from '../verify-selected-cdn.mjs'
+
+test('Git blob verification preserves files larger than the former 32 MiB output limit',()=>{
+  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'abyssmod-cdn-large-test-'))
+  try {
+    execFileSync('git',['init','--bare',directory],{stdio:'ignore'})
+    const bytes=Buffer.alloc(33*1024*1024+7,0x61),file=path.join(directory,'input.bin')
+    bytes.write('\n한국어\n',bytes.length-16)
+    fs.writeFileSync(file,bytes)
+    const oid=execFileSync('git',['-c','core.autocrlf=false','-C',directory,'hash-object','-w',file],{encoding:'utf8'}).trim()
+    const actual=readGitBytes(directory,['cat-file','blob',oid])
+    assert.equal(actual.length,bytes.length)
+    assert.equal(cdnByteHash(actual),cdnByteHash(bytes))
+    assert.throws(()=>readGitBytes(directory,['cat-file','blob','missing-object']),/cdn_git_failed/)
+  } finally {
+    const resolved=path.resolve(directory),parent=path.resolve(os.tmpdir())
+    assert.ok(resolved.startsWith(parent+path.sep)&&path.basename(resolved).startsWith('abyssmod-cdn-large-test-'))
+    fs.rmSync(resolved,{recursive:true,force:true})
+  }
+})
 test('CDN requires successful status and exact bytes, including newlines',()=>{
   const bytes=Buffer.from('saved\n'),expectedHash=cdnByteHash(bytes)
   assert.equal(verifyCdnBytes({status:200,bytes,expectedHash}),true)

@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import os from 'node:os'
 import crypto from 'node:crypto'
 import {spawnSync} from 'node:child_process'
 import {fileURLToPath} from 'node:url'
@@ -51,7 +52,26 @@ const rootPath=file=>{
   return full
 }
 const save=(file,value)=>fs.writeFileSync(file,JSON.stringify(value,null,2)+'\n')
+// UI dictionaries can exceed spawnSync's output buffer; preserve Git blob bytes
+// through a temporary file rather than imposing a dictionary-size limit.
+export function readGitBytes(checkout,args) {
+  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'abyssmod-cdn-git-'))
+  const file=path.join(directory,'stdout.bin')
+  let descriptor
+  try {
+    descriptor=fs.openSync(file,'w')
+    const result=spawnSync('git',args,{cwd:checkout,stdio:['ignore',descriptor,'pipe'],maxBuffer:1024*1024})
+    fs.closeSync(descriptor);descriptor=undefined
+    ensure(result.status===0,'cdn_git_failed')
+    return fs.readFileSync(file)
+  } finally {
+    if(descriptor!==undefined)fs.closeSync(descriptor)
+    if(fs.existsSync(file))fs.unlinkSync(file)
+    fs.rmdirSync(directory)
+  }
+}
 const git=(checkout,args,raw=false)=>{
+  if(raw)return readGitBytes(checkout,args)
   const result=spawnSync('git',args,{cwd:checkout,encoding:raw?undefined:'utf8',maxBuffer:32*1024*1024})
   ensure(result.status===0,'cdn_git_failed');return raw?result.stdout:result.stdout.trim()
 }
