@@ -9,6 +9,7 @@ Use this table format:
 | Source | Korean | Note |
 | --- | --- | --- |
 | <user> | <user> | Placeholder. Do not translate. |
+| 殿方 | 남자분 / 남성분 | 남성을 공손하게 가리키는 일반 명사. 문맥에 맞게 단·복수를 구별한다. `사마님`·`전방`으로 오역하거나 `토노가타`로 음역하지 않으며, 임의로 `당신`·`당신들`로 바꾸지 않는다. |
 | 娼婦 | 매춘부 | Always use `매춘부`. Do not use `창부` or `매음부`. |
 | 売春婦 / 売女 | 매춘부 | Use a softened `매춘부`-family translation by default. Avoid harsh literal slurs unless the scene explicitly requires one. |
 | 娼館 | 창관 | Always use `창관`. Do not use `매음굴` or `매음관`. |
