@@ -1,10 +1,10 @@
 {
     "names": "c95fa31a5bf4d92875b6cb1eceaddc3a",
-    "titles": "b9a7342438b916e8fb338550d44ad6b1",
-    "descriptions": "1ff746327f1dcac1315cded2d0be38f1",
+    "titles": "fb91b405d69b35e635ef83ecc939cfcd",
+    "descriptions": "4c60ae945e1d6b2696b3933af3019922",
     "another_name": "cc8a25f4edee69a007471d1e5b7a3be3",
-    "outgame": "c4593b02dcdeb23934c34d172efe0574",
-    "static": "ccfefe5edfe68b19eb1155b073621c0c",
+    "outgame": "05d6f8481b5aa7940ce2c8d2e642068c",
+    "static": "36a2e511b222838f3e75f61ac4943e86",
     "novels": {
         "evs_10200010101": "bb6815f831703175b1fd8627c1135f21",
         "evs_10200010201": "d42dfd32ccd906da320ab9a7a6d8f2a7",
@@ -81,6 +81,8 @@
         "evs_10300030201": "cc71b7f91b09a9e64ff4a58f357fbf4a",
         "evs_10300040101": "2a375bb6f4acc7a2680d7a57bc16d78c",
         "evs_10300040201": "36034c7cc3c4ecf397186010a7ffaa6e",
+        "evs_10300050101": "6f73f2937891350fda2455a85dfd442a",
+        "evs_10300050201": "7bfd14424e72ebba79257b9a211ad27b",
         "evs_10600010101": "2b43148d61780447f3ec2ec589f87138",
         "evs_10600020101": "54f98dc608953a23f465bc284104cbdb",
         "evs_10600020201": "faab8da2a3e0fb111608126e5d529ba0",
@@ -1434,5 +1436,5 @@
         "men_11360100002": "36cc73a1420351baa6a6330254f223f6",
         "men_11360100003": "b040f305ad562469a8df6052fbbfda9f"
     },
-    "hash": "32ff937142350541bdc22b3678abd6e8"
+    "hash": "982a552e17252f6d35d36f1a7c3b13ed"
 }
